@@ -37,14 +37,17 @@ namespace CapaPresentacion
             catch (ArgumentException ex)
             {
                 lblMensaje.Text = ex.Message;
+                txtPassword.Clear(); 
             }
             catch (InvalidOperationException ex)
             {
                 lblMensaje.Text = ex.Message;
+                txtPassword.Clear(); 
             }
             catch (Exception ex)
             {
                 lblMensaje.Text = "Error inesperado: " + ex.Message;
+                txtPassword.Clear(); 
             }
         }
     }
