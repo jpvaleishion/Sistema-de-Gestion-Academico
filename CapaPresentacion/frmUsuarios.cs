@@ -9,7 +9,7 @@ namespace CapaPresentacion
     {
         private UsuarioServicio usuarioNegocio = new UsuarioServicio();
         private PermisoServicio permisoNegocio = new PermisoServicio();
-
+        private RolServicio rolNegocio = new RolServicio();
         // Si cuentas con un RolServicio para llenar tu combobox, instáncialo aquí:
         // private RolServicio rolNegocio = new RolServicio();
 
@@ -160,24 +160,17 @@ namespace CapaPresentacion
         {
             try
             {
-                // NOTA: Para producción, carga los roles desde la Base de Datos usando tu RolServicio
-                // Ejemplo ideal:
-                // cboRol.DataSource = rolNegocio.ObtenerTodos();
-                // cboRol.DisplayMember = "NombreRol";
-                // cboRol.ValueMember = "IdRol";
+                // Enlazamos la lista real de roles al ComboBox
+                cboRol.DataSource = rolNegocio.ObtenerTodos();
+                cboRol.DisplayMember = "NombreRol"; // Lo que el usuario ve
+                cboRol.ValueMember = "IdRol";       // El valor interno que se guardará (ID)
 
-                var rolesPrueba = new [] {
-                    new { IdRol = 1, NombreRol = "Administrador" },
-                    new { IdRol = 2, NombreRol = "Docente" },
-                    new { IdRol = 3, NombreRol = "Estudiante" }
-                };
-                cboRol.DataSource = rolesPrueba;
-                cboRol.DisplayMember = "NombreRol";
-                cboRol.ValueMember = "IdRol";
+                // Iniciamos con el combo limpio sin selección por defecto
+                cboRol.SelectedIndex = -1;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar la lista de roles: " + ex.Message, "Error Combo Roles", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al cargar la lista de roles: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         // *cambio* - Método unificado para restringir accesos usando PermisoServicio

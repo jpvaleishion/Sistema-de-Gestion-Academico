@@ -52,6 +52,7 @@
     <Compile Include="PeriodoAcademicoRepositorio.cs" />
     <Compile Include="PermisoRepositorio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RolRepositorio.cs" />
     <Compile Include="UsuarioRepositorio.cs" />
   </ItemGroup>
   <ItemGroup>

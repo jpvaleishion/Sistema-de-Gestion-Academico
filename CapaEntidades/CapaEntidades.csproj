@@ -51,6 +51,7 @@
     <Compile Include="Entidades\PeriodoAcademico.cs" />
     <Compile Include="Entidades\Permiso.cs" />
     <Compile Include="Entidades\Persona.cs" />
+    <Compile Include="Entidades\Rol.cs" />
     <Compile Include="Entidades\Usuario.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

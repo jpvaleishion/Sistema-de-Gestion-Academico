@@ -51,6 +51,7 @@
     <Compile Include="PeriodoAcademicoServicio.cs" />
     <Compile Include="PermisoServicio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RolServicio.cs" />
     <Compile Include="UsuarioServicio.cs" />
   </ItemGroup>
   <ItemGroup>
