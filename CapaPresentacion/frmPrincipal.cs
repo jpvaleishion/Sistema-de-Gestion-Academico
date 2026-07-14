@@ -14,8 +14,6 @@ namespace CapaPresentacion
         }
 
         // Cada opción del menú abre su formulario hijo dentro del MDI
-
-
         private void AbrirHija(Form formularioHijo)
         {
             foreach (Form formularioAbierto in this.MdiChildren)
@@ -39,17 +37,32 @@ namespace CapaPresentacion
             formularioHijo.Show();
         }
 
-        private void mnuEstudiantes_Click(object sender, EventArgs e) => AbrirHija(new frmEstudiantes());
-        private void mnuDocentes_Click(object sender, EventArgs e) => AbrirHija(new frmDocentes());
-        private void mnuAsignaturas_Click(object sender, EventArgs e) => AbrirHija(new frmAsignaturas());
-        private void mnuCursos_Click(object sender, EventArgs e) => AbrirHija(new frmCursos());
-        private void mnuPeriodos_Click(object sender, EventArgs e) => AbrirHija(new frmPeriodos());
-        private void mnuMatriculas_Click(object sender, EventArgs e) => AbrirHija(new frmMatriculas());
-        private void mnuCalificaciones_Click(object sender, EventArgs e) => AbrirHija(new frmCalificaciones());
-        private void mnuUsuarios_Click(object sender, EventArgs e) => AbrirHija(new frmUsuarios());
+        // *cambios* - Ahora pasamos el ID del usuario logueado en el constructor de cada formulario hijo
+        private void mnuEstudiantes_Click(object sender, EventArgs e) =>
+            AbrirHija(new frmEstudiantes(SesionActual.UsuarioLogueado.IdUsuario));
+
+        private void mnuDocentes_Click(object sender, EventArgs e) =>
+            AbrirHija(new frmDocentes(SesionActual.UsuarioLogueado.IdUsuario));
+
+        private void mnuAsignaturas_Click(object sender, EventArgs e) =>
+            AbrirHija(new frmAsignaturas(SesionActual.UsuarioLogueado.IdUsuario));
+
+        private void mnuCursos_Click(object sender, EventArgs e) =>
+            AbrirHija(new frmCursos(SesionActual.UsuarioLogueado.IdUsuario));
+
+        private void mnuPeriodos_Click(object sender, EventArgs e) =>
+            AbrirHija(new frmPeriodos(SesionActual.UsuarioLogueado.IdUsuario));
+
+        private void mnuMatriculas_Click(object sender, EventArgs e) =>
+            AbrirHija(new frmMatriculas(SesionActual.UsuarioLogueado.IdUsuario));
+
+        private void mnuCalificaciones_Click(object sender, EventArgs e) =>
+            AbrirHija(new frmCalificaciones(SesionActual.UsuarioLogueado.IdUsuario));
+
+        private void mnuUsuarios_Click(object sender, EventArgs e) =>
+            AbrirHija(new frmUsuarios(SesionActual.UsuarioLogueado.IdUsuario));
 
         private void mnuSalir_Click(object sender, EventArgs e) => Application.Exit();
-
         private void frmPrincipal_Load(object sender, EventArgs e)
         {
             var usuario = SesionActual.UsuarioLogueado;

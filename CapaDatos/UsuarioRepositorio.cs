@@ -13,8 +13,9 @@ namespace CapaDatos
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                string sql = "INSERT INTO Usuarios (NombreUsuario,Password,Rol,Estado,Salt,IntentosFallidos,FechaBloqueo) " +
-                    "VALUES (@NombreUsuario, @Password, @Rol, @Estado, @Salt, @IntentosFallidos, @FechaBloqueo)";
+                // *cambio* - Guardamos 'IdRol' en la base de datos en lugar de la cadena de texto de Rol
+                string sql = "INSERT INTO Usuarios (NombreUsuario,Password,IdRol,Estado,Salt,IntentosFallidos,FechaBloqueo) " +
+                    "VALUES (@NombreUsuario, @Password, @IdRol, @Estado, @Salt, @IntentosFallidos, @FechaBloqueo)";
                 try
                 {
                     conexion.Open();
@@ -22,7 +23,7 @@ namespace CapaDatos
                     {
                         command.Parameters.AddWithValue("@NombreUsuario", u.NombreUsuario);
                         command.Parameters.AddWithValue("@Password", u.Password);
-                        command.Parameters.AddWithValue("@Rol", u.Rol);
+                        command.Parameters.AddWithValue("@IdRol", u.IdRol); // *cambio*
                         command.Parameters.AddWithValue("@Estado", u.Estado);
                         command.Parameters.AddWithValue("@Salt", (object)u.Salt ?? DBNull.Value);
                         command.Parameters.AddWithValue("@IntentosFallidos", 0);
@@ -41,7 +42,8 @@ namespace CapaDatos
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                string sql = "UPDATE Usuarios SET NombreUsuario=@NombreUsuario, Password=@Password, Rol=@Rol, Estado=@Estado, " +
+                // *cambio* - Actualizamos 'IdRol'
+                string sql = "UPDATE Usuarios SET NombreUsuario=@NombreUsuario, Password=@Password, IdRol=@IdRol, Estado=@Estado, " +
                     "Salt=@Salt, IntentosFallidos=@IntentosFallidos, FechaBloqueo=@FechaBloqueo WHERE IdUsuario=@IdUsuario";
                 try
                 {
@@ -51,7 +53,7 @@ namespace CapaDatos
                         command.Parameters.AddWithValue("@IdUsuario", u.IdUsuario);
                         command.Parameters.AddWithValue("@NombreUsuario", u.NombreUsuario);
                         command.Parameters.AddWithValue("@Password", u.Password);
-                        command.Parameters.AddWithValue("@Rol", u.Rol);
+                        command.Parameters.AddWithValue("@IdRol", u.IdRol); // *cambio*
                         command.Parameters.AddWithValue("@Estado", u.Estado);
                         command.Parameters.AddWithValue("@Salt", (object)u.Salt ?? DBNull.Value);
                         command.Parameters.AddWithValue("@IntentosFallidos", u.IntentosFallidos);
@@ -93,7 +95,8 @@ namespace CapaDatos
 
             using (SqlConnection conexion = con.Conectar())
             {
-                string sql = "SELECT * FROM Usuarios";
+                // *cambio* - Traemos el Nombre del Rol haciendo Join con la tabla Roles
+                string sql = "SELECT u.*, r.NombreRol FROM Usuarios u INNER JOIN Roles r ON u.IdRol = r.IdRol";
                 try
                 {
                     conexion.Open();
@@ -106,7 +109,8 @@ namespace CapaDatos
                             u.IdUsuario = Convert.ToInt32(reader["IdUsuario"]);
                             u.NombreUsuario = reader["NombreUsuario"].ToString();
                             u.Password = reader["Password"].ToString();
-                            u.Rol = reader["Rol"].ToString();
+                            u.IdRol = Convert.ToInt32(reader["IdRol"]); // *cambio*
+                            u.NombreRol = reader["NombreRol"].ToString(); // *cambio*
                             u.Estado = reader["Estado"].ToString();
                             u.Salt = reader["Salt"] != DBNull.Value ? reader["Salt"].ToString() : null;
                             u.IntentosFallidos = Convert.ToInt32(reader["IntentosFallidos"]);
@@ -130,7 +134,8 @@ namespace CapaDatos
 
             using (SqlConnection conexion = con.Conectar())
             {
-                string sql = "SELECT * FROM Usuarios WHERE IdUsuario=@IdUsuario";
+                // *cambio* - Traemos el Nombre del Rol mediante Join
+                string sql = "SELECT u.*, r.NombreRol FROM Usuarios u INNER JOIN Roles r ON u.IdRol = r.IdRol WHERE u.IdUsuario=@IdUsuario";
                 try
                 {
                     conexion.Open();
@@ -144,7 +149,8 @@ namespace CapaDatos
                             u.IdUsuario = Convert.ToInt32(reader["IdUsuario"]);
                             u.NombreUsuario = reader["NombreUsuario"].ToString();
                             u.Password = reader["Password"].ToString();
-                            u.Rol = reader["Rol"].ToString();
+                            u.IdRol = Convert.ToInt32(reader["IdRol"]); // *cambio*
+                            u.NombreRol = reader["NombreRol"].ToString(); // *cambio*
                             u.Estado = reader["Estado"].ToString();
                             u.Salt = reader["Salt"] != DBNull.Value ? reader["Salt"].ToString() : null;
                             u.IntentosFallidos = Convert.ToInt32(reader["IntentosFallidos"]);
@@ -167,7 +173,8 @@ namespace CapaDatos
 
             using (SqlConnection conexion = con.Conectar())
             {
-                string sql = "SELECT * FROM Usuarios WHERE NombreUsuario=@NombreUsuario";
+                // *cambio* - Traemos el Nombre del Rol mediante Join
+                string sql = "SELECT u.*, r.NombreRol FROM Usuarios u INNER JOIN Roles r ON u.IdRol = r.IdRol WHERE u.NombreUsuario=@NombreUsuario";
                 try
                 {
                     conexion.Open();
@@ -181,7 +188,8 @@ namespace CapaDatos
                             u.IdUsuario = Convert.ToInt32(reader["IdUsuario"]);
                             u.NombreUsuario = reader["NombreUsuario"].ToString();
                             u.Password = reader["Password"].ToString();
-                            u.Rol = reader["Rol"].ToString();
+                            u.IdRol = Convert.ToInt32(reader["IdRol"]); // *cambio*
+                            u.NombreRol = reader["NombreRol"].ToString(); // *cambio*
                             u.Estado = reader["Estado"].ToString();
                             u.Salt = reader["Salt"] != DBNull.Value ? reader["Salt"].ToString() : null;
                             u.IntentosFallidos = Convert.ToInt32(reader["IntentosFallidos"]);

@@ -7,15 +7,26 @@ namespace CapaPresentacion
 {
     public partial class frmUsuarios : Form
     {
-        UsuarioServicio usuarioNegocio = new UsuarioServicio();
-        int idSeleccionado = 0;
+        private UsuarioServicio usuarioNegocio = new UsuarioServicio();
+        private PermisoServicio permisoNegocio = new PermisoServicio();
 
+        // Si cuentas con un RolServicio para llenar tu combobox, instáncialo aquí:
+        // private RolServicio rolNegocio = new RolServicio();
+
+        private int idUsuarioLogueado;
+        private int idSeleccionado = 0;
+
+        // *cambio* - Constructor estándar que recibe el ID de sesión del usuario activo
+        public frmUsuarios(int idUsuario)
+        {
+            InitializeComponent();
+            this.idUsuarioLogueado = idUsuario;
+        }
+        // Constructor por defecto para compatibilidad con el Diseñador de Visual Studio
         public frmUsuarios()
         {
             InitializeComponent();
         }
-
-
         private void CargarGrid()
         {
             dgvUsuarios.DataSource = null;
@@ -30,7 +41,7 @@ namespace CapaPresentacion
                 IdUsuario = idSeleccionado,
                 NombreUsuario = txtNombreUsuario.Text.Trim(),
                 Password = txtPassword.Text,
-                Rol = cboRol.Text,
+                IdRol = cboRol.SelectedValue != null ? Convert.ToInt32(cboRol.SelectedValue) : 0, // *cambio* - Obtenemos el ID del rol
                 Estado = cboEstado.Text
             };
         }
@@ -59,8 +70,8 @@ namespace CapaPresentacion
         {
             try
             {
-                usuarioNegocio.Guardar(ObtenerUsuarioDelFormulario());
-                MessageBox.Show("Usuario guardado correctamente.");
+                usuarioNegocio.Guardar(ObtenerUsuarioDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Usuario guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -70,7 +81,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -88,8 +99,8 @@ namespace CapaPresentacion
 
             try
             {
-                usuarioNegocio.Actualizar(ObtenerUsuarioDelFormulario());
-                MessageBox.Show("Usuario actualizado correctamente.");
+                usuarioNegocio.Actualizar(ObtenerUsuarioDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Usuario actualizado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -99,7 +110,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -120,8 +131,8 @@ namespace CapaPresentacion
 
             try
             {
-                usuarioNegocio.Eliminar(idSeleccionado);
-                MessageBox.Show("Usuario eliminado correctamente.");
+                usuarioNegocio.Eliminar(idSeleccionado, idUsuarioLogueado);
+                MessageBox.Show("Usuario eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -131,7 +142,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -141,9 +152,53 @@ namespace CapaPresentacion
 
         private void frmUsuarios_Load_1(object sender, EventArgs e)
         {
+            CargarComboRoles();       // Cargamos los Roles en el ComboBox de forma relacional
             CargarGrid();
+            AplicarPermisosVisuales(); // Oculta o desactiva botones según permisos del rol
         }
+        private void CargarComboRoles()
+        {
+            try
+            {
+                // NOTA: Para producción, carga los roles desde la Base de Datos usando tu RolServicio
+                // Ejemplo ideal:
+                // cboRol.DataSource = rolNegocio.ObtenerTodos();
+                // cboRol.DisplayMember = "NombreRol";
+                // cboRol.ValueMember = "IdRol";
 
+                var rolesPrueba = new [] {
+                    new { IdRol = 1, NombreRol = "Administrador" },
+                    new { IdRol = 2, NombreRol = "Docente" },
+                    new { IdRol = 3, NombreRol = "Estudiante" }
+                };
+                cboRol.DataSource = rolesPrueba;
+                cboRol.DisplayMember = "NombreRol";
+                cboRol.ValueMember = "IdRol";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar la lista de roles: " + ex.Message, "Error Combo Roles", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        // *cambio* - Método unificado para restringir accesos usando PermisoServicio
+        private void AplicarPermisosVisuales()
+        {
+            try
+            {
+                // Evaluamos los accesos del rol activo para esta pantalla ("frmUsuarios")
+                btnGuardar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Crear");
+                btnEditar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Modificar");
+                btnEliminar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Eliminar");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al validar los permisos de seguridad: " + ex.Message, "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Bloqueo preventivo total en caso de fallo de validación
+                btnGuardar.Enabled = false;
+                btnEditar.Enabled = false;
+                btnEliminar.Enabled = false;
+            }
+        }
         private void dgvUsuarios_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -153,7 +208,7 @@ namespace CapaPresentacion
             idSeleccionado = usuario.IdUsuario;
             txtNombreUsuario.Text = usuario.NombreUsuario;
             txtPassword.Text = usuario.Password;
-            cboRol.Text = usuario.Rol;
+            cboRol.SelectedValue = usuario.IdRol; // *cambio* - Enlazamos el ID numérico al ComboBox
             cboEstado.Text = usuario.Estado;
         }
     }

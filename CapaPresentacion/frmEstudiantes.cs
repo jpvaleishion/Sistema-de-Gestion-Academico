@@ -9,16 +9,26 @@ namespace CapaPresentacion
 {
     public partial class frmEstudiantes : Form
     {
-        EstudianteServicio estudianteNegocio = new EstudianteServicio();
-        int idSeleccionado = 0;
+        private EstudianteServicio estudianteNegocio = new EstudianteServicio();
 
+        // *cambio* - Instanciamos el servicio de permisos, igual que en los otros formularios
+        private PermisoServicio permisoNegocio = new PermisoServicio();
+
+        // *cambio* - Almacenamos el ID del usuario activo localmente
+        private int idUsuarioLogueado;
+        private int idSeleccionado = 0;
+
+        // *cambio* - Constructor uniforme que recibe el ID de sesión
+        public frmEstudiantes(int idUsuario)
+        {
+            InitializeComponent();
+            this.idUsuarioLogueado = idUsuario;
+        }
+        // Constructor por defecto para compatibilidad con el Diseñador de Visual Studio
         public frmEstudiantes()
         {
             InitializeComponent();
         }
-
-
-
         private void CargarGrid()
         {
             dgvEstudiantes.DataSource = null;
@@ -59,8 +69,9 @@ namespace CapaPresentacion
         {
             try
             {
-                estudianteNegocio.Guardar(ObtenerEstudianteDelFormulario());
-                MessageBox.Show("Estudiante guardado correctamente.");
+                // *cambio* - Enviamos el ID del usuario logueado a la capa de negocio
+                estudianteNegocio.Guardar(ObtenerEstudianteDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Estudiante guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -70,7 +81,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -88,8 +99,9 @@ namespace CapaPresentacion
 
             try
             {
-                estudianteNegocio.Actualizar(ObtenerEstudianteDelFormulario());
-                MessageBox.Show("Estudiante actualizado correctamente.");
+                // *cambio* - Enviamos el ID del usuario logueado al actualizar
+                estudianteNegocio.Actualizar(ObtenerEstudianteDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Estudiante actualizado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -99,7 +111,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -120,8 +132,9 @@ namespace CapaPresentacion
 
             try
             {
-                estudianteNegocio.Eliminar(idSeleccionado);
-                MessageBox.Show("Estudiante eliminado correctamente.");
+                // *cambio* - Enviamos el ID del usuario logueado al eliminar
+                estudianteNegocio.Eliminar(idSeleccionado, idUsuarioLogueado);
+                MessageBox.Show("Estudiante eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -131,7 +144,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -151,23 +164,23 @@ namespace CapaPresentacion
 
         private void frmEstudiantes_Load_1(object sender, EventArgs e)
         {
-            // 1. Cargamos los datos de los estudiantes en la tabla (tu código actual)
             CargarGrid();
-
-            // 2. *cambio* - Buscamos en la sesión los permisos específicos para esta pantalla
-            // (Asegúrate de tener "using System.Linq;" al inicio de tu archivo)
-            var permiso = SesionActual.Permisos.FirstOrDefault(p => p.NombreFormulario == "frmEstudiantes");
-
-            if (permiso != null)
+            AplicarPermisosVisuales(); // *cambio* - Bloqueo de UI consistente con el resto de pantallas
+        }
+        // *cambio* - Método unificado para restringir accesos usando PermisoServicio
+        private void AplicarPermisosVisuales()
+        {
+            try
             {
-                // Habilitamos o deshabilitamos los botones de tu formulario según la base de datos
-                btnGuardar.Enabled = permiso.Crear;
-                btnEditar.Enabled = permiso.Modificar;
-                btnEliminar.Enabled = permiso.Eliminar;
+                // Evaluamos los accesos del rol para esta pantalla ("frmEstudiantes")
+                btnGuardar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmEstudiantes", "Crear");
+                btnEditar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmEstudiantes", "Modificar");
+                btnEliminar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmEstudiantes", "Eliminar");
             }
-            else
+            catch (Exception ex)
             {
-                // Medida de seguridad: Si el rol no tiene este formulario asignado, bloqueamos todo
+                MessageBox.Show("Error al cargar los permisos de seguridad: " + ex.Message, "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Si algo falla, bloqueamos las acciones de escritura por precaución
                 btnGuardar.Enabled = false;
                 btnEditar.Enabled = false;
                 btnEliminar.Enabled = false;

@@ -7,15 +7,27 @@ namespace CapaPresentacion
 {
     public partial class frmMatriculas : Form
     {
-        MatriculaServicio matriculaNegocio = new MatriculaServicio();
-        EstudianteServicio estudianteNegocio = new EstudianteServicio();
-        AsignaturaServicio asignaturaNegocio = new AsignaturaServicio();
-        DocenteServicio docenteNegocio = new DocenteServicio();
-        CursoServicio cursoNegocio = new CursoServicio();
-        PeriodoAcademicoServicio periodoNegocio = new PeriodoAcademicoServicio();
+        private MatriculaServicio matriculaNegocio = new MatriculaServicio();
+        private EstudianteServicio estudianteNegocio = new EstudianteServicio();
+        private AsignaturaServicio asignaturaNegocio = new AsignaturaServicio();
+        private DocenteServicio docenteNegocio = new DocenteServicio();
+        private CursoServicio cursoNegocio = new CursoServicio();
+        private PeriodoAcademicoServicio periodoNegocio = new PeriodoAcademicoServicio();
 
-        int idSeleccionado = 0;
+        // *cambio* - Instanciamos el servicio de permisos de forma local
+        private PermisoServicio permisoNegocio = new PermisoServicio();
 
+        // *cambio* - Variable para retener el ID del usuario con la sesión activa
+        private int idUsuarioLogueado;
+        private int idSeleccionado = 0;
+
+        // *cambio* - Constructor que recibe el ID de usuario (Patrón Consistente)
+        public frmMatriculas(int idUsuario)
+        {
+            InitializeComponent();
+            this.idUsuarioLogueado = idUsuario;
+        }
+        // Constructor vacío requerido por el Diseñador de Visual Studio
         public frmMatriculas()
         {
             InitializeComponent();
@@ -24,8 +36,27 @@ namespace CapaPresentacion
         {
             CargarCombos();
             CargarGrid();
+            AplicarPermisosVisuales(); // *cambio* - Aplicamos restricciones visuales al cargar
         }
-
+        // *cambio* - Habilita o deshabilita la UI basándose en el rol del usuario logueado
+        private void AplicarPermisosVisuales()
+        {
+            try
+            {
+                // Comprobamos permisos específicos del rol para el objeto "frmMatriculas"
+                btnGuardar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Crear");
+                btnEditar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Modificar");
+                btnEliminar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Eliminar");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar los permisos de seguridad: " + ex.Message, "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Bloqueo preventivo en caso de error en la consulta de permisos
+                btnGuardar.Enabled = false;
+                btnEditar.Enabled = false;
+                btnEliminar.Enabled = false;
+            }
+        }
         private void CargarCombos()
         {
 
@@ -91,10 +122,19 @@ namespace CapaPresentacion
 
         private void btnGuardar_Click_1(object sender, EventArgs e)
         {
+            // Control preventivo en caso de combos vacíos al intentar registrar
+            if (cboEstudiante.SelectedValue == null || cboAsignatura.SelectedValue == null ||
+                cboDocente.SelectedValue == null || cboCurso.SelectedValue == null || cboPeriodo.SelectedValue == null)
+            {
+                MessageBox.Show("Asegúrese de seleccionar todos los campos requeridos para la matrícula.", "Campos Incompletos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
-                matriculaNegocio.Guardar(ObtenerMatriculaDelFormulario());
-                MessageBox.Show("Matrícula guardada correctamente.");
+                // *cambio* - Enviamos el ID de usuario activo a la capa de negocio
+                matriculaNegocio.Guardar(ObtenerMatriculaDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Matrícula guardada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -104,7 +144,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -122,8 +162,9 @@ namespace CapaPresentacion
 
             try
             {
-                matriculaNegocio.Actualizar(ObtenerMatriculaDelFormulario());
-                MessageBox.Show("Matrícula actualizada correctamente.");
+                // *cambio* - Enviamos el ID de usuario activo al actualizar
+                matriculaNegocio.Actualizar(ObtenerMatriculaDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Matrícula actualizada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -133,7 +174,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -154,8 +195,9 @@ namespace CapaPresentacion
 
             try
             {
-                matriculaNegocio.Eliminar(idSeleccionado);
-                MessageBox.Show("Matrícula eliminada correctamente.");
+                // *cambio* - Enviamos el ID de usuario activo al eliminar
+                matriculaNegocio.Eliminar(idSeleccionado, idUsuarioLogueado);
+                MessageBox.Show("Matrícula eliminada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -165,7 +207,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {

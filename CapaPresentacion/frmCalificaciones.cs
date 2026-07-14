@@ -7,22 +7,31 @@ namespace CapaPresentacion
 {
     public partial class frmCalificaciones : Form
     {
-        CalificacionServicio calificacionNegocio = new CalificacionServicio();
-        MatriculaServicio matriculaNegocio = new MatriculaServicio();
+        private CalificacionServicio calificacionNegocio = new CalificacionServicio();
+        private MatriculaServicio matriculaNegocio = new MatriculaServicio();
 
-        int idSeleccionado = 0;
+        // *cambio* - Instanciamos el servicio de permisos
+        private PermisoServicio permisoNegocio = new PermisoServicio();
 
+        // *cambio* - Almacenamos el ID del usuario logueado en esta sesión
+        private int idUsuarioLogueado;
+        private int idSeleccionado = 0;
+        // *cambio* - Constructor recomendado: Recibe el ID del usuario logueado
+        public frmCalificaciones(int idUsuario)
+        {
+            InitializeComponent();
+            this.idUsuarioLogueado = idUsuario;
+        }
+        // Constructor por defecto para que no falle el Diseñador de Visual Studio
         public frmCalificaciones()
         {
             InitializeComponent();
         }
 
-
         private void CargarCombos()
         {
             // El combo muestra las matrículas disponibles para asignar la nota
-
-            cboMatricula.DisplayMember = "IdMatricula"; // Cambia por una propiedad descriptiva si esque la tenemos
+            cboMatricula.DisplayMember = "IdMatricula"; // Cambia por una propiedad descriptiva si la tienes
             cboMatricula.ValueMember = "IdMatricula";
             cboMatricula.DataSource = matriculaNegocio.ObtenerTodos();
         }
@@ -74,8 +83,9 @@ namespace CapaPresentacion
         {
             try
             {
-                calificacionNegocio.Guardar(ObtenerCalificacionDelFormulario());
-                MessageBox.Show("Calificación guardada correctamente.");
+                // *cambio* - Enviamos el ID del usuario activo para validar permisos en negocio y registrar bitácora
+                calificacionNegocio.Guardar(ObtenerCalificacionDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Calificación guardada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -85,7 +95,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -103,8 +113,9 @@ namespace CapaPresentacion
 
             try
             {
-                calificacionNegocio.Actualizar(ObtenerCalificacionDelFormulario());
-                MessageBox.Show("Calificación actualizada correctamente.");
+                // *cambio* - Enviamos el ID del usuario activo para actualizar
+                calificacionNegocio.Actualizar(ObtenerCalificacionDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Calificación actualizada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -114,7 +125,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -135,8 +146,9 @@ namespace CapaPresentacion
 
             try
             {
-                calificacionNegocio.Eliminar(idSeleccionado);
-                MessageBox.Show("Calificación eliminada correctamente.");
+                // *cambio* - Enviamos el ID del usuario activo para eliminar
+                calificacionNegocio.Eliminar(idSeleccionado, idUsuarioLogueado);
+                MessageBox.Show("Calificación eliminada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -146,7 +158,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -163,8 +175,27 @@ namespace CapaPresentacion
         {
             CargarCombos();
             CargarGrid();
+            AplicarPermisosVisuales(); // *cambio* - Validamos los permisos al abrir la pantalla
         }
-
+        // *cambio* - Método para restringir los botones según el rol del usuario
+        private void AplicarPermisosVisuales()
+        {
+            try
+            {
+                // Comprobamos permisos específicos para la pantalla de "frmCalificaciones"
+                btnGuardar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Crear");
+                btnEditar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Modificar");
+                btnEliminar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Eliminar");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar los permisos de seguridad: " + ex.Message, "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Si hay un error, deshabilitamos todo por seguridad
+                btnGuardar.Enabled = false;
+                btnEditar.Enabled = false;
+                btnEliminar.Enabled = false;
+            }
+        }
         private void dgvCalificaciones_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;

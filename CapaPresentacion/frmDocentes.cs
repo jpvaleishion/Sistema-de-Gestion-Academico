@@ -7,16 +7,26 @@ namespace CapaPresentacion
 {
     public partial class frmDocentes : Form
     {
-        DocenteServicio docenteNegocio = new DocenteServicio();
-        int idSeleccionado = 0;
+        private DocenteServicio docenteNegocio = new DocenteServicio();
 
+        // *cambio* - Instanciamos el servicio de permisos para el control visual de la UI
+        private PermisoServicio permisoNegocio = new PermisoServicio();
+
+        // *cambio* - Almacenamos el ID del usuario con sesión activa
+        private int idUsuarioLogueado;
+        private int idSeleccionado = 0;
+
+        // *cambio* - Constructor recomendado: Recibe el ID de sesión del usuario logueado
+        public frmDocentes(int idUsuario)
+        {
+            InitializeComponent();
+            this.idUsuarioLogueado = idUsuario;
+        }
+        // Constructor por defecto para compatibilidad con el Diseñador de Visual Studio
         public frmDocentes()
         {
             InitializeComponent();
         }
-
-
-
         private void CargarGrid()
         {
             dgvDocentes.DataSource = null;
@@ -55,8 +65,9 @@ namespace CapaPresentacion
         {
             try
             {
-                docenteNegocio.Guardar(ObtenerDocenteDelFormulario());
-                MessageBox.Show("Docente guardado correctamente.");
+                // *cambio* - Enviamos el ID del usuario activo al guardar para validar permisos y registrar bitácora
+                docenteNegocio.Guardar(ObtenerDocenteDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Docente guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -66,7 +77,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -84,8 +95,9 @@ namespace CapaPresentacion
 
             try
             {
-                docenteNegocio.Actualizar(ObtenerDocenteDelFormulario());
-                MessageBox.Show("Docente actualizado correctamente.");
+                // *cambio* - Enviamos el ID del usuario activo al actualizar
+                docenteNegocio.Actualizar(ObtenerDocenteDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Docente actualizado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -95,7 +107,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -116,8 +128,9 @@ namespace CapaPresentacion
 
             try
             {
-                docenteNegocio.Eliminar(idSeleccionado);
-                MessageBox.Show("Docente eliminado correctamente.");
+                // *cambio* - Enviamos el ID del usuario activo al eliminar
+                docenteNegocio.Eliminar(idSeleccionado, idUsuarioLogueado);
+                MessageBox.Show("Docente eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -127,7 +140,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -148,8 +161,27 @@ namespace CapaPresentacion
         private void frmDocentes_Load_1(object sender, EventArgs e)
         {
             CargarGrid();
+            AplicarPermisosVisuales(); // *cambio* - Bloqueo preventivo de controles según permisos
         }
-
+        // *cambio* - Método que habilita/deshabilita los botones según el rol del usuario
+        private void AplicarPermisosVisuales()
+        {
+            try
+            {
+                // Verificamos los permisos asignados a esta pantalla ("frmDocentes")
+                btnGuardar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmDocentes", "Crear");
+                btnEditar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmDocentes", "Modificar");
+                btnEliminar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmDocentes", "Eliminar");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al validar los permisos de seguridad: " + ex.Message, "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // En caso de fallo por seguridad bloqueamos las acciones de escritura
+                btnGuardar.Enabled = false;
+                btnEditar.Enabled = false;
+                btnEliminar.Enabled = false;
+            }
+        }
         private void dgvDocentes_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;

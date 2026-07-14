@@ -2,11 +2,9 @@
 using CapaEntidades.Entidades;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CapaNegocio
 {
@@ -19,7 +17,8 @@ namespace CapaNegocio
         private const int MINUTOS_BLOQUEO = 15;
         private const string MENSAJE_LOGIN_GENERICO = "Usuario o contraseña incorrectos.";
 
-        public void Guardar(Usuario u)
+        // *cambio* - Ahora se inyecta el ID del usuario en sesión para registrar en la bitácora
+        public void Guardar(Usuario u, int idUsuarioLogueado)
         {
             if (string.IsNullOrWhiteSpace(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario es obligatorio.");
@@ -30,7 +29,8 @@ namespace CapaNegocio
             if (string.IsNullOrWhiteSpace(u.Password))
                 throw new ArgumentException("La contraseña es obligatoria.");
 
-            if (string.IsNullOrWhiteSpace(u.Rol))
+            // *cambio* - Validamos IdRol en lugar de la cadena vacía
+            if (u.IdRol <= 0)
                 throw new ArgumentException("El rol es obligatorio.");
 
             string salt = GenerarSalt();
@@ -42,9 +42,18 @@ namespace CapaNegocio
             u.FechaBloqueo = null;
 
             repositorio.Insertar(u);
+
+            // *cambio* - Registramos la acción en la bitácora
+            bitacoraNegocio.RegistrarAccion(
+                idUsuarioLogueado,
+                "Usuarios",
+                "Crear Usuario",
+                $"Se creó exitosamente el usuario {u.NombreUsuario}."
+            );
         }
 
-        public void Actualizar(Usuario u)
+        // *cambio* - Se añade idUsuarioLogueado para auditoría
+        public void Actualizar(Usuario u, int idUsuarioLogueado)
         {
             if (string.IsNullOrWhiteSpace(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario es obligatorio.");
@@ -55,7 +64,8 @@ namespace CapaNegocio
             if (string.IsNullOrWhiteSpace(u.Password))
                 throw new ArgumentException("La contraseña es obligatoria.");
 
-            if (string.IsNullOrWhiteSpace(u.Rol))
+            // *cambio* - Validamos IdRol en lugar de Rol texto
+            if (u.IdRol <= 0)
                 throw new ArgumentException("El rol es obligatorio.");
 
             string salt = GenerarSalt();
@@ -65,14 +75,35 @@ namespace CapaNegocio
             u.Password = passwordEncriptada;
 
             repositorio.Actualizar(u);
+
+            // *cambio* - Registramos la acción en la bitácora
+            bitacoraNegocio.RegistrarAccion(
+                idUsuarioLogueado,
+                "Usuarios",
+                "Actualizar Usuario",
+                $"Se actualizaron los datos del usuario {u.NombreUsuario}."
+            );
         }
 
-        public void Eliminar(int idUsuario)
+        // *cambio* - Se añade idUsuarioLogueado para auditoría
+        public void Eliminar(int idUsuario, int idUsuarioLogueado)
         {
             if (idUsuario <= 0)
                 throw new ArgumentException("El identificador del usuario no es válido.");
 
+            // Obtenemos el nombre antes de borrarlo para registrarlo en la bitácora
+            var u = repositorio.ObtenerPorId(idUsuario);
+            string nombreUsuarioEliminado = u != null ? u.NombreUsuario : "Desconocido";
+
             repositorio.Eliminar(idUsuario);
+
+            // *cambio* - Registramos la acción en la bitácora
+            bitacoraNegocio.RegistrarAccion(
+                idUsuarioLogueado,
+                "Usuarios",
+                "Eliminar Usuario",
+                $"Se eliminó de forma permanente al usuario con ID {idUsuario} (Nombre: {nombreUsuarioEliminado})."
+            );
         }
 
         public List<Usuario> ObtenerTodos()
@@ -151,7 +182,7 @@ namespace CapaNegocio
             repositorio.ActualizarIntentosYBloqueo(u.IdUsuario, 0, null);
             u.IntentosFallidos = 0;
             u.FechaBloqueo = null;
-            
+
             bitacoraNegocio.RegistrarAccion(
                 u.IdUsuario,
                 "Seguridad",

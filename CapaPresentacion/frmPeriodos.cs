@@ -7,14 +7,26 @@ namespace CapaPresentacion
 {
     public partial class frmPeriodos : Form
     {
-        PeriodoAcademicoServicio periodoNegocio = new PeriodoAcademicoServicio();
-        int idSeleccionado = 0;
+        private PeriodoAcademicoServicio periodoNegocio = new PeriodoAcademicoServicio();
 
+        // *cambio* - Instanciamos el servicio de permisos de forma local
+        private PermisoServicio permisoNegocio = new PermisoServicio();
+
+        // *cambio* - Variable para retener el ID del usuario activo
+        private int idUsuarioLogueado;
+        private int idSeleccionado = 0;
+
+        // *cambio* - Constructor que recibe el ID de usuario (Patrón Estándar)
+        public frmPeriodos(int idUsuario)
+        {
+            InitializeComponent();
+            this.idUsuarioLogueado = idUsuario;
+        }
+        // Constructor por defecto para compatibilidad con el Diseñador de Visual Studio
         public frmPeriodos()
         {
             InitializeComponent();
         }
-
         private void CargarGrid()
         {
             dgvPeriodos.DataSource = null;
@@ -52,8 +64,9 @@ namespace CapaPresentacion
         {
             try
             {
-                periodoNegocio.Guardar(ObtenerPeriodoDelFormulario());
-                MessageBox.Show("Período guardado correctamente.");
+                // *cambio* - Pasamos el ID del usuario que registra el período
+                periodoNegocio.Guardar(ObtenerPeriodoDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Período guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -63,7 +76,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -81,8 +94,9 @@ namespace CapaPresentacion
 
             try
             {
-                periodoNegocio.Actualizar(ObtenerPeriodoDelFormulario());
-                MessageBox.Show("Período actualizado correctamente.");
+                // *cambio* - Pasamos el ID del usuario que actualiza el período
+                periodoNegocio.Actualizar(ObtenerPeriodoDelFormulario(), idUsuarioLogueado);
+                MessageBox.Show("Período actualizado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -92,7 +106,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -113,8 +127,9 @@ namespace CapaPresentacion
 
             try
             {
-                periodoNegocio.Eliminar(idSeleccionado);
-                MessageBox.Show("Período eliminado correctamente.");
+                // *cambio* - Pasamos el ID del usuario que elimina el período
+                periodoNegocio.Eliminar(idSeleccionado, idUsuarioLogueado);
+                MessageBox.Show("Período eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarGrid();
                 Limpiar();
             }
@@ -124,7 +139,7 @@ namespace CapaPresentacion
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show(ex.Message, "Regla de Negocio / Error Operacional", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Regla de Negocio / Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -140,8 +155,27 @@ namespace CapaPresentacion
         private void frmPeriodos_Load_1(object sender, EventArgs e)
         {
             CargarGrid();
+            AplicarPermisosVisuales(); // *cambio* - Bloqueo de UI consistente según permisos del rol
         }
-
+        // *cambio* - Método unificado para restringir accesos usando PermisoServicio
+        private void AplicarPermisosVisuales()
+        {
+            try
+            {
+                // Evaluamos los accesos asignados a esta pantalla ("frmPeriodos")
+                btnGuardar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmPeriodos", "Crear");
+                btnEditar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmPeriodos", "Modificar");
+                btnEliminar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmPeriodos", "Eliminar");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar los permisos de seguridad: " + ex.Message, "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Si la verificación falla, bloqueamos los botones de escritura por seguridad
+                btnGuardar.Enabled = false;
+                btnEditar.Enabled = false;
+                btnEliminar.Enabled = false;
+            }
+        }
         private void dgvPeriodos_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
