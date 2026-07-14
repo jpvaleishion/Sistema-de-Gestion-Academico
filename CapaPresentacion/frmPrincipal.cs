@@ -70,7 +70,7 @@ namespace CapaPresentacion
             // Muestra el usuario y rol en la barra de estado
             lblUsuarioActivo.Text = "Usuario: " + usuario.NombreUsuario + "   |   Rol: " + usuario.NombreRol;
 
-            // *cambio* - Evaluamos y ocultamos cada menú según la base de datos de permisos
+            // Evaluamos y ocultamos cada menú según la base de datos de permisos
             ConfigurarVisibilidad(mnuEstudiantes, "frmEstudiantes");
             ConfigurarVisibilidad(mnuDocentes, "frmDocentes");
             ConfigurarVisibilidad(mnuAsignaturas, "frmAsignaturas");
@@ -80,24 +80,38 @@ namespace CapaPresentacion
             ConfigurarVisibilidad(mnuCalificaciones, "frmCalificaciones");
             ConfigurarVisibilidad(mnuUsuarios, "frmUsuarios");
 
-            // *cambio* - Si los submenús están ocultos, ocultamos los menús contenedores principales
+            // SOLUCIÓN AL BUG: Usamos .Available en lugar de .Visible para leer el estado real de los hijos
+
             // El menú de administración solo es visible si puedes ver la gestión de usuarios
-            mnuAdministracion.Visible = mnuUsuarios.Visible;
+            mnuAdministracion.Visible = mnuUsuarios.Available;
 
             // Mantenimiento solo es visible si tienes permisos para ver estudiantes, docentes, asignaturas, cursos o periodos
-            mnuMantenimiento.Visible = mnuEstudiantes.Visible ||
-                                       mnuDocentes.Visible ||
-                                       mnuAsignaturas.Visible ||
-                                       mnuCursos.Visible ||
-                                       mnuPeriodos.Visible;
+            mnuMantenimiento.Visible = mnuEstudiantes.Available ||
+                                       mnuDocentes.Available ||
+                                       mnuAsignaturas.Available ||
+                                       mnuCursos.Available ||
+                                       mnuPeriodos.Available;
+
+            // Procesos solo es visible si tienes permisos para Matrículas o Calificaciones
+            // (Esto corrige el detalle de que Procesos se quede visible siempre por defecto)
+            mnuProcesos.Visible = mnuMatriculas.Available ||
+                                  mnuCalificaciones.Available;
         }
         // *cambio* - Método auxiliar para ocultar menús de forma dinámica
         private void ConfigurarVisibilidad(ToolStripMenuItem menu, string nombreFormulario)
         {
-            // Busca si existe un permiso asignado en la sesión para este formulario específico
-            var permiso = SesionActual.Permisos.FirstOrDefault(p => p.NombreFormulario.Equals(nombreFormulario, StringComparison.OrdinalIgnoreCase));
+            if (SesionActual.Permisos == null)
+            {
+                menu.Visible = false;
+                return;
+            }
 
-            // Si el permiso existe y tiene habilitado 'Visualizar', se muestra el menú. Si no, se oculta por completo.
+            // Buscamos ignorando mayúsculas/minúsculas y eliminando espacios en blanco a los lados (.Trim())
+            var permiso = SesionActual.Permisos.FirstOrDefault(p =>
+                p.NombreFormulario != null &&
+                p.NombreFormulario.Trim().Equals(nombreFormulario.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            // Si el permiso existe y tiene Visualizar en true, se muestra
             menu.Visible = permiso != null && permiso.Visualizar;
         }
     }

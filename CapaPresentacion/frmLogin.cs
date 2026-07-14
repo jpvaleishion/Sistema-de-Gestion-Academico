@@ -47,6 +47,10 @@ namespace CapaPresentacion
                 );
 
                 frmPrincipal principal = new frmPrincipal();
+
+                // Al cerrarse el principal, mostramos de nuevo este Login
+                principal.FormClosed += (s, args) => this.Show();
+
                 principal.Show();
                 this.Hide();
             }

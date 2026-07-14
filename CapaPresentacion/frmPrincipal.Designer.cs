@@ -35,7 +35,7 @@
             this.mnuAsignaturas = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuCursos = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuPeriodos = new System.Windows.Forms.ToolStripMenuItem();
-            this.procesosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuProcesos = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuMatriculas = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuCalificaciones = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuAdministracion = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,7 +52,7 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuMantenimiento,
-            this.procesosToolStripMenuItem,
+            this.mnuProcesos,
             this.mnuAdministracion,
             this.mnuSalir});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -76,58 +76,58 @@
             // mnuDocentes
             // 
             this.mnuDocentes.Name = "mnuDocentes";
-            this.mnuDocentes.Size = new System.Drawing.Size(169, 26);
+            this.mnuDocentes.Size = new System.Drawing.Size(224, 26);
             this.mnuDocentes.Text = "Docente";
             this.mnuDocentes.Click += new System.EventHandler(this.mnuDocentes_Click);
             // 
             // mnuEstudiantes
             // 
             this.mnuEstudiantes.Name = "mnuEstudiantes";
-            this.mnuEstudiantes.Size = new System.Drawing.Size(169, 26);
+            this.mnuEstudiantes.Size = new System.Drawing.Size(224, 26);
             this.mnuEstudiantes.Text = "Estudiante";
             this.mnuEstudiantes.Click += new System.EventHandler(this.mnuEstudiantes_Click);
             // 
             // mnuAsignaturas
             // 
             this.mnuAsignaturas.Name = "mnuAsignaturas";
-            this.mnuAsignaturas.Size = new System.Drawing.Size(169, 26);
+            this.mnuAsignaturas.Size = new System.Drawing.Size(224, 26);
             this.mnuAsignaturas.Text = "Asignaturas";
             this.mnuAsignaturas.Click += new System.EventHandler(this.mnuAsignaturas_Click);
             // 
             // mnuCursos
             // 
             this.mnuCursos.Name = "mnuCursos";
-            this.mnuCursos.Size = new System.Drawing.Size(169, 26);
+            this.mnuCursos.Size = new System.Drawing.Size(224, 26);
             this.mnuCursos.Text = "Cursos";
             this.mnuCursos.Click += new System.EventHandler(this.mnuCursos_Click);
             // 
             // mnuPeriodos
             // 
             this.mnuPeriodos.Name = "mnuPeriodos";
-            this.mnuPeriodos.Size = new System.Drawing.Size(169, 26);
+            this.mnuPeriodos.Size = new System.Drawing.Size(224, 26);
             this.mnuPeriodos.Text = "Períodos";
             this.mnuPeriodos.Click += new System.EventHandler(this.mnuPeriodos_Click);
             // 
-            // procesosToolStripMenuItem
+            // mnuProcesos
             // 
-            this.procesosToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuProcesos.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuMatriculas,
             this.mnuCalificaciones});
-            this.procesosToolStripMenuItem.Name = "procesosToolStripMenuItem";
-            this.procesosToolStripMenuItem.Size = new System.Drawing.Size(81, 24);
-            this.procesosToolStripMenuItem.Text = "Procesos";
+            this.mnuProcesos.Name = "mnuProcesos";
+            this.mnuProcesos.Size = new System.Drawing.Size(81, 24);
+            this.mnuProcesos.Text = "Procesos";
             // 
             // mnuMatriculas
             // 
             this.mnuMatriculas.Name = "mnuMatriculas";
-            this.mnuMatriculas.Size = new System.Drawing.Size(183, 26);
+            this.mnuMatriculas.Size = new System.Drawing.Size(224, 26);
             this.mnuMatriculas.Text = "Matrículas";
             this.mnuMatriculas.Click += new System.EventHandler(this.mnuMatriculas_Click);
             // 
             // mnuCalificaciones
             // 
             this.mnuCalificaciones.Name = "mnuCalificaciones";
-            this.mnuCalificaciones.Size = new System.Drawing.Size(183, 26);
+            this.mnuCalificaciones.Size = new System.Drawing.Size(224, 26);
             this.mnuCalificaciones.Text = "Calificaciones";
             this.mnuCalificaciones.Click += new System.EventHandler(this.mnuCalificaciones_Click);
             // 
@@ -199,7 +199,7 @@
             private System.Windows.Forms.ToolStripMenuItem mnuAsignaturas;
             private System.Windows.Forms.ToolStripMenuItem mnuCursos;
             private System.Windows.Forms.ToolStripMenuItem mnuPeriodos;
-            private System.Windows.Forms.ToolStripMenuItem procesosToolStripMenuItem;
+            private System.Windows.Forms.ToolStripMenuItem mnuProcesos;
             private System.Windows.Forms.ToolStripMenuItem mnuMatriculas;
             private System.Windows.Forms.ToolStripMenuItem mnuCalificaciones;
             private System.Windows.Forms.ToolStripMenuItem mnuAdministracion;
