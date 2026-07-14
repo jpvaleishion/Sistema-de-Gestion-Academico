@@ -68,7 +68,7 @@ namespace CapaPresentacion
             var usuario = SesionActual.UsuarioLogueado;
 
             // Muestra el usuario y rol en la barra de estado
-            lblUsuarioActivo.Text = "Usuario: " + usuario.NombreUsuario + "   |   Rol: " + usuario.Rol;
+            lblUsuarioActivo.Text = "Usuario: " + usuario.NombreUsuario + "   |   Rol: " + usuario.NombreRol;
 
             // *cambio* - Evaluamos y ocultamos cada menú según la base de datos de permisos
             ConfigurarVisibilidad(mnuEstudiantes, "frmEstudiantes");
