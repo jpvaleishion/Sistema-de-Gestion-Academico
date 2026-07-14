@@ -42,12 +42,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entidades\Asignatura.cs" />
+    <Compile Include="Entidades\Bitacora.cs" />
     <Compile Include="Entidades\Calificacion.cs" />
     <Compile Include="Entidades\Curso.cs" />
     <Compile Include="Entidades\Docente.cs" />
     <Compile Include="Entidades\Estudiante.cs" />
     <Compile Include="Entidades\Matricula.cs" />
     <Compile Include="Entidades\PeriodoAcademico.cs" />
+    <Compile Include="Entidades\Permiso.cs" />
     <Compile Include="Entidades\Persona.cs" />
     <Compile Include="Entidades\Usuario.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -13,6 +13,7 @@ namespace CapaNegocio
     public class UsuarioServicio
     {
         UsuarioRepositorio repositorio = new UsuarioRepositorio();
+        BitacoraServicio bitacoraNegocio = new BitacoraServicio();
 
         private const int MAX_INTENTOS_FALLIDOS = 3;
         private const int MINUTOS_BLOQUEO = 15;
@@ -104,6 +105,11 @@ namespace CapaNegocio
             // Verifica si la cuenta sigue bloqueada por tiempo
             if (u.FechaBloqueo.HasValue && u.FechaBloqueo.Value > DateTime.Now)
             {
+                bitacoraNegocio.RegistrarAccion(
+                   u.IdUsuario,
+                   "Seguridad",
+                   "Acceso Denegado",
+                   "Intento de acceso en una cuenta que se encuentra bloqueada.");
                 TimeSpan restante = u.FechaBloqueo.Value - DateTime.Now;
                 throw new InvalidOperationException(
                     $"La cuenta está bloqueada temporalmente. Intente nuevamente en {Math.Ceiling(restante.TotalMinutes)} minuto(s).");
@@ -122,7 +128,19 @@ namespace CapaNegocio
                 }
 
                 repositorio.ActualizarIntentosYBloqueo(u.IdUsuario, intentos, fechaBloqueo);
-
+                bitacoraNegocio.RegistrarAccion(
+                    u.IdUsuario,
+                    "Seguridad",
+                    "Intento Fallido",
+                    $"Contraseña incorrecta. Intento #{intentos} para el usuario {u.NombreUsuario}.");
+                if (fechaBloqueo.HasValue)
+                {
+                    bitacoraNegocio.RegistrarAccion(
+                        u.IdUsuario,
+                        "Seguridad",
+                        "Bloqueo de Cuenta",
+                        "Cuenta bloqueada temporalmente por exceso de intentos fallidos.");
+                }
                 throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO);
             }
 
@@ -133,6 +151,12 @@ namespace CapaNegocio
             repositorio.ActualizarIntentosYBloqueo(u.IdUsuario, 0, null);
             u.IntentosFallidos = 0;
             u.FechaBloqueo = null;
+            
+            bitacoraNegocio.RegistrarAccion(
+                u.IdUsuario,
+                "Seguridad",
+                "Inicio de Sesión",
+                $"El usuario {u.NombreUsuario} ingresó al sistema con éxito.");
 
             return u;
         }

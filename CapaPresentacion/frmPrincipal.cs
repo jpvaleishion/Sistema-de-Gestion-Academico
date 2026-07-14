@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 using static CapaPresentacion.Program;
 
@@ -56,16 +57,35 @@ namespace CapaPresentacion
             // Muestra el usuario y rol en la barra de estado
             lblUsuarioActivo.Text = "Usuario: " + usuario.NombreUsuario + "   |   Rol: " + usuario.Rol;
 
-            // Solo el Administrador puede gestionar usuarios
-            mnuAdministracion.Visible = usuario.Rol == "Administrador";
+            // *cambio* - Evaluamos y ocultamos cada menú según la base de datos de permisos
+            ConfigurarVisibilidad(mnuEstudiantes, "frmEstudiantes");
+            ConfigurarVisibilidad(mnuDocentes, "frmDocentes");
+            ConfigurarVisibilidad(mnuAsignaturas, "frmAsignaturas");
+            ConfigurarVisibilidad(mnuCursos, "frmCursos");
+            ConfigurarVisibilidad(mnuPeriodos, "frmPeriodos");
+            ConfigurarVisibilidad(mnuMatriculas, "frmMatriculas");
+            ConfigurarVisibilidad(mnuCalificaciones, "frmCalificaciones");
+            ConfigurarVisibilidad(mnuUsuarios, "frmUsuarios");
 
-            // Solo Administrador y Secretaria gestionan mantenimiento y matrículas
-            bool esAdminOSecretaria = usuario.Rol == "Administrador" || usuario.Rol == "Secretaria";
-            mnuMantenimiento.Visible = esAdminOSecretaria;
-            mnuMatriculas.Visible = esAdminOSecretaria;
+            // *cambio* - Si los submenús están ocultos, ocultamos los menús contenedores principales
+            // El menú de administración solo es visible si puedes ver la gestión de usuarios
+            mnuAdministracion.Visible = mnuUsuarios.Visible;
 
-            // Calificaciones la usan Administrador y Docente
-            mnuCalificaciones.Visible = usuario.Rol == "Administrador" || usuario.Rol == "Docente";
+            // Mantenimiento solo es visible si tienes permisos para ver estudiantes, docentes, asignaturas, cursos o periodos
+            mnuMantenimiento.Visible = mnuEstudiantes.Visible ||
+                                       mnuDocentes.Visible ||
+                                       mnuAsignaturas.Visible ||
+                                       mnuCursos.Visible ||
+                                       mnuPeriodos.Visible;
+        }
+        // *cambio* - Método auxiliar para ocultar menús de forma dinámica
+        private void ConfigurarVisibilidad(ToolStripMenuItem menu, string nombreFormulario)
+        {
+            // Busca si existe un permiso asignado en la sesión para este formulario específico
+            var permiso = SesionActual.Permisos.FirstOrDefault(p => p.NombreFormulario.Equals(nombreFormulario, StringComparison.OrdinalIgnoreCase));
+
+            // Si el permiso existe y tiene habilitado 'Visualizar', se muestra el menú. Si no, se oculta por completo.
+            menu.Visible = permiso != null && permiso.Visualizar;
         }
     }
 }

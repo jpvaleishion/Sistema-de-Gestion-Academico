@@ -20,6 +20,8 @@ namespace CapaPresentacion
         public static class SesionActual
         {
             public static Usuario UsuarioLogueado { get; set; }
+            // *cambio* - Almacena la lista de permisos del usuario que inició sesión
+            public static System.Collections.Generic.List<CapaEntidades.Entidades.Permiso> Permisos { get; set; }
         }
 
     }

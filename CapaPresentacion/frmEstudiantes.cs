@@ -1,7 +1,9 @@
 ﻿using CapaEntidades.Entidades;
 using CapaNegocio;
 using System;
+using System.Linq;
 using System.Windows.Forms;
+using static CapaPresentacion.Program;
 
 namespace CapaPresentacion
 {
@@ -149,7 +151,27 @@ namespace CapaPresentacion
 
         private void frmEstudiantes_Load_1(object sender, EventArgs e)
         {
+            // 1. Cargamos los datos de los estudiantes en la tabla (tu código actual)
             CargarGrid();
+
+            // 2. *cambio* - Buscamos en la sesión los permisos específicos para esta pantalla
+            // (Asegúrate de tener "using System.Linq;" al inicio de tu archivo)
+            var permiso = SesionActual.Permisos.FirstOrDefault(p => p.NombreFormulario == "frmEstudiantes");
+
+            if (permiso != null)
+            {
+                // Habilitamos o deshabilitamos los botones de tu formulario según la base de datos
+                btnGuardar.Enabled = permiso.Crear;
+                btnEditar.Enabled = permiso.Modificar;
+                btnEliminar.Enabled = permiso.Eliminar;
+            }
+            else
+            {
+                // Medida de seguridad: Si el rol no tiene este formulario asignado, bloqueamos todo
+                btnGuardar.Enabled = false;
+                btnEditar.Enabled = false;
+                btnEliminar.Enabled = false;
+            }
         }
 
         private void dgvEstudiantes_CellDoubleClick(object sender, DataGridViewCellEventArgs e)

@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsignaturaRepositorio.cs" />
+    <Compile Include="BitacoraRepositorio.cs" />
     <Compile Include="CalificacionRepositorio.cs" />
     <Compile Include="Conexion.cs" />
     <Compile Include="CursoRepositorio.cs" />
@@ -49,6 +50,7 @@
     <Compile Include="EstudianteRepositorio.cs" />
     <Compile Include="MatriculaRepositorio.cs" />
     <Compile Include="PeriodoAcademicoRepositorio.cs" />
+    <Compile Include="PermisoRepositorio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UsuarioRepositorio.cs" />
   </ItemGroup>

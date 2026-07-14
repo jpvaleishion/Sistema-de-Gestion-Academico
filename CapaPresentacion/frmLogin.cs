@@ -30,24 +30,18 @@ namespace CapaPresentacion
 
                 SesionActual.UsuarioLogueado = usuario;
 
+                // *cambio* - Cargamos dinámicamente los permisos del rol del usuario
+                PermisoServicio permisoNegocio = new PermisoServicio();
+                SesionActual.Permisos = permisoNegocio.ObtenerPermisosPorRol(usuario.IdRol);
+
                 frmPrincipal principal = new frmPrincipal();
                 principal.Show();
                 this.Hide();
             }
-            catch (ArgumentException ex)
-            {
-                lblMensaje.Text = ex.Message;
-                txtPassword.Clear(); 
-            }
-            catch (InvalidOperationException ex)
-            {
-                lblMensaje.Text = ex.Message;
-                txtPassword.Clear(); 
-            }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error inesperado: " + ex.Message;
-                txtPassword.Clear(); 
+                lblMensaje.Text = ex.Message;
+                txtPassword.Clear();
             }
         }
     }

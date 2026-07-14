@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaEntidades.Entidades
 {
@@ -13,22 +9,27 @@ namespace CapaEntidades.Entidades
         // -- Propiedades base del sistema --
         public int IdUsuario { get; set; }
         public string NombreUsuario { get; set; }
-        public string Password { get; set; } //Aqui se guarda el Hash
-        public string Rol { get; set; }
+        public string Password { get; set; }
+
+        // *cambio* - Ahora usamos la relación de la base de datos
+        public int IdRol { get; set; }
+        public string NombreRol { get; set; } // Para mostrar "Administrador" o "Docente" en el diseño
+
         public string Estado { get; set; }
 
         // -- CAMPOS PARA SEGURIDAD AVANZADA --
         public string Salt { get; set; }
         public int IntentosFallidos { get; set; }
-        public DateTime? FechaBloqueo { get; set; } // '?' para valores nullables, ya que un usuario puede no estar bloqueado
+        public DateTime? FechaBloqueo { get; set; }
 
-        // -- Constructor completo --
-        public Usuario(int idUsuario, string nombreUsuario, string password, string rol, string estado, string salt, int intentosFallidos, DateTime? fechaBloqueo)
+        // *cambio* - Constructor adaptado
+        public Usuario(int idUsuario, string nombreUsuario, string password, int idRol, string nombreRol, string estado, string salt, int intentosFallidos, DateTime? fechaBloqueo)
         {
             IdUsuario = idUsuario;
             NombreUsuario = nombreUsuario;
             Password = password;
-            Rol = rol;
+            IdRol = idRol;
+            NombreRol = nombreRol;
             Estado = estado;
             Salt = salt;
             IntentosFallidos = intentosFallidos;

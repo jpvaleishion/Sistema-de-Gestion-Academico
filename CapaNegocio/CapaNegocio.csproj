@@ -42,12 +42,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsignaturaServicio.cs" />
+    <Compile Include="BitacoraServicio.cs" />
     <Compile Include="CalificacionServicio.cs" />
     <Compile Include="CursoServicio.cs" />
     <Compile Include="DocenteServicio.cs" />
     <Compile Include="EstudianteServicio.cs" />
     <Compile Include="MatriculaServicio.cs" />
     <Compile Include="PeriodoAcademicoServicio.cs" />
+    <Compile Include="PermisoServicio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UsuarioServicio.cs" />
   </ItemGroup>
