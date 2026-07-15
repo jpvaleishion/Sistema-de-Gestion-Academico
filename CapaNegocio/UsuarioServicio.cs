@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace CapaNegocio
 {
@@ -17,19 +16,18 @@ namespace CapaNegocio
         private const int MINUTOS_BLOQUEO = 15;
         private const string MENSAJE_LOGIN_GENERICO = "Usuario o contraseña incorrectos.";
 
-        // *cambio* - Ahora se inyecta el ID del usuario en sesión para registrar en la bitácora
         public void Guardar(Usuario u, int idUsuarioLogueado)
         {
             if (string.IsNullOrWhiteSpace(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario es obligatorio.");
 
-            if (!EsEmailValido(u.NombreUsuario))
-                throw new ArgumentException("El nombre de usuario debe tener un formato de correo electrónico válido.");
+            // *cambio* - Validamos longitud en lugar de formato de correo
+            if (!EsNombreUsuarioValido(u.NombreUsuario))
+                throw new ArgumentException("El nombre de usuario debe tener entre 3 y 100 caracteres.");
 
             if (string.IsNullOrWhiteSpace(u.Password))
                 throw new ArgumentException("La contraseña es obligatoria.");
 
-            // *cambio* - Validamos IdRol en lugar de la cadena vacía
             if (u.IdRol <= 0)
                 throw new ArgumentException("El rol es obligatorio.");
 
@@ -43,7 +41,6 @@ namespace CapaNegocio
 
             repositorio.Insertar(u);
 
-            // *cambio* - Registramos la acción en la bitácora
             bitacoraNegocio.RegistrarAccion(
                 idUsuarioLogueado,
                 "Usuarios",
@@ -52,19 +49,18 @@ namespace CapaNegocio
             );
         }
 
-        // *cambio* - Se añade idUsuarioLogueado para auditoría
         public void Actualizar(Usuario u, int idUsuarioLogueado)
         {
             if (string.IsNullOrWhiteSpace(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario es obligatorio.");
 
-            if (!EsEmailValido(u.NombreUsuario))
-                throw new ArgumentException("El nombre de usuario debe tener un formato de correo electrónico válido.");
+            // *cambio* - Validamos longitud en lugar de formato de correo
+            if (!EsNombreUsuarioValido(u.NombreUsuario))
+                throw new ArgumentException("El nombre de usuario debe tener entre 3 y 100 caracteres.");
 
             if (string.IsNullOrWhiteSpace(u.Password))
                 throw new ArgumentException("La contraseña es obligatoria.");
 
-            // *cambio* - Validamos IdRol en lugar de Rol texto
             if (u.IdRol <= 0)
                 throw new ArgumentException("El rol es obligatorio.");
 
@@ -76,7 +72,6 @@ namespace CapaNegocio
 
             repositorio.Actualizar(u);
 
-            // *cambio* - Registramos la acción en la bitácora
             bitacoraNegocio.RegistrarAccion(
                 idUsuarioLogueado,
                 "Usuarios",
@@ -85,19 +80,16 @@ namespace CapaNegocio
             );
         }
 
-        // *cambio* - Se añade idUsuarioLogueado para auditoría
         public void Eliminar(int idUsuario, int idUsuarioLogueado)
         {
             if (idUsuario <= 0)
                 throw new ArgumentException("El identificador del usuario no es válido.");
 
-            // Obtenemos el nombre antes de borrarlo para registrarlo en la bitácora
             var u = repositorio.ObtenerPorId(idUsuario);
             string nombreUsuarioEliminado = u != null ? u.NombreUsuario : "Desconocido";
 
             repositorio.Eliminar(idUsuario);
 
-            // *cambio* - Registramos la acción en la bitácora
             bitacoraNegocio.RegistrarAccion(
                 idUsuarioLogueado,
                 "Usuarios",
@@ -119,7 +111,6 @@ namespace CapaNegocio
             return repositorio.ObtenerPorId(idUsuario);
         }
 
-        // RF-08: Iniciar sesión
         public Usuario IniciarSesion(string nombreUsuario, string password)
         {
             if (string.IsNullOrWhiteSpace(nombreUsuario))
@@ -133,12 +124,11 @@ namespace CapaNegocio
             if (u == null)
                 throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO);
 
-            // Verifica si la cuenta sigue bloqueada por tiempo
             if (u.FechaBloqueo.HasValue && u.FechaBloqueo.Value > DateTime.Now)
             {
                 bitacoraNegocio.RegistrarAccion(
                    u.IdUsuario,
-                   "Seguridad",
+                   "Security",
                    "Acceso Denegado",
                    "Intento de acceso en una cuenta que se encuentra bloqueada.");
                 TimeSpan restante = u.FechaBloqueo.Value - DateTime.Now;
@@ -178,7 +168,6 @@ namespace CapaNegocio
             if (u.Estado != "Activo")
                 throw new InvalidOperationException("El usuario está inactivo.");
 
-            // Ingreso exitoso: reinicia contadores de seguridad
             repositorio.ActualizarIntentosYBloqueo(u.IdUsuario, 0, null);
             u.IntentosFallidos = 0;
             u.FechaBloqueo = null;
@@ -192,7 +181,6 @@ namespace CapaNegocio
             return u;
         }
 
-        // ── SEGURIDAD: SALT Y HASH SHA256 ─────────────────────────────
         private string GenerarSalt()
         {
             byte[] bytesSalt = new byte[16];
@@ -213,13 +201,14 @@ namespace CapaNegocio
             }
         }
 
-        // ── VALIDACIÓN DE FORMATO DE CORREO ───────────────────────────
-        private bool EsEmailValido(string nombreUsuario)
+        // *cambio* - Nueva validación de nombre de usuario flexible (reemplaza a EsEmailValido)
+        private bool EsNombreUsuarioValido(string nombreUsuario)
         {
             if (string.IsNullOrWhiteSpace(nombreUsuario))
                 return false;
 
-            return Regex.IsMatch(nombreUsuario, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+            // Permite cualquier tipo de nombre de usuario (correos, nicks, etc.) entre 3 y 100 caracteres.
+            return nombreUsuario.Length >= 3 && nombreUsuario.Length <= 100;
         }
     }
 }

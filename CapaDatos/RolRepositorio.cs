@@ -9,15 +9,14 @@ namespace CapaDatos
     {
         private Conexion con = new Conexion();
 
-        // Método para obtener todos los roles activos/disponibles para el ComboBox
         public List<Rol> ObtenerTodos()
         {
             List<Rol> lista = new List<Rol>();
 
             using (SqlConnection conexion = con.Conectar())
             {
-                // Consulta simple para traer los roles de la base de datos
-                string sql = "SELECT IdRol, NombreRol FROM Roles ORDER BY NombreRol ASC";
+                // *cambio* - Cambiamos 'NombreRol' por 'Nombre' en la consulta SQL
+                string sql = "SELECT IdRol, Nombre FROM Roles ORDER BY Nombre ASC";
                 try
                 {
                     conexion.Open();
@@ -30,7 +29,7 @@ namespace CapaDatos
                                 Rol r = new Rol
                                 {
                                     IdRol = Convert.ToInt32(reader["IdRol"]),
-                                    NombreRol = reader["NombreRol"].ToString()
+                                    NombreRol = reader["Nombre"].ToString() // *cambio* - Leemos la columna 'Nombre'
                                 };
                                 lista.Add(r);
                             }
