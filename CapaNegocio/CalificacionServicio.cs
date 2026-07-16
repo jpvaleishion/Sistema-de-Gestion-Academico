@@ -5,23 +5,23 @@ using System.Collections.Generic;
 
 namespace CapaNegocio
 {
+    /// <summary>
+    /// Servicio de negocio para la gestión de calificaciones académicas.
+    /// Aplica reglas de negocio sobre notas, cálculo de nota final, estado y auditoría.
+    /// </summary>
     public class CalificacionServicio
     {
         private CalificacionRepositorio repositorio = new CalificacionRepositorio();
-
-        // *cambio* - Instanciamos los servicios de permisos y bitácora
         private PermisoServicio permisoService = new PermisoServicio();
         private BitacoraServicio bitacoraService = new BitacoraServicio();
 
-        // RN-04: Las notas deben estar dentro del rango permitido (0 - NotaMaxima)
-        // RN-06: NotaFinal = (Nota1 + Nota2) / 2
-        // RN-07: Estado se calcula según el porcentaje de NotaMaxima
-        //        >= 70% Aprobado | 50% - 69% Supletorio | < 50% Reprobado
-
-        // *cambio* - Ahora recibe el ID del usuario logueado para validar seguridad y registrar auditoría
+        /// <summary>
+        /// Registra una nueva calificación aplicando validaciones, cálculo de nota final y auditoría.
+        /// </summary>
+        /// <param name="c">Entidad Calificacion a guardar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Guardar(Calificacion c, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el rol tiene permiso para Crear calificaciones
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Crear"))
             {
                 throw new InvalidOperationException("No tiene permisos para registrar calificaciones.");
@@ -34,7 +34,6 @@ namespace CapaNegocio
 
             repositorio.Insertar(c);
 
-            // *auditoria* - Se registra la acción en la bitácora con los detalles de la nota
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Calificaciones",
@@ -43,10 +42,13 @@ namespace CapaNegocio
             );
         }
 
-        // *cambio* - Ahora recibe el ID del usuario logueado
+        /// <summary>
+        /// Actualiza una calificación existente aplicando validaciones, recálculo y auditoría.
+        /// </summary>
+        /// <param name="c">Entidad Calificacion a actualizar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Actualizar(Calificacion c, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el rol tiene permiso para Modificar calificaciones
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Modificar"))
             {
                 throw new InvalidOperationException("No tiene permisos para modificar calificaciones.");
@@ -59,7 +61,6 @@ namespace CapaNegocio
 
             repositorio.Actualizar(c);
 
-            // *auditoria* - Se registra la actualización en la bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Calificaciones",
@@ -68,10 +69,13 @@ namespace CapaNegocio
             );
         }
 
-        // *cambio* - Ahora recibe el ID del usuario logueado
+        /// <summary>
+        /// Elimina una calificación y registra la acción en la bitácora.
+        /// </summary>
+        /// <param name="idCalificacion">Identificador de la calificación a eliminar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Eliminar(int idCalificacion, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el rol tiene permiso para Eliminar calificaciones
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Eliminar"))
             {
                 throw new InvalidOperationException("No tiene permisos para eliminar calificaciones.");
@@ -80,7 +84,6 @@ namespace CapaNegocio
             if (idCalificacion <= 0)
                 throw new ArgumentException("El identificador de la calificación no es válido.");
 
-            // Opcional: Obtener información de la calificación antes de borrar para la descripción de la bitácora
             string detalleCalificacion = $"ID {idCalificacion}";
             try
             {
@@ -90,11 +93,10 @@ namespace CapaNegocio
                     detalleCalificacion = $"ID {idCalificacion} (Matrícula ID: {califPrev.IdMatricula}, Nota Final previa: {califPrev.NotaFinal})";
                 }
             }
-            catch { /* Continuar si falla la lectura preliminar */ }
+            catch { }
 
             repositorio.Eliminar(idCalificacion);
 
-            // *auditoria* - Se registra la eliminación en la bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Calificaciones",
@@ -103,11 +105,20 @@ namespace CapaNegocio
             );
         }
 
+        /// <summary>
+        /// Obtiene todas las calificaciones registradas.
+        /// </summary>
+        /// <returns>Lista de calificaciones.</returns>
         public List<Calificacion> ObtenerTodos()
         {
             return repositorio.ObtenerTodos();
         }
 
+        /// <summary>
+        /// Obtiene una calificación por su identificador.
+        /// </summary>
+        /// <param name="idCalificacion">Identificador de la calificación.</param>
+        /// <returns>Entidad Calificacion correspondiente.</returns>
         public Calificacion ObtenerPorId(int idCalificacion)
         {
             if (idCalificacion <= 0)
@@ -116,7 +127,7 @@ namespace CapaNegocio
             return repositorio.ObtenerPorId(idCalificacion);
         }
 
-        // ── VALIDACIONES (RN-04) ──────────────────────────────────────
+        // VALIDACIONES (RN-04)
         private void Validar(Calificacion c)
         {
             if (c.IdMatricula <= 0)
@@ -132,13 +143,13 @@ namespace CapaNegocio
                 throw new ArgumentException("Nota2 debe estar entre 0 y la nota máxima.");
         }
 
-        // ── CALCULO NOTA FINAL (RN-06) ────────────────────────────────
+        // CALCULO NOTA FINAL (RN-06)
         private decimal CalcularNotaFinal(decimal nota1, decimal nota2)
         {
             return (nota1 + nota2) / 2m;
         }
 
-        // ── CALCULO ESTADO ACADEMICO (RN-07) ──────────────────────────
+        // CALCULO ESTADO ACADEMICO (RN-07)
         private string CalcularEstado(decimal notaFinal, decimal notaMaxima)
         {
             if (notaMaxima <= 0)

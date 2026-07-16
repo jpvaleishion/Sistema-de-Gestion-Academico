@@ -5,35 +5,36 @@ using System.Collections.Generic;
 
 namespace CapaNegocio
 {
+    /// <summary>
+    /// Servicio de negocio para la gestión de asignaturas.
+    /// Aplica reglas de negocio, validaciones y registra auditoría mediante bitácora y permisos.
+    /// </summary>
     public class AsignaturaServicio
     {
         private AsignaturaRepositorio repositorio = new AsignaturaRepositorio();
-
-        // *cambio* - Instanciamos los servicios de bitácora y permisos
         private BitacoraServicio bitacoraService = new BitacoraServicio();
         private PermisoServicio permisoService = new PermisoServicio();
 
-        // RN-03: Una asignatura debe tener al menos 1 crédito
-        // *cambio* - Ahora recibe el ID del usuario logueado para verificar permisos y auditar
+        /// <summary>
+        /// Registra una nueva asignatura en el sistema aplicando validaciones y auditoría.
+        /// </summary>
+        /// <param name="a">Entidad Asignatura a guardar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Guardar(Asignatura a, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el usuario tiene permiso para Crear en este formulario
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmAsignaturas", "Crear"))
             {
                 throw new InvalidOperationException("No tiene permisos para registrar asignaturas.");
             }
 
-            // Validaciones de negocio existentes
             if (string.IsNullOrWhiteSpace(a.Nombre))
                 throw new ArgumentException("El nombre de la asignatura es obligatorio.");
 
             if (a.Creditos < 1)
                 throw new ArgumentException("La asignatura debe tener al menos 1 crédito.");
 
-            // Inserción en la Base de Datos
             repositorio.Insertar(a);
 
-            // *auditoria* - Se registra la creación exitosa en la bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Asignaturas",
@@ -42,26 +43,26 @@ namespace CapaNegocio
             );
         }
 
-        // *cambio* - Ahora recibe el ID del usuario logueado para verificar permisos y auditar
+        /// <summary>
+        /// Actualiza los datos de una asignatura existente aplicando validaciones y auditoría.
+        /// </summary>
+        /// <param name="a">Entidad Asignatura a actualizar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Actualizar(Asignatura a, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el usuario tiene permiso para Modificar en este formulario
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmAsignaturas", "Modificar"))
             {
                 throw new InvalidOperationException("No tiene permisos para modificar asignaturas.");
             }
 
-            // Validaciones de negocio existentes
             if (string.IsNullOrWhiteSpace(a.Nombre))
                 throw new ArgumentException("El nombre de la asignatura es obligatorio.");
 
             if (a.Creditos < 1)
                 throw new ArgumentException("La asignatura debe tener al menos 1 crédito.");
 
-            // Actualización en la Base de Datos
             repositorio.Actualizar(a);
 
-            // *auditoria* - Se registra la modificación en la bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Asignaturas",
@@ -70,10 +71,13 @@ namespace CapaNegocio
             );
         }
 
-        // *cambio* - Ahora recibe el ID del usuario logueado para verificar permisos y auditar
+        /// <summary>
+        /// Elimina una asignatura del sistema y registra la acción en la bitácora.
+        /// </summary>
+        /// <param name="idAsignatura">Identificador de la asignatura a eliminar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Eliminar(int idAsignatura, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el usuario tiene permiso para Eliminar en este formulario
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmAsignaturas", "Eliminar"))
             {
                 throw new InvalidOperationException("No tiene permisos para eliminar asignaturas.");
@@ -82,19 +86,16 @@ namespace CapaNegocio
             if (idAsignatura <= 0)
                 throw new ArgumentException("El identificador de la asignatura no es válido.");
 
-            // Opcional: Obtener el nombre antes de borrar para un registro de bitácora más detallado
             string nombreAsignatura = "ID " + idAsignatura;
             try
             {
                 var de_paso = repositorio.ObtenerPorId(idAsignatura);
                 if (de_paso != null) nombreAsignatura = $"'{de_paso.Nombre}' (ID: {idAsignatura})";
             }
-            catch { /* Continuar si falla la lectura previa */ }
+            catch { }
 
-            // Eliminación en la Base de Datos
             repositorio.Eliminar(idAsignatura);
 
-            // *auditoria* - Se registra la eliminación en la bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Asignaturas",
@@ -103,12 +104,20 @@ namespace CapaNegocio
             );
         }
 
-        // Los métodos de lectura no requieren validación de permisos de edición ni bitácora de cambios
+        /// <summary>
+        /// Obtiene todas las asignaturas registradas.
+        /// </summary>
+        /// <returns>Lista de asignaturas.</returns>
         public List<Asignatura> ObtenerTodos()
         {
             return repositorio.ObtenerTodos();
         }
 
+        /// <summary>
+        /// Obtiene una asignatura por su identificador.
+        /// </summary>
+        /// <param name="idAsignatura">Identificador de la asignatura.</param>
+        /// <returns>Entidad Asignatura correspondiente.</returns>
         public Asignatura ObtenerPorId(int idAsignatura)
         {
             if (idAsignatura <= 0)

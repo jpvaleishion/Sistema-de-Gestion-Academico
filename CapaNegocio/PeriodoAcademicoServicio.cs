@@ -5,6 +5,10 @@ using System.Collections.Generic;
 
 namespace CapaNegocio
 {
+    /// <summary>
+    /// Servicio de negocio para la gestión de períodos académicos.
+    /// Aplica validaciones de integridad, controla permisos y registra auditoría.
+    /// </summary>
     public class PeriodoAcademicoServicio
     {
         private PeriodoAcademicoRepositorio repositorio = new PeriodoAcademicoRepositorio();
@@ -13,7 +17,11 @@ namespace CapaNegocio
         private PermisoServicio permisoService = new PermisoServicio();
         private BitacoraServicio bitacoraService = new BitacoraServicio();
 
-        // *cambio* - Ahora recibe el ID del usuario logueado para seguridad y auditoría
+        /// <summary>
+        /// Registra un nuevo período académico verificando permisos, validaciones y registrando auditoría.
+        /// </summary>
+        /// <param name="p">Entidad PeriodoAcademico a guardar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Guardar(PeriodoAcademico p, int idUsuarioLogueado)
         {
             // *seguridad* - Validar si el rol tiene permiso para Crear en frmPeriodosAcademicos
@@ -41,7 +49,11 @@ namespace CapaNegocio
             );
         }
 
-        // *cambio* - Ahora recibe el ID del usuario logueado
+        /// <summary>
+        /// Actualiza un período académico existente aplicando validaciones, control de permisos y auditoría.
+        /// </summary>
+        /// <param name="p">Entidad PeriodoAcademico a actualizar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Actualizar(PeriodoAcademico p, int idUsuarioLogueado)
         {
             // *seguridad* - Validar si el rol tiene permiso para Modificar en frmPeriodosAcademicos
@@ -69,7 +81,11 @@ namespace CapaNegocio
             );
         }
 
-        // *cambio* - Ahora recibe el ID del usuario logueado
+        /// <summary>
+        /// Elimina un período académico tras verificar permisos y registra la acción en la bitácora.
+        /// </summary>
+        /// <param name="idPeriodo">Identificador del período académico a eliminar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Eliminar(int idPeriodo, int idUsuarioLogueado)
         {
             // *seguridad* - Validar si el rol tiene permiso para Eliminar en frmPeriodosAcademicos
@@ -105,11 +121,20 @@ namespace CapaNegocio
             );
         }
 
+        /// <summary>
+        /// Obtiene todos los períodos académicos registrados.
+        /// </summary>
+        /// <returns>Lista de PeriodoAcademico.</returns>
         public List<PeriodoAcademico> ObtenerTodos()
         {
             return repositorio.ObtenerTodos();
         }
 
+        /// <summary>
+        /// Obtiene un período académico por su identificador.
+        /// </summary>
+        /// <param name="idPeriodo">Identificador del período académico.</param>
+        /// <returns>Entidad PeriodoAcademico correspondiente.</returns>
         public PeriodoAcademico ObtenerPorId(int idPeriodo)
         {
             if (idPeriodo <= 0)

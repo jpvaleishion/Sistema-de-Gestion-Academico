@@ -5,25 +5,28 @@ using System.Collections.Generic;
 
 namespace CapaNegocio
 {
+    /// <summary>
+    /// Servicio de negocio para la gestión de docentes.
+    /// Aplica reglas de negocio, validaciones y registra auditoría mediante bitácora y permisos.
+    /// </summary>
     public class DocenteServicio
     {
         private DocenteRepositorio repositorio = new DocenteRepositorio();
-
-        // *cambio* - Instanciamos los servicios de permisos y bitácora
         private PermisoServicio permisoService = new PermisoServicio();
         private BitacoraServicio bitacoraService = new BitacoraServicio();
 
-        // RN-02: No se puede registrar un docente sin especialidad
-        // *cambio* - Ahora recibe el ID del usuario logueado para validar seguridad y auditar
+        /// <summary>
+        /// Registra un nuevo docente aplicando validaciones de negocio y auditoría.
+        /// </summary>
+        /// <param name="d">Entidad Docente a guardar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Guardar(Docente d, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el rol tiene permiso para Crear en frmDocentes
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmDocentes", "Crear"))
             {
                 throw new InvalidOperationException("No tiene permisos para registrar docentes.");
             }
 
-            // Validaciones de regla de negocio (RN-02)
             if (string.IsNullOrWhiteSpace(d.Nombres))
                 throw new ArgumentException("El nombre es obligatorio.");
 
@@ -33,10 +36,8 @@ namespace CapaNegocio
             if (string.IsNullOrWhiteSpace(d.Especialidad))
                 throw new ArgumentException("La especialidad es obligatoria.");
 
-            // Inserción en Base de Datos
             repositorio.Insertar(d);
 
-            // *auditoria* - Registro en bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Docentes",
@@ -45,16 +46,18 @@ namespace CapaNegocio
             );
         }
 
-        // *cambio* - Ahora recibe el ID del usuario logueado
+        /// <summary>
+        /// Actualiza los datos de un docente aplicando validaciones y auditoría.
+        /// </summary>
+        /// <param name="d">Entidad Docente a actualizar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Actualizar(Docente d, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el rol tiene permiso para Modificar en frmDocentes
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmDocentes", "Modificar"))
             {
                 throw new InvalidOperationException("No tiene permisos para modificar docentes.");
             }
 
-            // Validaciones de regla de negocio (RN-02)
             if (string.IsNullOrWhiteSpace(d.Nombres))
                 throw new ArgumentException("El nombre es obligatorio.");
 
@@ -64,10 +67,8 @@ namespace CapaNegocio
             if (string.IsNullOrWhiteSpace(d.Especialidad))
                 throw new ArgumentException("La especialidad es obligatoria.");
 
-            // Actualización en Base de Datos
             repositorio.Actualizar(d);
 
-            // *auditoria* - Registro en bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Docentes",
@@ -76,10 +77,13 @@ namespace CapaNegocio
             );
         }
 
-        // *cambio* - Ahora recibe el ID del usuario logueado
+        /// <summary>
+        /// Elimina un docente del sistema y registra la acción en la bitácora.
+        /// </summary>
+        /// <param name="idPersona">Identificador de la persona/docente a eliminar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Eliminar(int idPersona, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el rol tiene permiso para Eliminar en frmDocentes
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmDocentes", "Eliminar"))
             {
                 throw new InvalidOperationException("No tiene permisos para eliminar docentes.");
@@ -88,7 +92,6 @@ namespace CapaNegocio
             if (idPersona <= 0)
                 throw new ArgumentException("El identificador del docente no es válido.");
 
-            // Buscamos el nombre del docente antes de eliminarlo para registrarlo en la auditoría
             string nombreDocente = $"ID {idPersona}";
             try
             {
@@ -98,12 +101,10 @@ namespace CapaNegocio
                     nombreDocente = $"'{de_paso.Nombres} {de_paso.Apellidos}' (ID: {idPersona})";
                 }
             }
-            catch { /* Si falla la lectura, se mantiene el ID en el registro */ }
+            catch { }
 
-            // Eliminación en Base de Datos
             repositorio.Eliminar(idPersona);
 
-            // *auditoria* - Registro en bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Docentes",
@@ -112,11 +113,20 @@ namespace CapaNegocio
             );
         }
 
+        /// <summary>
+        /// Obtiene todos los docentes registrados.
+        /// </summary>
+        /// <returns>Lista de docentes.</returns>
         public List<Docente> ObtenerTodos()
         {
             return repositorio.ObtenerTodos();
         }
 
+        /// <summary>
+        /// Obtiene un docente por su identificador.
+        /// </summary>
+        /// <param name="idPersona">Identificador del docente.</param>
+        /// <returns>Entidad Docente correspondiente.</returns>
         public Docente ObtenerPorId(int idPersona)
         {
             if (idPersona <= 0)

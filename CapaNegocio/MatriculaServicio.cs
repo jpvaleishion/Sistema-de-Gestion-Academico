@@ -5,25 +5,28 @@ using System.Collections.Generic;
 
 namespace CapaNegocio
 {
+    /// <summary>
+    /// Servicio de negocio para la gestión de matrículas.
+    /// Aplica reglas de negocio que aseguran la asociación correcta y registra auditoría.
+    /// </summary>
     public class MatriculaServicio
     {
         private MatriculaRepositorio repositorio = new MatriculaRepositorio();
-
-        // *cambio* - Instanciamos los servicios de permisos y bitácora
         private PermisoServicio permisoService = new PermisoServicio();
         private BitacoraServicio bitacoraService = new BitacoraServicio();
 
-        // RN-05: La matrícula debe estar asociada a Estudiante, Asignatura, Docente, Curso y Período
-        // *cambio* - Ahora recibe el ID del usuario logueado para control de acceso y auditoría
+        /// <summary>
+        /// Registra una nueva matrícula verificando asociaciones obligatorias y registrando auditoría.
+        /// </summary>
+        /// <param name="m">Entidad Matricula a guardar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Guardar(Matricula m, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el rol tiene permiso para Crear en frmMatriculas
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Crear"))
             {
                 throw new InvalidOperationException("No tiene permisos para registrar matrículas.");
             }
 
-            // Validaciones de regla de negocio (RN-05)
             if (m.IdEstudiante <= 0)
                 throw new ArgumentException("Debe seleccionar un estudiante.");
 
@@ -39,28 +42,28 @@ namespace CapaNegocio
             if (m.IdPeriodo <= 0)
                 throw new ArgumentException("Debe seleccionar un período académico.");
 
-            // Inserción en Base de Datos
             repositorio.Insertar(m);
 
-            // *auditoria* - Registro detallado en la bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Matriculas",
                 "Crear",
-                $"Se registró matrícula para el Estudiante ID {m.IdEstudiante} en la Asignatura ID {m.IdAsignatura} (Docente ID: {m.IdDocente}, Curso ID: {m.IdCurso}, Período ID: {m.IdPeriodo})."
+                $"Se registró la matrícula: Matrícula ID {m.IdMatricula}, Estudiante ID {m.IdEstudiante}, Asignatura ID {m.IdAsignatura}, Docente ID {m.IdDocente}, Curso ID {m.IdCurso}, Período ID {m.IdPeriodo}."
             );
         }
 
-        // *cambio* - Ahora recibe el ID del usuario logueado
+        /// <summary>
+        /// Actualiza una matrícula existente aplicando validaciones y registrando auditoría.
+        /// </summary>
+        /// <param name="m">Entidad Matricula a actualizar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Actualizar(Matricula m, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el rol tiene permiso para Modificar en frmMatriculas
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Modificar"))
             {
                 throw new InvalidOperationException("No tiene permisos para modificar matrículas.");
             }
 
-            // Validaciones de regla de negocio (RN-05)
             if (m.IdEstudiante <= 0)
                 throw new ArgumentException("Debe seleccionar un estudiante.");
 
@@ -76,22 +79,23 @@ namespace CapaNegocio
             if (m.IdPeriodo <= 0)
                 throw new ArgumentException("Debe seleccionar un período académico.");
 
-            // Actualización en Base de Datos
             repositorio.Actualizar(m);
 
-            // *auditoria* - Registro en bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Matriculas",
                 "Modificar",
-                $"Se modificó la Matrícula ID {m.IdMatricula}. Nuevos datos -> Estudiante ID: {m.IdEstudiante}, Asignatura ID: {m.IdAsignatura}, Docente ID: {m.IdDocente}, Curso ID: {m.IdCurso}, Período ID: {m.IdPeriodo}."
+                $"Se actualizó la Matrícula ID {m.IdMatricula}: Estudiante ID {m.IdEstudiante}, Asignatura ID {m.IdAsignatura}, Docente ID {m.IdDocente}, Curso ID {m.IdCurso}, Período ID {m.IdPeriodo}."
             );
         }
 
-        // *cambio* - Ahora recibe el ID del usuario logueado
+        /// <summary>
+        /// Elimina una matrícula y registra la acción en la bitácora.
+        /// </summary>
+        /// <param name="idMatricula">Identificador de la matrícula a eliminar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Eliminar(int idMatricula, int idUsuarioLogueado)
         {
-            // *seguridad* - Validar si el rol tiene permiso para Eliminar en frmMatriculas
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Eliminar"))
             {
                 throw new InvalidOperationException("No tiene permisos para eliminar matrículas.");
@@ -100,35 +104,41 @@ namespace CapaNegocio
             if (idMatricula <= 0)
                 throw new ArgumentException("El identificador de la matrícula no es válido.");
 
-            // Rescatamos datos clave de la matrícula antes de proceder a borrarla físicamente
-            string detalleMatricula = $"ID {idMatricula}";
+            string detalle = $"ID {idMatricula}";
             try
             {
-                var matriculaPrev = repositorio.ObtenerPorId(idMatricula);
-                if (matriculaPrev != null)
+                var de_paso = repositorio.ObtenerPorId(idMatricula);
+                if (de_paso != null)
                 {
-                    detalleMatricula = $"ID {idMatricula} (Estudiante ID: {matriculaPrev.IdEstudiante}, Asignatura ID: {matriculaPrev.IdAsignatura})";
+                    detalle = $"ID {idMatricula} (Estudiante ID: {de_paso.IdEstudiante}, Asignatura ID: {de_paso.IdAsignatura})";
                 }
             }
-            catch { /* Continuar silenciosamente si falla la lectura preliminar */ }
+            catch { }
 
-            // Eliminación en Base de Datos
             repositorio.Eliminar(idMatricula);
 
-            // *auditoria* - Registro en la bitácora
             bitacoraService.RegistrarAccion(
                 idUsuarioLogueado,
                 "Matriculas",
                 "Eliminar",
-                $"Se eliminó la matrícula: {detalleMatricula}."
+                $"Se eliminó la matrícula: {detalle}."
             );
         }
 
+        /// <summary>
+        /// Obtiene todas las matrículas registradas.
+        /// </summary>
+        /// <returns>Lista de matrículas.</returns>
         public List<Matricula> ObtenerTodos()
         {
             return repositorio.ObtenerTodos();
         }
 
+        /// <summary>
+        /// Obtiene una matrícula por su identificador.
+        /// </summary>
+        /// <param name="idMatricula">Identificador de la matrícula.</param>
+        /// <returns>Entidad Matricula correspondiente.</returns>
         public Matricula ObtenerPorId(int idMatricula)
         {
             if (idMatricula <= 0)

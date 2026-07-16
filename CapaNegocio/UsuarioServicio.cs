@@ -7,21 +7,29 @@ using System.Text;
 
 namespace CapaNegocio
 {
+    /// <summary>
+    /// Servicio de negocio responsable de la gestión de usuarios.
+    /// Encapsula validaciones, encriptación de contraseñas, control de intentos y auditoría.
+    /// </summary>
     public class UsuarioServicio
     {
-        UsuarioRepositorio repositorio = new UsuarioRepositorio();
-        BitacoraServicio bitacoraNegocio = new BitacoraServicio();
+        private UsuarioRepositorio repositorio = new UsuarioRepositorio();
+        private BitacoraServicio bitacoraNegocio = new BitacoraServicio();
 
         private const int MAX_INTENTOS_FALLIDOS = 3;
         private const int MINUTOS_BLOQUEO = 15;
         private const string MENSAJE_LOGIN_GENERICO = "Usuario o contraseña incorrectos.";
 
+        /// <summary>
+        /// Crea un nuevo usuario: valida datos, genera salt, encripta contraseña y registra auditoría.
+        /// </summary>
+        /// <param name="u">Entidad Usuario a persistir.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación (auditoría).</param>
         public void Guardar(Usuario u, int idUsuarioLogueado)
         {
             if (string.IsNullOrWhiteSpace(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario es obligatorio.");
 
-            // *cambio* - Validamos longitud en lugar de formato de correo
             if (!EsNombreUsuarioValido(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario debe tener entre 3 y 100 caracteres.");
 
@@ -49,12 +57,16 @@ namespace CapaNegocio
             );
         }
 
+        /// <summary>
+        /// Actualiza un usuario existente: valida datos, re-genera salt y encripta la nueva contraseña, registra auditoría.
+        /// </summary>
+        /// <param name="u">Entidad Usuario con los datos actualizados.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación (auditoría).</param>
         public void Actualizar(Usuario u, int idUsuarioLogueado)
         {
             if (string.IsNullOrWhiteSpace(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario es obligatorio.");
 
-            // *cambio* - Validamos longitud en lugar de formato de correo
             if (!EsNombreUsuarioValido(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario debe tener entre 3 y 100 caracteres.");
 
@@ -80,6 +92,11 @@ namespace CapaNegocio
             );
         }
 
+        /// <summary>
+        /// Elimina permanentemente un usuario y registra la acción en la bitácora.
+        /// </summary>
+        /// <param name="idUsuario">Identificador del usuario a eliminar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación (auditoría).</param>
         public void Eliminar(int idUsuario, int idUsuarioLogueado)
         {
             if (idUsuario <= 0)
@@ -98,11 +115,20 @@ namespace CapaNegocio
             );
         }
 
+        /// <summary>
+        /// Recupera todos los usuarios registrados en el sistema.
+        /// </summary>
+        /// <returns>Lista de entidades Usuario.</returns>
         public List<Usuario> ObtenerTodos()
         {
             return repositorio.ObtenerTodos();
         }
 
+        /// <summary>
+        /// Obtiene un usuario por su identificador.
+        /// </summary>
+        /// <param name="idUsuario">Identificador del usuario a recuperar.</param>
+        /// <returns>Entidad Usuario correspondiente.</returns>
         public Usuario ObtenerPorId(int idUsuario)
         {
             if (idUsuario <= 0)
@@ -111,6 +137,12 @@ namespace CapaNegocio
             return repositorio.ObtenerPorId(idUsuario);
         }
 
+        /// <summary>
+        /// Intenta iniciar sesión con las credenciales proporcionadas; controla intentos fallidos, bloqueo temporal y auditoría.
+        /// </summary>
+        /// <param name="nombreUsuario">Nombre de usuario proporcionado por quien intenta acceder.</param>
+        /// <param name="password">Contraseña proporcionada por quien intenta acceder.</param>
+        /// <returns>Entidad Usuario autenticada si las credenciales son válidas.</returns>
         public Usuario IniciarSesion(string nombreUsuario, string password)
         {
             if (string.IsNullOrWhiteSpace(nombreUsuario))
@@ -181,6 +213,10 @@ namespace CapaNegocio
             return u;
         }
 
+        /// <summary>
+        /// Genera un salt criptográfico aleatorio codificado en Base64.
+        /// </summary>
+        /// <returns>Cadena Base64 que representa el salt.</returns>
         private string GenerarSalt()
         {
             byte[] bytesSalt = new byte[16];
@@ -191,6 +227,12 @@ namespace CapaNegocio
             return Convert.ToBase64String(bytesSalt);
         }
 
+        /// <summary>
+        /// Encripta la contraseña concatenada con el salt usando SHA256 y devuelve el hash en Base64.
+        /// </summary>
+        /// <param name="password">Contraseña en texto plano.</param>
+        /// <param name="salt">Salt asociado al usuario.</param>
+        /// <returns>Hash Base64 de la contraseña + salt.</returns>
         private string EncriptarPassword(string password, string salt)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -201,13 +243,16 @@ namespace CapaNegocio
             }
         }
 
-        // *cambio* - Nueva validación de nombre de usuario flexible (reemplaza a EsEmailValido)
+        /// <summary>
+        /// Valida la longitud y presencia del nombre de usuario (permite correos, nicks u otros formatos).
+        /// </summary>
+        /// <param name="nombreUsuario">Nombre de usuario a validar.</param>
+        /// <returns>True si el nombre cumple la regla de longitud; False en caso contrario.</returns>
         private bool EsNombreUsuarioValido(string nombreUsuario)
         {
             if (string.IsNullOrWhiteSpace(nombreUsuario))
                 return false;
 
-            // Permite cualquier tipo de nombre de usuario (correos, nicks, etc.) entre 3 y 100 caracteres.
             return nombreUsuario.Length >= 3 && nombreUsuario.Length <= 100;
         }
     }
