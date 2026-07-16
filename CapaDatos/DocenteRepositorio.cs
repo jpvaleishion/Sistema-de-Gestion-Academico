@@ -5,15 +5,21 @@ using System.Data.SqlClient;
 
 namespace CapaDatos
 {
+    /// <summary>
+    /// Repositorio encargado de gestionar las operaciones de acceso a datos para la entidad <see cref="Docente"/>.
+    /// </summary>
     public class DocenteRepositorio
     {
-        Conexion con = new Conexion();
+        private Conexion con = new Conexion();
 
+        /// <summary>
+        /// Inserta un nuevo docente en la base de datos.
+        /// </summary>
+        /// <param name="d">Objeto <see cref="Docente"/> con los datos a insertar.</param>
         public void Insertar(Docente d)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "INSERT INTO Docentes (Nombres,Apellidos,Email,Telefono,Estado,Especialidad) VALUES (@Nombres, @Apellidos, @Email, @Telefono, @Estado, @Especialidad)";
                 try
                 {
@@ -36,11 +42,14 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Actualiza los datos de un docente existente.
+        /// </summary>
+        /// <param name="d">Objeto <see cref="Docente"/> con los datos actualizados.</param>
         public void Actualizar(Docente d)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "UPDATE Docentes SET Nombres=@Nombres, Apellidos=@Apellidos, Email=@Email, Telefono=@Telefono, Estado=@Estado, Especialidad=@Especialidad WHERE IdPersona=@IdPersona";
                 try
                 {
@@ -64,11 +73,14 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Elimina un docente de la base de datos según su identificador de persona.
+        /// </summary>
+        /// <param name="idPersona">Identificador de la persona/docente a eliminar.</param>
         public void Eliminar(int idPersona)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "DELETE FROM Docentes WHERE IdPersona=@IdPersona";
                 try
                 {
@@ -86,13 +98,16 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Obtiene la lista completa de docentes registrados.
+        /// </summary>
+        /// <returns>Lista de objetos <see cref="Docente"/>.</returns>
         public List<Docente> ObtenerTodos()
         {
             List<Docente> lista = new List<Docente>();
 
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "SELECT * FROM Docentes";
                 try
                 {
@@ -123,13 +138,17 @@ namespace CapaDatos
             return lista;
         }
 
+        /// <summary>
+        /// Obtiene un docente específico según su identificador de persona.
+        /// </summary>
+        /// <param name="idPersona">Identificador de la persona/docente a buscar.</param>
+        /// <returns>Objeto <see cref="Docente"/> encontrado, o <c>null</c> si no existe.</returns>
         public Docente ObtenerPorId(int idPersona)
         {
             Docente d = null;
 
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "SELECT * FROM Docentes WHERE IdPersona=@IdPersona";
                 try
                 {

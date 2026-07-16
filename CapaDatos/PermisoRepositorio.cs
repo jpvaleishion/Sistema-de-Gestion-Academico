@@ -6,10 +6,18 @@ using CapaEntidades.Entidades;
 
 namespace CapaDatos
 {
+    /// <summary>
+    /// Repositorio encargado de gestionar la consulta y verificación de permisos asignados a los roles del sistema.
+    /// </summary>
     public class PermisoRepositorio
     {
-        Conexion conexion = new Conexion();
-        // Obtiene la lista completa de permisos para cargarlos en la sesión al iniciar sesión
+        private Conexion conexion = new Conexion();
+
+        /// <summary>
+        /// Obtiene la lista completa de permisos asociados a un rol, utilizada para cargarlos en la sesión al iniciar sesión.
+        /// </summary>
+        /// <param name="idRol">Identificador del rol cuyos permisos se desean consultar.</param>
+        /// <returns>Lista de objetos <see cref="Permiso"/> asociados al rol.</returns>
         public List<Permiso> ObtenerPermisosPorRol(int idRol)
         {
             List<Permiso> lista = new List<Permiso>();
@@ -46,10 +54,17 @@ namespace CapaDatos
                     }
                 }
             }
+
             return lista;
         }
 
-        // Verifica un permiso específico rápidamente en la Capa de Negocio
+        /// <summary>
+        /// Verifica de forma rápida si un usuario tiene un permiso específico sobre un formulario determinado.
+        /// </summary>
+        /// <param name="idUsuario">Identificador del usuario a verificar.</param>
+        /// <param name="nombreFormulario">Nombre del formulario sobre el cual se consulta el permiso.</param>
+        /// <param name="operacion">Operación a verificar (visualizar, crear, modificar o eliminar).</param>
+        /// <returns><c>true</c> si el usuario tiene el permiso solicitado; de lo contrario, <c>false</c>.</returns>
         public bool TienePermiso(int idUsuario, string nombreFormulario, string operacion)
         {
             using (SqlConnection con = conexion.Conectar())
@@ -87,6 +102,7 @@ namespace CapaDatos
                     }
                 }
             }
+
             return false;
         }
     }

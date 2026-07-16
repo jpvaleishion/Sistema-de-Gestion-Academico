@@ -6,10 +6,17 @@ using System.Data.SqlClient;
 
 namespace CapaDatos
 {
+    /// <summary>
+    /// Repositorio encargado de gestionar el registro y la consulta de eventos de auditoría del sistema.
+    /// </summary>
     public class BitacoraRepositorio
     {
-        Conexion con = new Conexion();
+        private Conexion con = new Conexion();
 
+        /// <summary>
+        /// Inserta un nuevo registro de bitácora mediante el procedimiento almacenado correspondiente.
+        /// </summary>
+        /// <param name="b">Objeto <see cref="Bitacora"/> con los datos del evento a registrar.</param>
         public void Insertar(Bitacora b)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -34,6 +41,10 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Obtiene todos los registros de bitácora mediante el procedimiento almacenado correspondiente.
+        /// </summary>
+        /// <returns>Lista de objetos <see cref="Bitacora"/>.</returns>
         public List<Bitacora> ObtenerTodo()
         {
             List<Bitacora> lista = new List<Bitacora>();

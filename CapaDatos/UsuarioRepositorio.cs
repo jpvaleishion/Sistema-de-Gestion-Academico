@@ -5,10 +5,17 @@ using System.Data.SqlClient;
 
 namespace CapaDatos
 {
+    /// <summary>
+    /// Repositorio encargado de gestionar las operaciones de acceso a datos para la entidad <see cref="Usuario"/>, incluyendo autenticación y control de bloqueo por intentos fallidos.
+    /// </summary>
     public class UsuarioRepositorio
     {
-        Conexion con = new Conexion();
+        private Conexion con = new Conexion();
 
+        /// <summary>
+        /// Inserta un nuevo usuario en la base de datos con sus valores iniciales de seguridad.
+        /// </summary>
+        /// <param name="u">Objeto <see cref="Usuario"/> con los datos a insertar.</param>
         public void Insertar(Usuario u)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -37,6 +44,10 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Actualiza los datos generales y de seguridad de un usuario existente.
+        /// </summary>
+        /// <param name="u">Objeto <see cref="Usuario"/> con los datos actualizados.</param>
         public void Actualizar(Usuario u)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -66,6 +77,10 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Elimina un usuario de la base de datos según su identificador.
+        /// </summary>
+        /// <param name="idUsuario">Identificador del usuario a eliminar.</param>
         public void Eliminar(int idUsuario)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -87,13 +102,16 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Obtiene la lista completa de usuarios registrados, incluyendo el nombre de su rol asociado.
+        /// </summary>
+        /// <returns>Lista de objetos <see cref="Usuario"/>.</returns>
         public List<Usuario> ObtenerTodos()
         {
             List<Usuario> lista = new List<Usuario>();
 
             using (SqlConnection conexion = con.Conectar())
             {
-                // CORREGIDO: Se cambia r.NombreRol por r.Nombre AS NombreRol
                 string sql = "SELECT u.*, r.Nombre AS NombreRol FROM Usuarios u INNER JOIN Roles r ON u.IdRol = r.IdRol";
                 try
                 {
@@ -126,13 +144,17 @@ namespace CapaDatos
             return lista;
         }
 
+        /// <summary>
+        /// Obtiene un usuario específico según su identificador, incluyendo el nombre de su rol asociado.
+        /// </summary>
+        /// <param name="idUsuario">Identificador del usuario a buscar.</param>
+        /// <returns>Objeto <see cref="Usuario"/> encontrado, o <c>null</c> si no existe.</returns>
         public Usuario ObtenerPorId(int idUsuario)
         {
             Usuario u = null;
 
             using (SqlConnection conexion = con.Conectar())
             {
-                // CORREGIDO: Se cambia r.NombreRol por r.Nombre AS NombreRol
                 string sql = "SELECT u.*, r.Nombre AS NombreRol FROM Usuarios u INNER JOIN Roles r ON u.IdRol = r.IdRol WHERE u.IdUsuario=@IdUsuario";
                 try
                 {
@@ -165,13 +187,17 @@ namespace CapaDatos
             return u;
         }
 
+        /// <summary>
+        /// Obtiene un usuario específico según su nombre de usuario, incluyendo el nombre de su rol asociado.
+        /// </summary>
+        /// <param name="nombreUsuario">Nombre de usuario a buscar.</param>
+        /// <returns>Objeto <see cref="Usuario"/> encontrado, o <c>null</c> si no existe.</returns>
         public Usuario ObtenerPorNombreUsuario(string nombreUsuario)
         {
             Usuario u = null;
 
             using (SqlConnection conexion = con.Conectar())
             {
-                // CORREGIDO: Se cambia r.NombreRol por r.Nombre AS NombreRol
                 string sql = "SELECT u.*, r.Nombre AS NombreRol FROM Usuarios u INNER JOIN Roles r ON u.IdRol = r.IdRol WHERE u.NombreUsuario=@NombreUsuario";
                 try
                 {
@@ -204,6 +230,12 @@ namespace CapaDatos
             return u;
         }
 
+        /// <summary>
+        /// Actualiza el número de intentos fallidos de inicio de sesión y la fecha de bloqueo de un usuario.
+        /// </summary>
+        /// <param name="idUsuario">Identificador del usuario a actualizar.</param>
+        /// <param name="intentos">Nuevo número de intentos fallidos registrados.</param>
+        /// <param name="fechaBloqueo">Nueva fecha de bloqueo, o <c>null</c> si el usuario no está bloqueado.</param>
         public void ActualizarIntentosYBloqueo(int idUsuario, int intentos, DateTime? fechaBloqueo)
         {
             using (SqlConnection conexion = con.Conectar())

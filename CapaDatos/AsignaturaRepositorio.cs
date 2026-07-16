@@ -5,15 +5,21 @@ using System.Data.SqlClient;
 
 namespace CapaDatos
 {
+    /// <summary>
+    /// Repositorio encargado de gestionar las operaciones de acceso a datos para la entidad <see cref="Asignatura"/>.
+    /// </summary>
     public class AsignaturaRepositorio
     {
-        Conexion con = new Conexion();
+        private Conexion con = new Conexion();
 
+        /// <summary>
+        /// Inserta una nueva asignatura en la base de datos.
+        /// </summary>
+        /// <param name="a">Objeto <see cref="Asignatura"/> con los datos a insertar.</param>
         public void Insertar(Asignatura a)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "INSERT INTO Asignaturas (Nombre,Creditos,Modalidad,Estado) VALUES (@Nombre, @Creditos, @Modalidad, @Estado)";
                 try
                 {
@@ -34,11 +40,14 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Actualiza los datos de una asignatura existente.
+        /// </summary>
+        /// <param name="a">Objeto <see cref="Asignatura"/> con los datos actualizados.</param>
         public void Actualizar(Asignatura a)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "UPDATE Asignaturas SET Nombre=@Nombre, Creditos=@Creditos, Modalidad=@Modalidad, Estado=@Estado WHERE IdAsignatura=@IdAsignatura";
                 try
                 {
@@ -60,6 +69,10 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Elimina una asignatura de la base de datos según su identificador.
+        /// </summary>
+        /// <param name="idAsignatura">Identificador de la asignatura a eliminar.</param>
         public void Eliminar(int idAsignatura)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -81,13 +94,16 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Obtiene la lista completa de asignaturas registradas.
+        /// </summary>
+        /// <returns>Lista de objetos <see cref="Asignatura"/>.</returns>
         public List<Asignatura> ObtenerTodos()
         {
             List<Asignatura> lista = new List<Asignatura>();
 
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "SELECT * FROM Asignaturas";
                 try
                 {
@@ -116,13 +132,17 @@ namespace CapaDatos
             return lista;
         }
 
+        /// <summary>
+        /// Obtiene una asignatura específica según su identificador.
+        /// </summary>
+        /// <param name="idAsignatura">Identificador de la asignatura a buscar.</param>
+        /// <returns>Objeto <see cref="Asignatura"/> encontrado, o <c>null</c> si no existe.</returns>
         public Asignatura ObtenerPorId(int idAsignatura)
         {
             Asignatura a = null;
 
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "SELECT * FROM Asignaturas WHERE IdAsignatura=@IdAsignatura";
                 try
                 {

@@ -5,16 +5,21 @@ using System.Data.SqlClient;
 
 namespace CapaDatos
 {
+    /// <summary>
+    /// Repositorio encargado de gestionar las operaciones de acceso a datos para la entidad <see cref="Calificacion"/>.
+    /// </summary>
     public class CalificacionRepositorio
     {
-        Conexion con = new Conexion();
-        //Codigo por Andre Granda 4to C
+        private Conexion con = new Conexion();
 
+        /// <summary>
+        /// Inserta una nueva calificación en la base de datos.
+        /// </summary>
+        /// <param name="c">Objeto <see cref="Calificacion"/> con los datos a insertar.</param>
         public void Insertar(Calificacion c)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "INSERT INTO Calificaciones (IdMatricula,Nota1," +
                     "Nota2,NotaFinal,NotaMaxima,Estado,Faltas,Observaciones,FechaCalificacion) " +
                     "VALUES (@IdMatricula, @Nota1, @Nota2, @NotaFinal, @NotaMaxima, @Estado, @Faltas, " +
@@ -43,11 +48,14 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Actualiza los datos de una calificación existente.
+        /// </summary>
+        /// <param name="c">Objeto <see cref="Calificacion"/> con los datos actualizados.</param>
         public void Actualizar(Calificacion c)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "UPDATE Calificaciones SET IdMatricula=@IdMatricula, Nota1=@Nota1, Nota2=@Nota2, NotaFinal=@NotaFinal, NotaMaxima=@NotaMaxima, " +
                     "Estado=@Estado, Faltas=@Faltas, Observaciones=@Observaciones, " +
                     "FechaCalificacion=@FechaCalificacion WHERE IdCalificacion=@IdCalificacion";
@@ -76,11 +84,14 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Elimina una calificación de la base de datos según su identificador.
+        /// </summary>
+        /// <param name="idCalificacion">Identificador de la calificación a eliminar.</param>
         public void Eliminar(int idCalificacion)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "DELETE FROM Calificaciones WHERE IdCalificacion=@IdCalificacion";
                 try
                 {
@@ -98,13 +109,16 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Obtiene la lista completa de calificaciones registradas.
+        /// </summary>
+        /// <returns>Lista de objetos <see cref="Calificacion"/>.</returns>
         public List<Calificacion> ObtenerTodos()
         {
             List<Calificacion> lista = new List<Calificacion>();
 
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "SELECT * FROM Calificaciones";
                 try
                 {
@@ -138,19 +152,23 @@ namespace CapaDatos
             return lista;
         }
 
+        /// <summary>
+        /// Obtiene una calificación específica según su identificador.
+        /// </summary>
+        /// <param name="idCalificacion">Identificador de la calificación a buscar.</param>
+        /// <returns>Objeto <see cref="Calificacion"/> encontrado, o <c>null</c> si no existe.</returns>
         public Calificacion ObtenerPorId(int idCalificacion)
         {
             Calificacion c = null;
 
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "SELECT * FROM Calificaciones WHERE IdCalificacion=@IdCalificacion";
                 try
                 {
+                    conexion.Open();
                     using (SqlCommand command = new SqlCommand(sql, conexion))
                     {
-                        conexion.Open();
                         command.Parameters.AddWithValue("@IdCalificacion", idCalificacion);
                         SqlDataReader reader = command.ExecuteReader();
                         if (reader.Read())

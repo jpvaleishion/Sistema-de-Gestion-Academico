@@ -5,15 +5,21 @@ using System.Data.SqlClient;
 
 namespace CapaDatos
 {
+    /// <summary>
+    /// Repositorio encargado de gestionar las operaciones de acceso a datos para la entidad <see cref="Matricula"/>.
+    /// </summary>
     public class MatriculaRepositorio
     {
-        Conexion con = new Conexion();
+        private Conexion con = new Conexion();
 
+        /// <summary>
+        /// Inserta una nueva matrícula en la base de datos.
+        /// </summary>
+        /// <param name="m">Objeto <see cref="Matricula"/> con los datos a insertar.</param>
         public void Insertar(Matricula m)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "INSERT INTO Matriculas (IdEstudiante,IdAsignatura,IdDocente,IdCurso,IdPeriodo,FechaMatricula,Estado) VALUES (@IdEstudiante, @IdAsignatura, @IdDocente, @IdCurso, @IdPeriodo, @FechaMatricula, @Estado)";
                 try
                 {
@@ -37,11 +43,14 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Actualiza los datos de una matrícula existente.
+        /// </summary>
+        /// <param name="m">Objeto <see cref="Matricula"/> con los datos actualizados.</param>
         public void Actualizar(Matricula m)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "UPDATE Matriculas SET IdEstudiante=@IdEstudiante, IdAsignatura=@IdAsignatura, IdDocente=@IdDocente, IdCurso=@IdCurso, IdPeriodo=@IdPeriodo, FechaMatricula=@FechaMatricula, Estado=@Estado WHERE IdMatricula=@IdMatricula";
                 try
                 {
@@ -66,11 +75,14 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Elimina una matrícula de la base de datos según su identificador.
+        /// </summary>
+        /// <param name="idMatricula">Identificador de la matrícula a eliminar.</param>
         public void Eliminar(int idMatricula)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "DELETE FROM Matriculas WHERE IdMatricula=@IdMatricula";
                 try
                 {
@@ -88,13 +100,16 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Obtiene la lista completa de matrículas registradas.
+        /// </summary>
+        /// <returns>Lista de objetos <see cref="Matricula"/>.</returns>
         public List<Matricula> ObtenerTodos()
         {
             List<Matricula> lista = new List<Matricula>();
 
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "SELECT * FROM Matriculas";
                 try
                 {
@@ -126,13 +141,17 @@ namespace CapaDatos
             return lista;
         }
 
+        /// <summary>
+        /// Obtiene una matrícula específica según su identificador.
+        /// </summary>
+        /// <param name="idMatricula">Identificador de la matrícula a buscar.</param>
+        /// <returns>Objeto <see cref="Matricula"/> encontrado, o <c>null</c> si no existe.</returns>
         public Matricula ObtenerPorId(int idMatricula)
         {
             Matricula m = null;
 
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "SELECT * FROM Matriculas WHERE IdMatricula=@IdMatricula";
                 try
                 {

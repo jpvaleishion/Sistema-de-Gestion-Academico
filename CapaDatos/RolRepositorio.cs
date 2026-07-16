@@ -5,17 +5,23 @@ using System.Data.SqlClient;
 
 namespace CapaDatos
 {
+    /// <summary>
+    /// Repositorio encargado de gestionar las operaciones de consulta de acceso a datos para la entidad <see cref="Rol"/>.
+    /// </summary>
     public class RolRepositorio
     {
         private Conexion con = new Conexion();
 
+        /// <summary>
+        /// Obtiene la lista completa de roles registrados, ordenados alfabéticamente por nombre.
+        /// </summary>
+        /// <returns>Lista de objetos <see cref="Rol"/>.</returns>
         public List<Rol> ObtenerTodos()
         {
             List<Rol> lista = new List<Rol>();
 
             using (SqlConnection conexion = con.Conectar())
             {
-                // *cambio* - Cambiamos 'NombreRol' por 'Nombre' en la consulta SQL
                 string sql = "SELECT IdRol, Nombre FROM Roles ORDER BY Nombre ASC";
                 try
                 {
@@ -29,7 +35,7 @@ namespace CapaDatos
                                 Rol r = new Rol
                                 {
                                     IdRol = Convert.ToInt32(reader["IdRol"]),
-                                    NombreRol = reader["Nombre"].ToString() // *cambio* - Leemos la columna 'Nombre'
+                                    NombreRol = reader["Nombre"].ToString()
                                 };
                                 lista.Add(r);
                             }

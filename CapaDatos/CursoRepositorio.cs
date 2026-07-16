@@ -5,15 +5,21 @@ using System.Data.SqlClient;
 
 namespace CapaDatos
 {
+    /// <summary>
+    /// Repositorio encargado de gestionar las operaciones de acceso a datos para la entidad <see cref="Curso"/>.
+    /// </summary>
     public class CursoRepositorio
     {
-        Conexion con = new Conexion();
+        private Conexion con = new Conexion();
 
+        /// <summary>
+        /// Inserta un nuevo curso en la base de datos.
+        /// </summary>
+        /// <param name="c">Objeto <see cref="Curso"/> con los datos a insertar.</param>
         public void Insertar(Curso c)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "INSERT INTO Cursos (NombreCurso,Paralelo,Capacidad,Estado) VALUES (@NombreCurso, @Paralelo, @Capacidad, @Estado)";
                 try
                 {
@@ -34,11 +40,14 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Actualiza los datos de un curso existente.
+        /// </summary>
+        /// <param name="c">Objeto <see cref="Curso"/> con los datos actualizados.</param>
         public void Actualizar(Curso c)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "UPDATE Cursos SET NombreCurso=@NombreCurso, Paralelo=@Paralelo, Capacidad=@Capacidad, Estado=@Estado WHERE IdCurso=@IdCurso";
                 try
                 {
@@ -60,11 +69,14 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Elimina un curso de la base de datos según su identificador.
+        /// </summary>
+        /// <param name="idCurso">Identificador del curso a eliminar.</param>
         public void Eliminar(int idCurso)
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "DELETE FROM Cursos WHERE IdCurso=@IdCurso";
                 try
                 {
@@ -82,13 +94,16 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Obtiene la lista completa de cursos registrados.
+        /// </summary>
+        /// <returns>Lista de objetos <see cref="Curso"/>.</returns>
         public List<Curso> ObtenerTodos()
         {
             List<Curso> lista = new List<Curso>();
 
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "SELECT * FROM Cursos";
                 try
                 {
@@ -117,13 +132,17 @@ namespace CapaDatos
             return lista;
         }
 
+        /// <summary>
+        /// Obtiene un curso específico según su identificador.
+        /// </summary>
+        /// <param name="idCurso">Identificador del curso a buscar.</param>
+        /// <returns>Objeto <see cref="Curso"/> encontrado, o <c>null</c> si no existe.</returns>
         public Curso ObtenerPorId(int idCurso)
         {
             Curso c = null;
 
             using (SqlConnection conexion = con.Conectar())
             {
-                
                 string sql = "SELECT * FROM Cursos WHERE IdCurso=@IdCurso";
                 try
                 {
