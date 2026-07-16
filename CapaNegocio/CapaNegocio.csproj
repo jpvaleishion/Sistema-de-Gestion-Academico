@@ -46,6 +46,7 @@
     <Compile Include="CalificacionServicio.cs" />
     <Compile Include="CursoServicio.cs" />
     <Compile Include="DocenteServicio.cs" />
+    <Compile Include="EstadoUsuarioServicio.cs" />
     <Compile Include="EstudianteServicio.cs" />
     <Compile Include="MatriculaServicio.cs" />
     <Compile Include="PeriodoAcademicoServicio.cs" />

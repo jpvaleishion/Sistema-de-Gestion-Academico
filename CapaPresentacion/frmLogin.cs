@@ -8,8 +8,6 @@ namespace CapaPresentacion
     public partial class frmLogin : Form
     {
         private UsuarioServicio usuarioNegocio = new UsuarioServicio();
-
-        // *cambio* - Instanciamos el servicio de bitácora para registrar los accesos
         private BitacoraServicio bitacoraNegocio = new BitacoraServicio();
         public frmLogin()
         {
@@ -30,15 +28,17 @@ namespace CapaPresentacion
 
             try
             {
+                // Intentar inicio de sesión seguro
                 var usuario = usuarioNegocio.IniciarSesion(nombreUsuarioIntento, txtPassword.Text);
 
+                // Guardar usuario en la sesión global
                 SesionActual.UsuarioLogueado = usuario;
 
                 // Cargamos dinámicamente los permisos del rol del usuario
                 PermisoServicio permisoNegocio = new PermisoServicio();
                 SesionActual.Permisos = permisoNegocio.ObtenerPermisosPorRol(usuario.IdRol);
 
-                // *cambio* - Registro de éxito en la bitácora
+                // Registro de éxito en la bitácora
                 bitacoraNegocio.RegistrarAccion(
                     idUsuario: usuario.IdUsuario,
                     modulo: "Seguridad",
@@ -54,27 +54,40 @@ namespace CapaPresentacion
                 principal.Show();
                 this.Hide();
             }
+            catch (InvalidOperationException ex)
+            {
+                // *cambio* - Captura errores controlados de negocio (Contraseña incorrecta, cuenta bloqueada, etc.)
+                lblMensaje.Text = ex.Message; 
+                RegistrarFalloBitacora(nombreUsuarioIntento, ex.Message);
+                
+                txtPassword.Clear();
+                txtPassword.Focus();
+            }
             catch (Exception ex)
             {
-                lblMensaje.Text = ex.Message;
-
-                try
-                {
-                    // *cambio* - Registro de fallo en la bitácora
-                    // Usamos ID 0 (o nulo) porque el usuario no logró autenticarse, pero dejamos constancia del intento
-                    bitacoraNegocio.RegistrarAccion(
-                        idUsuario: 0,
-                        modulo: "Seguridad",
-                        accion: "Login Fallido",
-                        descripcion: $"Intento de acceso fallido con el usuario: '{nombreUsuarioIntento}'. Motivo: {ex.Message}"
-                    );
-                }
-                catch
-                {
-                    // Evitamos que un fallo al escribir en la bitácora rompa el flujo visual del login
-                }
-
+                // *cambio* - Captura errores técnicos inesperados (Base de datos caída, error de red, etc.)
+                // Mostramos un mensaje amigable al usuario y ocultamos el error técnico real por seguridad
+                lblMensaje.Text = "Servicio no disponible temporalmente. Intente más tarde.";
+                RegistrarFalloBitacora(nombreUsuarioIntento, $"Error crítico del sistema: {ex.Message}");
+                
                 txtPassword.Clear();
+            }
+        }
+        // *cambio* - Método auxiliar para mantener limpio el flujo principal del botón ingresar
+        private void RegistrarFalloBitacora(string usuarioIntento, string motivoFallo)
+        {
+            try
+            {
+                bitacoraNegocio.RegistrarAccion(
+                    idUsuario: 0, // ID 0 porque no logró autenticarse
+                    modulo: "Seguridad",
+                    accion: "Login Fallido",
+                    descripcion: $"Intento de acceso fallido con el usuario: '{usuarioIntento}'. Motivo: {motivoFallo}"
+                );
+            }
+            catch
+            {
+                // Evitamos que un fallo al escribir en la bitácora (ej. si cayó la BD) rompa la UI
             }
         }
 

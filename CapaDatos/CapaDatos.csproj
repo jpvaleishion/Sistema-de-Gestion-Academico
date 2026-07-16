@@ -47,6 +47,7 @@
     <Compile Include="Conexion.cs" />
     <Compile Include="CursoRepositorio.cs" />
     <Compile Include="DocenteRepositorio.cs" />
+    <Compile Include="EstadoUsuarioRepositorio.cs" />
     <Compile Include="EstudianteRepositorio.cs" />
     <Compile Include="MatriculaRepositorio.cs" />
     <Compile Include="PeriodoAcademicoRepositorio.cs" />

@@ -9,7 +9,7 @@ namespace CapaNegocio
 {
     /// <summary>
     /// Servicio de negocio responsable de la gestión de usuarios.
-    /// Encapsula validaciones, encriptación de contraseñas, control de intentos y auditoría.
+    /// Encapsula validaciones, encriptación avanzada (PBKDF2), control de intentos y auditoría.
     /// </summary>
     public class UsuarioServicio
     {
@@ -21,10 +21,8 @@ namespace CapaNegocio
         private const string MENSAJE_LOGIN_GENERICO = "Usuario o contraseña incorrectos.";
 
         /// <summary>
-        /// Crea un nuevo usuario: valida datos, genera salt, encripta contraseña y registra auditoría.
+        /// Crea un nuevo usuario: valida datos, genera salt, encripta contraseña con PBKDF2 y registra auditoría.
         /// </summary>
-        /// <param name="u">Entidad Usuario a persistir.</param>
-        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación (auditoría).</param>
         public void Guardar(Usuario u, int idUsuarioLogueado)
         {
             if (string.IsNullOrWhiteSpace(u.NombreUsuario))
@@ -39,11 +37,13 @@ namespace CapaNegocio
             if (u.IdRol <= 0)
                 throw new ArgumentException("El rol es obligatorio.");
 
-            string salt = GenerarSalt();
-            string passwordEncriptada = EncriptarPassword(u.Password, salt);
+            if (u.IdEstado <= 0)
+                throw new ArgumentException("El estado es obligatorio.");
 
-            u.Salt = salt;
-            u.Password = passwordEncriptada;
+            // Generamos un Salt único y aplicamos el hash robusto
+            u.Salt = GenerarSalt();
+            u.Password = EncriptarPassword(u.Password, u.Salt);
+
             u.IntentosFallidos = 0;
             u.FechaBloqueo = null;
 
@@ -58,10 +58,9 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// Actualiza un usuario existente: valida datos, re-genera salt y encripta la nueva contraseña, registra auditoría.
+        /// Actualiza un usuario existente de forma segura. Si la contraseña no se modificó en el formulario,
+        /// la mantiene intacta para evitar re-encriptar un hash existente.
         /// </summary>
-        /// <param name="u">Entidad Usuario con los datos actualizados.</param>
-        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación (auditoría).</param>
         public void Actualizar(Usuario u, int idUsuarioLogueado)
         {
             if (string.IsNullOrWhiteSpace(u.NombreUsuario))
@@ -70,17 +69,30 @@ namespace CapaNegocio
             if (!EsNombreUsuarioValido(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario debe tener entre 3 y 100 caracteres.");
 
-            if (string.IsNullOrWhiteSpace(u.Password))
-                throw new ArgumentException("La contraseña es obligatoria.");
-
             if (u.IdRol <= 0)
                 throw new ArgumentException("El rol es obligatorio.");
 
-            string salt = GenerarSalt();
-            string passwordEncriptada = EncriptarPassword(u.Password, salt);
+            if (u.IdEstado <= 0)
+                throw new ArgumentException("El estado es obligatorio.");
 
-            u.Salt = salt;
-            u.Password = passwordEncriptada;
+            // Jalamos el estado actual del usuario desde la base de datos para comparar
+            Usuario usuarioExistente = repositorio.ObtenerPorId(u.IdUsuario);
+            if (usuarioExistente == null)
+                throw new InvalidOperationException("El usuario que intenta modificar ya no existe.");
+
+            // PROTECCIÓN: Si desde la UI la contraseña viene vacía o viene el hash viejo idéntico,
+            // significa que el usuario NO cambió su clave (solo editó el rol, nombre, estado, etc.)
+            if (string.IsNullOrWhiteSpace(u.Password) || u.Password == usuarioExistente.Password)
+            {
+                u.Salt = usuarioExistente.Salt;
+                u.Password = usuarioExistente.Password;
+            }
+            else
+            {
+                // Si escribieron algo nuevo, asumimos que es texto plano y generamos nueva seguridad
+                u.Salt = GenerarSalt();
+                u.Password = EncriptarPassword(u.Password, u.Salt);
+            }
 
             repositorio.Actualizar(u);
 
@@ -95,8 +107,6 @@ namespace CapaNegocio
         /// <summary>
         /// Elimina permanentemente un usuario y registra la acción en la bitácora.
         /// </summary>
-        /// <param name="idUsuario">Identificador del usuario a eliminar.</param>
-        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación (auditoría).</param>
         public void Eliminar(int idUsuario, int idUsuarioLogueado)
         {
             if (idUsuario <= 0)
@@ -115,20 +125,11 @@ namespace CapaNegocio
             );
         }
 
-        /// <summary>
-        /// Recupera todos los usuarios registrados en el sistema.
-        /// </summary>
-        /// <returns>Lista de entidades Usuario.</returns>
         public List<Usuario> ObtenerTodos()
         {
             return repositorio.ObtenerTodos();
         }
 
-        /// <summary>
-        /// Obtiene un usuario por su identificador.
-        /// </summary>
-        /// <param name="idUsuario">Identificador del usuario a recuperar.</param>
-        /// <returns>Entidad Usuario correspondiente.</returns>
         public Usuario ObtenerPorId(int idUsuario)
         {
             if (idUsuario <= 0)
@@ -138,11 +139,8 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// Intenta iniciar sesión con las credenciales proporcionadas; controla intentos fallidos, bloqueo temporal y auditoría.
+        /// Intenta iniciar sesión controlando intentos fallidos, bloqueos invisibles y verificación segura con PBKDF2.
         /// </summary>
-        /// <param name="nombreUsuario">Nombre de usuario proporcionado por quien intenta acceder.</param>
-        /// <param name="password">Contraseña proporcionada por quien intenta acceder.</param>
-        /// <returns>Entidad Usuario autenticada si las credenciales son válidas.</returns>
         public Usuario IniciarSesion(string nombreUsuario, string password)
         {
             if (string.IsNullOrWhiteSpace(nombreUsuario))
@@ -153,24 +151,24 @@ namespace CapaNegocio
 
             Usuario u = repositorio.ObtenerPorNombreUsuario(nombreUsuario);
 
+            // 1. Si el usuario no existe, salimos con mensaje genérico (Evita enumeración de usuarios)
             if (u == null)
                 throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO);
 
+            // 2. Si está bloqueado por tiempo, registramos en bitácora pero mostramos error genérico al cliente
             if (u.FechaBloqueo.HasValue && u.FechaBloqueo.Value > DateTime.Now)
             {
                 bitacoraNegocio.RegistrarAccion(
-                   u.IdUsuario,
-                   "Security",
-                   "Acceso Denegado",
-                   "Intento de acceso en una cuenta que se encuentra bloqueada.");
-                TimeSpan restante = u.FechaBloqueo.Value - DateTime.Now;
-                throw new InvalidOperationException(
-                    $"La cuenta está bloqueada temporalmente. Intente nuevamente en {Math.Ceiling(restante.TotalMinutes)} minuto(s).");
+                    u.IdUsuario,
+                    "Seguridad",
+                    "Acceso Denegado",
+                    $"Intento de acceso en cuenta bloqueada temporalmente para el usuario: {u.NombreUsuario}.");
+
+                throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO);
             }
 
-            string passwordEncriptada = EncriptarPassword(password, u.Salt);
-
-            if (u.Password != passwordEncriptada)
+            // 3. Verificación criptográfica con PBKDF2 y tiempo constante manual
+            if (!VerificarPassword(password, u.Salt, u.Password))
             {
                 int intentos = u.IntentosFallidos + 1;
                 DateTime? fechaBloqueo = null;
@@ -181,25 +179,31 @@ namespace CapaNegocio
                 }
 
                 repositorio.ActualizarIntentosYBloqueo(u.IdUsuario, intentos, fechaBloqueo);
+
                 bitacoraNegocio.RegistrarAccion(
                     u.IdUsuario,
                     "Seguridad",
                     "Intento Fallido",
                     $"Contraseña incorrecta. Intento #{intentos} para el usuario {u.NombreUsuario}.");
+
                 if (fechaBloqueo.HasValue)
                 {
                     bitacoraNegocio.RegistrarAccion(
                         u.IdUsuario,
                         "Seguridad",
                         "Bloqueo de Cuenta",
-                        "Cuenta bloqueada temporalmente por exceso de intentos fallidos.");
+                        $"Cuenta del usuario {u.NombreUsuario} bloqueada temporalmente por exceder intentos.");
                 }
+
                 throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO);
             }
 
-            if (u.Estado != "Activo")
-                throw new InvalidOperationException("El usuario está inactivo.");
+            // 4. CORREGIDO: Validación de estado administrativo numérico (IdEstado)
+            // Asumiendo que en tu base de datos el ID 1 significa 'Activo'
+            if (u.IdEstado != 1)
+                throw new InvalidOperationException("El usuario está inactivo o suspendido.");
 
+            // 5. Login Exitoso: Limpiamos bloqueos e intentos
             repositorio.ActualizarIntentosYBloqueo(u.IdUsuario, 0, null);
             u.IntentosFallidos = 0;
             u.FechaBloqueo = null;
@@ -213,10 +217,11 @@ namespace CapaNegocio
             return u;
         }
 
+        #region Métodos Privados Criptográficos
+
         /// <summary>
-        /// Genera un salt criptográfico aleatorio codificado en Base64.
+        /// Genera un salt criptográfico aleatorio de 16 bytes codificado en Base64.
         /// </summary>
-        /// <returns>Cadena Base64 que representa el salt.</returns>
         private string GenerarSalt()
         {
             byte[] bytesSalt = new byte[16];
@@ -228,26 +233,59 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// Encripta la contraseña concatenada con el salt usando SHA256 y devuelve el hash en Base64.
+        /// Deriva la clave usando el algoritmo PBKDF2 con 100,000 iteraciones y SHA256.
         /// </summary>
-        /// <param name="password">Contraseña en texto plano.</param>
-        /// <param name="salt">Salt asociado al usuario.</param>
-        /// <returns>Hash Base64 de la contraseña + salt.</returns>
-        private string EncriptarPassword(string password, string salt)
+        private string EncriptarPassword(string password, string saltBase64)
         {
-            using (SHA256 sha256 = SHA256.Create())
+            byte[] salt = Convert.FromBase64String(saltBase64);
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256))
             {
-                byte[] bytesEntrada = Encoding.UTF8.GetBytes(password + salt);
-                byte[] bytesHash = sha256.ComputeHash(bytesEntrada);
-                return Convert.ToBase64String(bytesHash);
+                byte[] hash = pbkdf2.GetBytes(32); // Genera un hash de 256 bits (32 bytes)
+                return Convert.ToBase64String(hash);
             }
         }
 
         /// <summary>
-        /// Valida la longitud y presencia del nombre de usuario (permite correos, nicks u otros formatos).
+        /// Compara de forma segura y en tiempo constante el intento de contraseña contra el hash de la BD.
         /// </summary>
-        /// <param name="nombreUsuario">Nombre de usuario a validar.</param>
-        /// <returns>True si el nombre cumple la regla de longitud; False en caso contrario.</returns>
+        private bool VerificarPassword(string password, string saltBase64, string hashAlmacenadoBase64)
+        {
+            try
+            {
+                byte[] salt = Convert.FromBase64String(saltBase64);
+                byte[] hashAlmacenado = Convert.FromBase64String(hashAlmacenadoBase64);
+
+                using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256))
+                {
+                    byte[] hashCalculado = pbkdf2.GetBytes(32);
+
+                    // CORREGIDO: Llamada al método manual compatible con .NET Framework tradicional
+                    return CompararEnTiempoConstante(hashCalculado, hashAlmacenado);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// CORREGIDO: Reemplazo manual de FixedTimeEquals para evitar depender de .NET Core.
+        /// Compara dos arreglos de bytes sin importar dónde difieran para evitar ataques de temporización.
+        /// </summary>
+        private bool CompararEnTiempoConstante(byte[] a, byte[] b)
+        {
+            if (a.Length != b.Length)
+                return false;
+
+            int resultado = 0;
+            for (int i = 0; i < a.Length; i++)
+            {
+                resultado |= a[i] ^ b[i]; // Operación XOR bit a bit
+            }
+            return resultado == 0;
+        }
+
         private bool EsNombreUsuarioValido(string nombreUsuario)
         {
             if (string.IsNullOrWhiteSpace(nombreUsuario))
@@ -255,5 +293,7 @@ namespace CapaNegocio
 
             return nombreUsuario.Length >= 3 && nombreUsuario.Length <= 100;
         }
+
+        #endregion
     }
 }

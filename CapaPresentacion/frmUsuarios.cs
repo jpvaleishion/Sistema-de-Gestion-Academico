@@ -10,13 +10,11 @@ namespace CapaPresentacion
         private UsuarioServicio usuarioNegocio = new UsuarioServicio();
         private PermisoServicio permisoNegocio = new PermisoServicio();
         private RolServicio rolNegocio = new RolServicio();
-        // Si cuentas con un RolServicio para llenar tu combobox, instáncialo aquí:
-        // private RolServicio rolNegocio = new RolServicio();
 
         private int idUsuarioLogueado;
         private int idSeleccionado = 0;
 
-        // *cambio* - Constructor estándar que recibe el ID de sesión del usuario activo
+        // Constructor estándar que recibe el ID de sesión del usuario activo
         public frmUsuarios(int idUsuario)
         {
             InitializeComponent();
@@ -33,16 +31,16 @@ namespace CapaPresentacion
             dgvUsuarios.DataSource = usuarioNegocio.ObtenerTodos();
         }
 
-
+        // *cambio* - Mapeo corregido para usar IdEstado en lugar de Estado (string)
         private Usuario ObtenerUsuarioDelFormulario()
         {
             return new Usuario
             {
                 IdUsuario = idSeleccionado,
                 NombreUsuario = txtNombreUsuario.Text.Trim(),
-                Password = txtPassword.Text,
-                IdRol = cboRol.SelectedValue != null ? Convert.ToInt32(cboRol.SelectedValue) : 0, // *cambio* - Obtenemos el ID del rol
-                Estado = cboEstado.Text
+                Password = txtPassword.Text, // Mandamos el texto tal cual (vacio o nuevo)
+                IdRol = cboRol.SelectedValue != null ? Convert.ToInt32(cboRol.SelectedValue) : 0,
+                IdEstado = cboEstado.SelectedValue != null ? Convert.ToInt32(cboEstado.SelectedValue) : 0 // Enviamos el ID del Estado
             };
         }
 
@@ -153,19 +151,17 @@ namespace CapaPresentacion
         private void frmUsuarios_Load_1(object sender, EventArgs e)
         {
             CargarComboRoles();       // Cargamos los Roles en el ComboBox de forma relacional
+            CargarComboEstados();     // *cambio* - Cargamos los Estados de forma relacional
             CargarGrid();
-            AplicarPermisosVisuales(); // Oculta o desactiva botones según permisos del rol
+            AplicarPermisosVisuales();
         }
         private void CargarComboRoles()
         {
             try
             {
-                // Enlazamos la lista real de roles al ComboBox
                 cboRol.DataSource = rolNegocio.ObtenerTodos();
-                cboRol.DisplayMember = "NombreRol"; // Lo que el usuario ve
-                cboRol.ValueMember = "IdRol";       // El valor interno que se guardará (ID)
-
-                // Iniciamos con el combo limpio sin selección por defecto
+                cboRol.DisplayMember = "NombreRol";
+                cboRol.ValueMember = "IdRol";
                 cboRol.SelectedIndex = -1;
             }
             catch (Exception ex)
@@ -173,12 +169,31 @@ namespace CapaPresentacion
                 MessageBox.Show("Error al cargar la lista de roles: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        // *cambio* - Método unificado para restringir accesos usando PermisoServicio
+        // *cambio* - Carga los estados en el ComboBox usando objetos anónimos (ID y Nombre)
+        private void CargarComboEstados()
+        {
+            try
+            {
+                var listaEstados = new[]
+                {
+                    new { IdEstado = 1, NombreEstado = "Activo" },
+                    new { IdEstado = 2, NombreEstado = "Inactivo" }
+                };
+
+                cboEstado.DataSource = listaEstados;
+                cboEstado.DisplayMember = "NombreEstado"; // Lo que ve el usuario en pantalla
+                cboEstado.ValueMember = "IdEstado";       // El entero (1 o 2) que se asignará al objeto
+                cboEstado.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar la lista de estados: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         private void AplicarPermisosVisuales()
         {
             try
             {
-                // Evaluamos los accesos del rol activo para esta pantalla ("frmUsuarios")
                 btnGuardar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Crear");
                 btnEditar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Modificar");
                 btnEliminar.Enabled = permisoNegocio.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Eliminar");
@@ -186,7 +201,6 @@ namespace CapaPresentacion
             catch (Exception ex)
             {
                 MessageBox.Show("Error al validar los permisos de seguridad: " + ex.Message, "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Bloqueo preventivo total en caso de fallo de validación
                 btnGuardar.Enabled = false;
                 btnEditar.Enabled = false;
                 btnEliminar.Enabled = false;
@@ -200,9 +214,13 @@ namespace CapaPresentacion
 
             idSeleccionado = usuario.IdUsuario;
             txtNombreUsuario.Text = usuario.NombreUsuario;
-            txtPassword.Text = usuario.Password;
-            cboRol.SelectedValue = usuario.IdRol; // *cambio* - Enlazamos el ID numérico al ComboBox
-            cboEstado.Text = usuario.Estado;
+
+            // Dejamos la contraseña en blanco al hacer doble clic para que el administrador
+            // sepa que si no escribe nada nuevo, la contraseña vieja no se modificará.
+            txtPassword.Clear();
+            cboRol.SelectedValue = usuario.IdRol;
+            // *cambio* - Mapeamos seleccionando por SelectedValue (IdEstado) en lugar del Texto puro
+            cboEstado.SelectedValue = usuario.IdEstado;
         }
     }
 }

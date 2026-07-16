@@ -3,7 +3,7 @@
 namespace CapaEntidades.Entidades
 {
     /// <summary>
-    /// Representa a un usuario del sistema, incluyendo sus credenciales de acceso y datos de seguridad.
+    /// Representa a un usuario del sistema, incluyendo sus credenciales de acceso, datos de seguridad y control de estado.
     /// </summary>
     public class Usuario
     {
@@ -24,8 +24,6 @@ namespace CapaEntidades.Entidades
         /// </summary>
         public string Password { get; set; }
 
-        // *cambio* - Ahora usamos la relación de la base de datos
-
         /// <summary>
         /// Identificador del rol asignado al usuario.
         /// </summary>
@@ -34,12 +32,24 @@ namespace CapaEntidades.Entidades
         /// <summary>
         /// Nombre del rol del usuario, utilizado para mostrar "Administrador" o "Docente" en el diseño.
         /// </summary>
-        public string NombreRol { get; set; } // Para mostrar "Administrador" o "Docente" en el diseño
+        public string NombreRol { get; set; }
+
+        // -- Nueva estructura de control de estados --
 
         /// <summary>
-        /// Estado actual del usuario (por ejemplo, activo o bloqueado).
+        /// Identificador del estado actual del usuario (FK referenciando a EstadosUsuario).
         /// </summary>
-        public string Estado { get; set; }
+        public int IdEstado { get; set; }
+
+        /// <summary>
+        /// Nombre descriptivo del estado (ej. "Activo", "Inactivo", "Baneado") traído mediante JOIN.
+        /// </summary>
+        public string NombreEstado { get; set; }
+
+        /// <summary>
+        /// Razón o motivo específico por el cual el usuario tiene el estado actual.
+        /// </summary>
+        public string MotivoEstado { get; set; }
 
         // -- CAMPOS PARA SEGURIDAD AVANZADA --
 
@@ -71,18 +81,22 @@ namespace CapaEntidades.Entidades
         /// <param name="password">Contraseña del usuario.</param>
         /// <param name="idRol">Identificador del rol asignado al usuario.</param>
         /// <param name="nombreRol">Nombre del rol del usuario.</param>
-        /// <param name="estado">Estado actual del usuario.</param>
+        /// <param name="idEstado">Identificador del estado actual del usuario.</param>
+        /// <param name="nombreEstado">Nombre del estado del usuario.</param>
+        /// <param name="motivoEstado">Razón del estado asignado.</param>
         /// <param name="salt">Valor aleatorio utilizado en el cifrado de la contraseña.</param>
         /// <param name="intentosFallidos">Número de intentos fallidos de inicio de sesión registrados.</param>
         /// <param name="fechaBloqueo">Fecha en la que el usuario fue bloqueado, si aplica.</param>
-        public Usuario(int idUsuario, string nombreUsuario, string password, int idRol, string nombreRol, string estado, string salt, int intentosFallidos, DateTime? fechaBloqueo)
+        public Usuario(int idUsuario, string nombreUsuario, string password, int idRol, string nombreRol, int idEstado, string nombreEstado, string motivoEstado, string salt, int intentosFallidos, DateTime? fechaBloqueo)
         {
             IdUsuario = idUsuario;
             NombreUsuario = nombreUsuario;
             Password = password;
             IdRol = idRol;
             NombreRol = nombreRol;
-            Estado = estado;
+            IdEstado = idEstado;
+            NombreEstado = nombreEstado;
+            MotivoEstado = motivoEstado;
             Salt = salt;
             IntentosFallidos = intentosFallidos;
             FechaBloqueo = fechaBloqueo;
