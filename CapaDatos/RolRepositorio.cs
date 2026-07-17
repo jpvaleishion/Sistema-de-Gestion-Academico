@@ -15,30 +15,27 @@ namespace CapaDatos
         /// <summary>
         /// Obtiene la lista completa de roles registrados, ordenados alfabéticamente por nombre.
         /// </summary>
-        /// <returns>Lista de objetos <see cref="Rol"/>.</returns>
         public List<Rol> ObtenerTodos()
         {
             List<Rol> lista = new List<Rol>();
+            string sql = "SELECT IdRol, Nombre FROM Roles ORDER BY Nombre ASC";
 
             using (SqlConnection conexion = con.Conectar())
             {
-                string sql = "SELECT IdRol, Nombre FROM Roles ORDER BY Nombre ASC";
                 try
                 {
                     conexion.Open();
                     using (SqlCommand command = new SqlCommand(sql, conexion))
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        while (reader.Read())
                         {
-                            while (reader.Read())
+                            Rol r = new Rol
                             {
-                                Rol r = new Rol
-                                {
-                                    IdRol = Convert.ToInt32(reader["IdRol"]),
-                                    NombreRol = reader["Nombre"].ToString()
-                                };
-                                lista.Add(r);
-                            }
+                                IdRol = Convert.ToInt32(reader["IdRol"]),
+                                NombreRol = reader["Nombre"].ToString()
+                            };
+                            lista.Add(r);
                         }
                     }
                 }
@@ -49,6 +46,47 @@ namespace CapaDatos
             }
 
             return lista;
+        }
+
+        /// <summary>
+        /// Obtiene un rol por su identificador.
+        /// </summary>
+        /// <param name="idRol">Identificador del rol.</param>
+        /// <returns>Entidad Rol correspondiente o null si no existe.</returns>
+        public Rol ObtenerPorId(int idRol)
+        {
+            Rol rol = null;
+            string sql = "SELECT IdRol, Nombre FROM Roles WHERE IdRol = @IdRol";
+
+            using (SqlConnection conexion = con.Conectar())
+            {
+                try
+                {
+                    conexion.Open();
+                    using (SqlCommand command = new SqlCommand(sql, conexion))
+                    {
+                        command.Parameters.AddWithValue("@IdRol", idRol);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                rol = new Rol
+                                {
+                                    IdRol = Convert.ToInt32(reader["IdRol"]),
+                                    NombreRol = reader["Nombre"].ToString()
+                                };
+                            }
+                        }
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    throw new Exception("Error al obtener el rol desde la base de datos: " + ex.Message, ex);
+                }
+            }
+
+            return rol;
         }
     }
 }

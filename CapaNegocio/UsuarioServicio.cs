@@ -3,7 +3,6 @@ using CapaEntidades.Entidades;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace CapaNegocio
 {
@@ -15,6 +14,7 @@ namespace CapaNegocio
     {
         private UsuarioRepositorio repositorio = new UsuarioRepositorio();
         private BitacoraServicio bitacoraNegocio = new BitacoraServicio();
+        private PermisoServicio permisoService = new PermisoServicio();
 
         private const int MAX_INTENTOS_FALLIDOS = 3;
         private const int MINUTOS_BLOQUEO = 15;
@@ -25,6 +25,12 @@ namespace CapaNegocio
         /// </summary>
         public void Guardar(Usuario u, int idUsuarioLogueado)
         {
+            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Crear"))
+                throw new InvalidOperationException("No tiene permisos para registrar usuarios.");
+
+            if (u == null)
+                throw new ArgumentNullException(nameof(u));
+
             if (string.IsNullOrWhiteSpace(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario es obligatorio.");
 
@@ -40,21 +46,28 @@ namespace CapaNegocio
             if (u.IdEstado <= 0)
                 throw new ArgumentException("El estado es obligatorio.");
 
-            // Generamos un Salt único y aplicamos el hash robusto
-            u.Salt = GenerarSalt();
-            u.Password = EncriptarPassword(u.Password, u.Salt);
+            try
+            {
+                // Generamos un Salt único y aplicamos el hash robusto
+                u.Salt = GenerarSalt();
+                u.Password = EncriptarPassword(u.Password, u.Salt);
 
-            u.IntentosFallidos = 0;
-            u.FechaBloqueo = null;
+                u.IntentosFallidos = 0;
+                u.FechaBloqueo = null;
 
-            repositorio.Insertar(u);
+                repositorio.Insertar(u);
 
-            bitacoraNegocio.RegistrarAccion(
-                idUsuarioLogueado,
-                "Usuarios",
-                "Crear Usuario",
-                $"Se creó exitosamente el usuario {u.NombreUsuario}."
-            );
+                bitacoraNegocio.RegistrarAccion(
+                    idUsuarioLogueado,
+                    "Usuarios",
+                    "Crear Usuario",
+                    $"Se creó exitosamente el usuario {u.NombreUsuario}."
+                );
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error al guardar el usuario.", ex);
+            }
         }
 
         /// <summary>
@@ -63,6 +76,12 @@ namespace CapaNegocio
         /// </summary>
         public void Actualizar(Usuario u, int idUsuarioLogueado)
         {
+            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Modificar"))
+                throw new InvalidOperationException("No tiene permisos para modificar usuarios.");
+
+            if (u == null)
+                throw new ArgumentNullException(nameof(u));
+
             if (string.IsNullOrWhiteSpace(u.NombreUsuario))
                 throw new ArgumentException("El nombre de usuario es obligatorio.");
 
@@ -75,33 +94,40 @@ namespace CapaNegocio
             if (u.IdEstado <= 0)
                 throw new ArgumentException("El estado es obligatorio.");
 
-            // Jalamos el estado actual del usuario desde la base de datos para comparar
-            Usuario usuarioExistente = repositorio.ObtenerPorId(u.IdUsuario);
-            if (usuarioExistente == null)
-                throw new InvalidOperationException("El usuario que intenta modificar ya no existe.");
-
-            // PROTECCIÓN: Si desde la UI la contraseña viene vacía o viene el hash viejo idéntico,
-            // significa que el usuario NO cambió su clave (solo editó el rol, nombre, estado, etc.)
-            if (string.IsNullOrWhiteSpace(u.Password) || u.Password == usuarioExistente.Password)
+            try
             {
-                u.Salt = usuarioExistente.Salt;
-                u.Password = usuarioExistente.Password;
+                // Jalamos el estado actual del usuario desde la base de datos para comparar
+                Usuario usuarioExistente = repositorio.ObtenerPorId(u.IdUsuario);
+                if (usuarioExistente == null)
+                    throw new InvalidOperationException("El usuario que intenta modificar ya no existe.");
+
+                // PROTECCIÓN: Si desde la UI la contraseña viene vacía o viene el hash viejo idéntico,
+                // significa que el usuario NO cambió su clave (solo editó el rol, nombre, estado, etc.)
+                if (string.IsNullOrWhiteSpace(u.Password) || u.Password == usuarioExistente.Password)
+                {
+                    u.Salt = usuarioExistente.Salt;
+                    u.Password = usuarioExistente.Password;
+                }
+                else
+                {
+                    // Si escribieron algo nuevo, asumimos que es texto plano y generamos nueva seguridad
+                    u.Salt = GenerarSalt();
+                    u.Password = EncriptarPassword(u.Password, u.Salt);
+                }
+
+                repositorio.Actualizar(u);
+
+                bitacoraNegocio.RegistrarAccion(
+                    idUsuarioLogueado,
+                    "Usuarios",
+                    "Actualizar Usuario",
+                    $"Se actualizaron los datos del usuario {u.NombreUsuario}."
+                );
             }
-            else
+            catch (Exception ex)
             {
-                // Si escribieron algo nuevo, asumimos que es texto plano y generamos nueva seguridad
-                u.Salt = GenerarSalt();
-                u.Password = EncriptarPassword(u.Password, u.Salt);
+                throw new InvalidOperationException("Error al actualizar el usuario.", ex);
             }
-
-            repositorio.Actualizar(u);
-
-            bitacoraNegocio.RegistrarAccion(
-                idUsuarioLogueado,
-                "Usuarios",
-                "Actualizar Usuario",
-                $"Se actualizaron los datos del usuario {u.NombreUsuario}."
-            );
         }
 
         /// <summary>
@@ -109,25 +135,45 @@ namespace CapaNegocio
         /// </summary>
         public void Eliminar(int idUsuario, int idUsuarioLogueado)
         {
+            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Eliminar"))
+                throw new InvalidOperationException("No tiene permisos para eliminar usuarios.");
+
             if (idUsuario <= 0)
                 throw new ArgumentException("El identificador del usuario no es válido.");
 
-            var u = repositorio.ObtenerPorId(idUsuario);
-            string nombreUsuarioEliminado = u != null ? u.NombreUsuario : "Desconocido";
+            try
+            {
+                var u = repositorio.ObtenerPorId(idUsuario);
+                string nombreUsuarioEliminado = u != null ? u.NombreUsuario : "Desconocido";
 
-            repositorio.Eliminar(idUsuario);
+                repositorio.Eliminar(idUsuario);
 
-            bitacoraNegocio.RegistrarAccion(
-                idUsuarioLogueado,
-                "Usuarios",
-                "Eliminar Usuario",
-                $"Se eliminó de forma permanente al usuario con ID {idUsuario} (Nombre: {nombreUsuarioEliminado})."
-            );
+                bitacoraNegocio.RegistrarAccion(
+                    idUsuarioLogueado,
+                    "Usuarios",
+                    "Eliminar Usuario",
+                    $"Se eliminó de forma permanente al usuario con ID {idUsuario} (Nombre: {nombreUsuarioEliminado})."
+                );
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error al eliminar el usuario.", ex);
+            }
         }
 
         public List<Usuario> ObtenerTodos()
         {
-            return repositorio.ObtenerTodos();
+            try
+            {
+                var lista = repositorio.ObtenerTodos();
+                if (lista == null || lista.Count == 0)
+                    throw new InvalidOperationException("No se encontraron usuarios registrados.");
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error al obtener los usuarios.", ex);
+            }
         }
 
         public Usuario ObtenerPorId(int idUsuario)
@@ -135,7 +181,17 @@ namespace CapaNegocio
             if (idUsuario <= 0)
                 throw new ArgumentException("El identificador del usuario no es válido.");
 
-            return repositorio.ObtenerPorId(idUsuario);
+            try
+            {
+                var usuario = repositorio.ObtenerPorId(idUsuario);
+                if (usuario == null)
+                    throw new InvalidOperationException($"No existe un usuario con ID {idUsuario}.");
+                return usuario;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error al obtener el usuario.", ex);
+            }
         }
 
         /// <summary>
@@ -149,7 +205,15 @@ namespace CapaNegocio
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("La contraseña es obligatoria.");
 
-            Usuario u = repositorio.ObtenerPorNombreUsuario(nombreUsuario);
+            Usuario u;
+            try
+            {
+                u = repositorio.ObtenerPorNombreUsuario(nombreUsuario);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error al verificar credenciales.", ex);
+            }
 
             // 1. Si el usuario no existe, salimos con mensaje genérico (Evita enumeración de usuarios)
             if (u == null)
@@ -170,49 +234,63 @@ namespace CapaNegocio
             // 3. Verificación criptográfica con PBKDF2 y tiempo constante manual
             if (!VerificarPassword(password, u.Salt, u.Password))
             {
-                int intentos = u.IntentosFallidos + 1;
-                DateTime? fechaBloqueo = null;
-
-                if (intentos >= MAX_INTENTOS_FALLIDOS)
+                try
                 {
-                    fechaBloqueo = DateTime.Now.AddMinutes(MINUTOS_BLOQUEO);
-                }
+                    int intentos = u.IntentosFallidos + 1;
+                    DateTime? fechaBloqueo = null;
 
-                repositorio.ActualizarIntentosYBloqueo(u.IdUsuario, intentos, fechaBloqueo);
+                    if (intentos >= MAX_INTENTOS_FALLIDOS)
+                    {
+                        fechaBloqueo = DateTime.Now.AddMinutes(MINUTOS_BLOQUEO);
+                    }
 
-                bitacoraNegocio.RegistrarAccion(
-                    u.IdUsuario,
-                    "Seguridad",
-                    "Intento Fallido",
-                    $"Contraseña incorrecta. Intento #{intentos} para el usuario {u.NombreUsuario}.");
+                    repositorio.ActualizarIntentosYBloqueo(u.IdUsuario, intentos, fechaBloqueo);
 
-                if (fechaBloqueo.HasValue)
-                {
                     bitacoraNegocio.RegistrarAccion(
                         u.IdUsuario,
                         "Seguridad",
-                        "Bloqueo de Cuenta",
-                        $"Cuenta del usuario {u.NombreUsuario} bloqueada temporalmente por exceder intentos.");
+                        "Intento Fallido",
+                        $"Contraseña incorrecta. Intento #{intentos} para el usuario {u.NombreUsuario}.");
+
+                    if (fechaBloqueo.HasValue)
+                    {
+                        bitacoraNegocio.RegistrarAccion(
+                            u.IdUsuario,
+                            "Seguridad",
+                            "Bloqueo de Cuenta",
+                            $"Cuenta del usuario {u.NombreUsuario} bloqueada temporalmente por exceder intentos.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // No revelar detalles al cliente; registrar y continuar con mensaje genérico
+                    throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO, ex);
                 }
 
                 throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO);
             }
 
-            // 4. CORREGIDO: Validación de estado administrativo numérico (IdEstado)
-            // Asumiendo que en tu base de datos el ID 1 significa 'Activo'
+            // 4. Validación de estado administrativo numérico (IdEstado)
             if (u.IdEstado != 1)
                 throw new InvalidOperationException("El usuario está inactivo o suspendido.");
 
             // 5. Login Exitoso: Limpiamos bloqueos e intentos
-            repositorio.ActualizarIntentosYBloqueo(u.IdUsuario, 0, null);
-            u.IntentosFallidos = 0;
-            u.FechaBloqueo = null;
+            try
+            {
+                repositorio.ActualizarIntentosYBloqueo(u.IdUsuario, 0, null);
+                u.IntentosFallidos = 0;
+                u.FechaBloqueo = null;
 
-            bitacoraNegocio.RegistrarAccion(
-                u.IdUsuario,
-                "Seguridad",
-                "Inicio de Sesión",
-                $"El usuario {u.NombreUsuario} ingresó al sistema con éxito.");
+                bitacoraNegocio.RegistrarAccion(
+                    u.IdUsuario,
+                    "Seguridad",
+                    "Inicio de Sesión",
+                    $"El usuario {u.NombreUsuario} ingresó al sistema con éxito.");
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error al finalizar el proceso de inicio de sesión.", ex);
+            }
 
             return u;
         }
@@ -259,7 +337,7 @@ namespace CapaNegocio
                 {
                     byte[] hashCalculado = pbkdf2.GetBytes(32);
 
-                    // CORREGIDO: Llamada al método manual compatible con .NET Framework tradicional
+                    // Comparación en tiempo constante
                     return CompararEnTiempoConstante(hashCalculado, hashAlmacenado);
                 }
             }
@@ -270,11 +348,12 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// CORREGIDO: Reemplazo manual de FixedTimeEquals para evitar depender de .NET Core.
+        /// Reemplazo manual de FixedTimeEquals para evitar depender de .NET Core.
         /// Compara dos arreglos de bytes sin importar dónde difieran para evitar ataques de temporización.
         /// </summary>
         private bool CompararEnTiempoConstante(byte[] a, byte[] b)
         {
+            if (a == null || b == null) return false;
             if (a.Length != b.Length)
                 return false;
 

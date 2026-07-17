@@ -1,5 +1,6 @@
 ﻿using CapaDatos;
 using CapaEntidades.Entidades;
+using System;
 using System.Collections.Generic;
 
 namespace CapaNegocio
@@ -13,7 +14,7 @@ namespace CapaNegocio
         private BitacoraRepositorio repositorio = new BitacoraRepositorio();
 
         /// <summary>
-        /// Registra una acción en la bitácora del sistema.
+        /// Registra una acción en la bitácora del sistema aplicando validaciones.
         /// </summary>
         /// <param name="idUsuario">Identificador del usuario que ejecuta la acción.</param>
         /// <param name="modulo">Módulo del sistema donde ocurre la acción.</param>
@@ -21,15 +22,36 @@ namespace CapaNegocio
         /// <param name="descripcion">Descripción detallada de la acción.</param>
         public void RegistrarAccion(int idUsuario, string modulo, string accion, string descripcion)
         {
-            Bitacora b = new Bitacora
-            {
-                IdUsuario = idUsuario,
-                Modulo = modulo,
-                Accion = accion,
-                Descripcion = descripcion
-            };
+            if (idUsuario <= 0)
+                throw new ArgumentException("El identificador del usuario no es válido.");
 
-            repositorio.Insertar(b);
+            if (string.IsNullOrWhiteSpace(modulo))
+                throw new ArgumentException("El módulo es obligatorio.");
+
+            if (string.IsNullOrWhiteSpace(accion))
+                throw new ArgumentException("La acción es obligatoria.");
+
+            if (string.IsNullOrWhiteSpace(descripcion))
+                throw new ArgumentException("La descripción es obligatoria.");
+
+            try
+            {
+                Bitacora b = new Bitacora
+                {
+                    IdUsuario = idUsuario,
+                    Modulo = modulo.Trim(),
+                    Accion = accion.Trim(),
+                    Descripcion = descripcion.Trim(),
+                    FechaHora = DateTime.Now
+                };
+
+                repositorio.Insertar(b);
+            }
+            catch (Exception ex)
+            {
+                // Manejo de excepciones controlado
+                throw new InvalidOperationException("Error al registrar la acción en la bitácora.", ex);
+            }
         }
 
         /// <summary>
@@ -38,7 +60,14 @@ namespace CapaNegocio
         /// <returns>Lista de registros de bitácora.</returns>
         public List<Bitacora> ObtenerTodo()
         {
-            return repositorio.ObtenerTodo();
+            try
+            {
+                return repositorio.ObtenerTodo();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error al obtener los registros de bitácora.", ex);
+            }
         }
     }
 }

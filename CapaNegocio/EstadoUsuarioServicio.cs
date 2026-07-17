@@ -2,9 +2,6 @@
 using CapaEntidades.Entidades;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaNegocio
 {
@@ -23,13 +20,40 @@ namespace CapaNegocio
         {
             try
             {
-                // En este caso es una consulta directa, pero centralizarlo aquí 
-                // nos permite añadir reglas de ordenamiento o filtrado de negocio en el futuro.
-                return _repositorio.ObtenerTodos();
+                var lista = _repositorio.ObtenerTodos();
+
+                if (lista == null || lista.Count == 0)
+                    throw new InvalidOperationException("No se encontraron estados de usuario registrados.");
+
+                return lista;
             }
             catch (Exception ex)
             {
-                throw new Exception("Error en CapaNegocio - EstadoUsuarioServicio: " + ex.Message, ex);
+                throw new InvalidOperationException("Error al obtener los estados de usuario.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Obtiene un estado de usuario por su identificador.
+        /// </summary>
+        /// <param name="idEstado">Identificador del estado de usuario.</param>
+        /// <returns>Entidad EstadoUsuario correspondiente.</returns>
+        public EstadoUsuario ObtenerPorId(int idEstado)
+        {
+            if (idEstado <= 0)
+                throw new ArgumentException("El identificador del estado de usuario no es válido.");
+
+            try
+            {
+                var estado = _repositorio.ObtenerPorId(idEstado);
+                if (estado == null)
+                    throw new InvalidOperationException($"No existe un estado de usuario con ID {idEstado}.");
+
+                return estado;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error al obtener el estado de usuario.", ex);
             }
         }
     }

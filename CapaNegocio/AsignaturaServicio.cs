@@ -2,6 +2,7 @@
 using CapaEntidades.Entidades;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace CapaNegocio
 {
@@ -16,22 +17,32 @@ namespace CapaNegocio
         private PermisoServicio permisoService = new PermisoServicio();
 
         /// <summary>
-        /// Registra una nueva asignatura en el sistema aplicando validaciones y auditoría.
+        /// Método auxiliar para validar asignatura.
         /// </summary>
-        /// <param name="a">Entidad Asignatura a guardar.</param>
-        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
-        public void Guardar(Asignatura a, int idUsuarioLogueado)
+        private void ValidarAsignatura(Asignatura a)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmAsignaturas", "Crear"))
-            {
-                throw new InvalidOperationException("No tiene permisos para registrar asignaturas.");
-            }
-
             if (string.IsNullOrWhiteSpace(a.Nombre))
                 throw new ArgumentException("El nombre de la asignatura es obligatorio.");
 
-            if (a.Creditos < 1)
-                throw new ArgumentException("La asignatura debe tener al menos 1 crédito.");
+            if (a.Nombre.Length < 3 || a.Nombre.Length > 50)
+                throw new ArgumentException("El nombre de la asignatura debe tener entre 3 y 50 caracteres.");
+
+            if (!Regex.IsMatch(a.Nombre, @"^[a-zA-Z\s]+$"))
+                throw new ArgumentException("El nombre de la asignatura solo puede contener letras y espacios.");
+
+            if (a.Creditos < 1 || a.Creditos > 10)
+                throw new ArgumentException("La asignatura debe tener entre 1 y 10 créditos.");
+        }
+
+        /// <summary>
+        /// Registra una nueva asignatura en el sistema aplicando validaciones y auditoría.
+        /// </summary>
+        public void Guardar(Asignatura a, int idUsuarioLogueado)
+        {
+            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmAsignaturas", "Crear"))
+                throw new InvalidOperationException("No tiene permisos para registrar asignaturas.");
+
+            ValidarAsignatura(a);
 
             repositorio.Insertar(a);
 
@@ -46,20 +57,12 @@ namespace CapaNegocio
         /// <summary>
         /// Actualiza los datos de una asignatura existente aplicando validaciones y auditoría.
         /// </summary>
-        /// <param name="a">Entidad Asignatura a actualizar.</param>
-        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Actualizar(Asignatura a, int idUsuarioLogueado)
         {
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmAsignaturas", "Modificar"))
-            {
                 throw new InvalidOperationException("No tiene permisos para modificar asignaturas.");
-            }
 
-            if (string.IsNullOrWhiteSpace(a.Nombre))
-                throw new ArgumentException("El nombre de la asignatura es obligatorio.");
-
-            if (a.Creditos < 1)
-                throw new ArgumentException("La asignatura debe tener al menos 1 crédito.");
+            ValidarAsignatura(a);
 
             repositorio.Actualizar(a);
 
@@ -74,14 +77,10 @@ namespace CapaNegocio
         /// <summary>
         /// Elimina una asignatura del sistema y registra la acción en la bitácora.
         /// </summary>
-        /// <param name="idAsignatura">Identificador de la asignatura a eliminar.</param>
-        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
         public void Eliminar(int idAsignatura, int idUsuarioLogueado)
         {
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmAsignaturas", "Eliminar"))
-            {
                 throw new InvalidOperationException("No tiene permisos para eliminar asignaturas.");
-            }
 
             if (idAsignatura <= 0)
                 throw new ArgumentException("El identificador de la asignatura no es válido.");
@@ -107,7 +106,6 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene todas las asignaturas registradas.
         /// </summary>
-        /// <returns>Lista de asignaturas.</returns>
         public List<Asignatura> ObtenerTodos()
         {
             return repositorio.ObtenerTodos();
@@ -116,8 +114,6 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene una asignatura por su identificador.
         /// </summary>
-        /// <param name="idAsignatura">Identificador de la asignatura.</param>
-        /// <returns>Entidad Asignatura correspondiente.</returns>
         public Asignatura ObtenerPorId(int idAsignatura)
         {
             if (idAsignatura <= 0)
