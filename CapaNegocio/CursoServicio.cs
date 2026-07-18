@@ -9,25 +9,30 @@ namespace CapaNegocio
     /// <summary>
     /// Servicio de negocio para la gestión de cursos académicos.
     /// Aplica validaciones de negocio y registra auditoría mediante bitácora y permisos.
+    /// Se integra registro de errores en la bitácora sin cambiar firmas públicas.
     /// </summary>
     public class CursoServicio
     {
-        private CursoRepositorio repositorio = new CursoRepositorio();
-        private BitacoraServicio bitacoraService = new BitacoraServicio();
-        private PermisoServicio permisoService = new PermisoServicio();
+        private readonly CursoRepositorio repositorio = new CursoRepositorio();
+        private readonly BitacoraServicio bitacoraService = new BitacoraServicio();
+        private readonly PermisoServicio permisoService = new PermisoServicio();
 
         /// <summary>
         /// Método auxiliar para validar curso.
         /// </summary>
         private void ValidarCurso(Curso c)
         {
+            if (c == null)
+                throw new ArgumentNullException(nameof(c), "El curso no puede ser nulo.");
+
             if (string.IsNullOrWhiteSpace(c.NombreCurso))
                 throw new ArgumentException("El nombre del curso es obligatorio.");
 
             if (c.NombreCurso.Length < 3 || c.NombreCurso.Length > 100)
                 throw new ArgumentException("El nombre del curso debe tener entre 3 y 100 caracteres.");
 
-            if (!Regex.IsMatch(c.NombreCurso, @"^[a-zA-Z\s]+$"))
+            // Permitir letras Unicode (acentos, ñ, etc.) y espacios
+            if (!Regex.IsMatch(c.NombreCurso, @"^[\p{L}\s]+$"))
                 throw new ArgumentException("El nombre del curso solo puede contener letras y espacios.");
 
             if (c.Capacidad < 1 || c.Capacidad > 200)
@@ -35,17 +40,33 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
+        /// </summary>
+        private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
+        {
+            try
+            {
+                string descripcion = $"Contexto: {contexto} | Detalle: {ex.ToString()}";
+                bitacoraService.RegistrarAccion(idUsuario, modulo, "Error", descripcion);
+            }
+            catch
+            {
+                // No propagar excepciones desde el registro de errores para no afectar la lógica de negocio.
+            }
+        }
+
+        /// <summary>
         /// Registra un nuevo curso en el sistema aplicando validaciones y auditoría.
         /// </summary>
         public void Guardar(Curso c, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCursos", "Crear"))
-                throw new InvalidOperationException("No tiene permisos para registrar cursos.");
-
-            ValidarCurso(c);
-
             try
             {
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCursos", "Crear"))
+                    throw new InvalidOperationException("No tiene permisos para registrar cursos.");
+
+                ValidarCurso(c);
+
                 repositorio.Insertar(c);
 
                 bitacoraService.RegistrarAccion(
@@ -57,6 +78,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Cursos",
+                    "Crear",
+                    $"Intentando guardar curso: Nombre='{(c != null ? c.NombreCurso : "null")}', Capacidad={(c != null ? c.Capacidad.ToString() : "null")}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al guardar el curso.", ex);
             }
         }
@@ -66,13 +97,13 @@ namespace CapaNegocio
         /// </summary>
         public void Actualizar(Curso c, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCursos", "Modificar"))
-                throw new InvalidOperationException("No tiene permisos para modificar cursos.");
-
-            ValidarCurso(c);
-
             try
             {
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCursos", "Modificar"))
+                    throw new InvalidOperationException("No tiene permisos para modificar cursos.");
+
+                ValidarCurso(c);
+
                 repositorio.Actualizar(c);
 
                 bitacoraService.RegistrarAccion(
@@ -84,6 +115,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Cursos",
+                    "Modificar",
+                    $"Intentando actualizar curso ID={(c != null ? c.IdCurso.ToString() : "null")}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al actualizar el curso.", ex);
             }
         }
@@ -93,22 +134,25 @@ namespace CapaNegocio
         /// </summary>
         public void Eliminar(int idCurso, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCursos", "Eliminar"))
-                throw new InvalidOperationException("No tiene permisos para eliminar cursos.");
-
-            if (idCurso <= 0)
-                throw new ArgumentException("El identificador del curso no es válido.");
-
-            string nombreCurso = $"ID {idCurso}";
             try
             {
-                var de_paso = repositorio.ObtenerPorId(idCurso);
-                if (de_paso != null) nombreCurso = $"'{de_paso.NombreCurso}' (ID: {idCurso})";
-            }
-            catch { }
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCursos", "Eliminar"))
+                    throw new InvalidOperationException("No tiene permisos para eliminar cursos.");
 
-            try
-            {
+                if (idCurso <= 0)
+                    throw new ArgumentException("El identificador del curso no es válido.");
+
+                string nombreCurso = $"ID {idCurso}";
+                try
+                {
+                    var de_paso = repositorio.ObtenerPorId(idCurso);
+                    if (de_paso != null) nombreCurso = $"'{de_paso.NombreCurso}' (ID: {idCurso})";
+                }
+                catch (Exception exObtener)
+                {
+                    RegistrarErrorEnBitacora(exObtener, idUsuarioLogueado, "Cursos", "Eliminar", $"Obteniendo nombre para ID={idCurso}");
+                }
+
                 repositorio.Eliminar(idCurso);
 
                 bitacoraService.RegistrarAccion(
@@ -120,6 +164,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Cursos",
+                    "Eliminar",
+                    $"Intentando eliminar curso ID={idCurso}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al eliminar el curso.", ex);
             }
         }
@@ -135,6 +189,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(ex, 0, "Cursos", "ObtenerTodos", "Obteniendo todos los cursos");
                 throw new InvalidOperationException("Error al obtener los cursos.", ex);
             }
         }
@@ -144,15 +199,16 @@ namespace CapaNegocio
         /// </summary>
         public Curso ObtenerPorId(int idCurso)
         {
-            if (idCurso <= 0)
-                throw new ArgumentException("El identificador del curso no es válido.");
-
             try
             {
+                if (idCurso <= 0)
+                    throw new ArgumentException("El identificador del curso no es válido.");
+
                 return repositorio.ObtenerPorId(idCurso);
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(ex, 0, "Cursos", "ObtenerPorId", $"Obteniendo curso ID={idCurso}");
                 throw new InvalidOperationException("Error al obtener el curso.", ex);
             }
         }

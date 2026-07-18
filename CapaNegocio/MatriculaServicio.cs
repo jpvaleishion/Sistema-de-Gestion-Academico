@@ -8,18 +8,22 @@ namespace CapaNegocio
     /// <summary>
     /// Servicio de negocio para la gestión de matrículas.
     /// Aplica reglas de negocio que aseguran la asociación correcta y registra auditoría.
+    /// Se integra registro de errores en la bitácora sin cambiar firmas públicas.
     /// </summary>
     public class MatriculaServicio
     {
-        private MatriculaRepositorio repositorio = new MatriculaRepositorio();
-        private PermisoServicio permisoService = new PermisoServicio();
-        private BitacoraServicio bitacoraService = new BitacoraServicio();
+        private readonly MatriculaRepositorio repositorio = new MatriculaRepositorio();
+        private readonly PermisoServicio permisoService = new PermisoServicio();
+        private readonly BitacoraServicio bitacoraService = new BitacoraServicio();
 
         /// <summary>
         /// Método auxiliar para validar matrícula.
         /// </summary>
         private void ValidarMatricula(Matricula m)
         {
+            if (m == null)
+                throw new ArgumentNullException(nameof(m), "La matrícula no puede ser nula.");
+
             if (m.IdEstudiante <= 0)
                 throw new ArgumentException("Debe seleccionar un estudiante.");
             if (m.IdAsignatura <= 0)
@@ -37,17 +41,33 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
+        /// </summary>
+        private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
+        {
+            try
+            {
+                string descripcion = $"Contexto: {contexto} | Detalle: {ex.ToString()}";
+                bitacoraService.RegistrarAccion(idUsuario, modulo, "Error", descripcion);
+            }
+            catch
+            {
+                // No propagar excepciones desde el registro de errores para no afectar la lógica de negocio.
+            }
+        }
+
+        /// <summary>
         /// Registra una nueva matrícula verificando asociaciones obligatorias y registrando auditoría.
         /// </summary>
         public void Guardar(Matricula m, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Crear"))
-                throw new InvalidOperationException("No tiene permisos para registrar matrículas.");
-
-            ValidarMatricula(m);
-
             try
             {
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Crear"))
+                    throw new InvalidOperationException("No tiene permisos para registrar matrículas.");
+
+                ValidarMatricula(m);
+
                 repositorio.Insertar(m);
 
                 bitacoraService.RegistrarAccion(
@@ -59,6 +79,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Matriculas",
+                    "Crear",
+                    $"Intentando guardar matrícula: EstudianteID={(m != null ? m.IdEstudiante.ToString() : "null")}, AsignaturaID={(m != null ? m.IdAsignatura.ToString() : "null")}, CursoID={(m != null ? m.IdCurso.ToString() : "null")}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al guardar la matrícula.", ex);
             }
         }
@@ -68,13 +98,13 @@ namespace CapaNegocio
         /// </summary>
         public void Actualizar(Matricula m, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Modificar"))
-                throw new InvalidOperationException("No tiene permisos para modificar matrículas.");
-
-            ValidarMatricula(m);
-
             try
             {
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Modificar"))
+                    throw new InvalidOperationException("No tiene permisos para modificar matrículas.");
+
+                ValidarMatricula(m);
+
                 repositorio.Actualizar(m);
 
                 bitacoraService.RegistrarAccion(
@@ -86,6 +116,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Matriculas",
+                    "Modificar",
+                    $"Intentando actualizar matrícula ID={(m != null ? m.IdMatricula.ToString() : "null")}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al actualizar la matrícula.", ex);
             }
         }
@@ -95,23 +135,26 @@ namespace CapaNegocio
         /// </summary>
         public void Eliminar(int idMatricula, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Eliminar"))
-                throw new InvalidOperationException("No tiene permisos para eliminar matrículas.");
-
-            if (idMatricula <= 0)
-                throw new ArgumentException("El identificador de la matrícula no es válido.");
-
-            string detalle = $"ID {idMatricula}";
             try
             {
-                var de_paso = repositorio.ObtenerPorId(idMatricula);
-                if (de_paso != null)
-                    detalle = $"ID {idMatricula} (Estudiante ID: {de_paso.IdEstudiante}, Asignatura ID: {de_paso.IdAsignatura}, Estado: {de_paso.Estado})";
-            }
-            catch { }
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Eliminar"))
+                    throw new InvalidOperationException("No tiene permisos para eliminar matrículas.");
 
-            try
-            {
+                if (idMatricula <= 0)
+                    throw new ArgumentException("El identificador de la matrícula no es válido.");
+
+                string detalle = $"ID {idMatricula}";
+                try
+                {
+                    var de_paso = repositorio.ObtenerPorId(idMatricula);
+                    if (de_paso != null)
+                        detalle = $"ID {idMatricula} (Estudiante ID: {de_paso.IdEstudiante}, Asignatura ID: {de_paso.IdAsignatura}, Estado: {de_paso.Estado})";
+                }
+                catch (Exception exObtener)
+                {
+                    RegistrarErrorEnBitacora(exObtener, idUsuarioLogueado, "Matriculas", "Eliminar", $"Obteniendo detalle para ID={idMatricula}");
+                }
+
                 repositorio.Eliminar(idMatricula);
 
                 bitacoraService.RegistrarAccion(
@@ -123,6 +166,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Matriculas",
+                    "Eliminar",
+                    $"Intentando eliminar matrícula ID={idMatricula}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al eliminar la matrícula.", ex);
             }
         }
@@ -138,6 +191,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(ex, 0, "Matriculas", "ObtenerTodos", "Obteniendo todas las matrículas");
                 throw new InvalidOperationException("Error al obtener las matrículas.", ex);
             }
         }
@@ -147,19 +201,24 @@ namespace CapaNegocio
         /// </summary>
         public Matricula ObtenerPorId(int idMatricula)
         {
-            if (idMatricula <= 0)
-                throw new ArgumentException("El identificador de la matrícula no es válido.");
-
             try
             {
+                if (idMatricula <= 0)
+                    throw new ArgumentException("El identificador de la matrícula no es válido.");
+
                 var matricula = repositorio.ObtenerPorId(idMatricula);
                 if (matricula == null)
-                    throw new InvalidOperationException($"No existe una matrícula con ID {idMatricula}.");
+                {
+                    var ex = new InvalidOperationException($"No existe una matrícula con ID {idMatricula}.");
+                    RegistrarErrorEnBitacora(ex, 0, "Matriculas", "ObtenerPorId", $"ID no encontrado: {idMatricula}");
+                    throw ex;
+                }
 
                 return matricula;
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(ex, 0, "Matriculas", "ObtenerPorId", $"Obteniendo matrícula ID={idMatricula}");
                 throw new InvalidOperationException("Error al obtener la matrícula.", ex);
             }
         }

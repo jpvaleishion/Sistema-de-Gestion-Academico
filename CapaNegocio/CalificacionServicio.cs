@@ -8,29 +8,46 @@ namespace CapaNegocio
     /// <summary>
     /// Servicio de negocio para la gestión de calificaciones académicas.
     /// Aplica reglas de negocio sobre notas, cálculo de nota final, estado y auditoría.
+    /// Se integra registro de errores en la bitácora sin cambiar firmas públicas.
     /// </summary>
     public class CalificacionServicio
     {
-        private CalificacionRepositorio repositorio = new CalificacionRepositorio();
-        private PermisoServicio permisoService = new PermisoServicio();
-        private BitacoraServicio bitacoraService = new BitacoraServicio();
+        private readonly CalificacionRepositorio repositorio = new CalificacionRepositorio();
+        private readonly PermisoServicio permisoService = new PermisoServicio();
+        private readonly BitacoraServicio bitacoraService = new BitacoraServicio();
+
+        /// <summary>
+        /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
+        /// </summary>
+        private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
+        {
+            try
+            {
+                string descripcion = $"Contexto: {contexto} | Detalle: {ex.ToString()}";
+                bitacoraService.RegistrarAccion(idUsuario, modulo, "Error", descripcion);
+            }
+            catch
+            {
+                // No propagar excepciones desde el registro de errores para no afectar la lógica de negocio.
+            }
+        }
 
         /// <summary>
         /// Registra una nueva calificación aplicando validaciones, cálculo de nota final y auditoría.
         /// </summary>
         public void Guardar(Calificacion c, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Crear"))
-                throw new InvalidOperationException("No tiene permisos para registrar calificaciones.");
-
-            Validar(c);
-
-            c.NotaFinal = CalcularNotaFinal(c.Nota1, c.Nota2);
-            c.Estado = CalcularEstado(c.NotaFinal, c.NotaMaxima);
-            c.FechaCalificacion = DateTime.Now;
-
             try
             {
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Crear"))
+                    throw new InvalidOperationException("No tiene permisos para registrar calificaciones.");
+
+                Validar(c);
+
+                c.NotaFinal = CalcularNotaFinal(c.Nota1, c.Nota2);
+                c.Estado = CalcularEstado(c.NotaFinal, c.NotaMaxima);
+                c.FechaCalificacion = DateTime.Now;
+
                 repositorio.Insertar(c);
 
                 bitacoraService.RegistrarAccion(
@@ -42,6 +59,17 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Calificaciones",
+                    "Crear",
+                    $"Intentando guardar calificación MatrículaID={(c != null ? c.IdMatricula.ToString() : "null")}, Nota1={(c != null ? c.Nota1.ToString() : "null")}, Nota2={(c != null ? c.Nota2.ToString() : "null")}"
+                );
+
+                // Mantener comportamiento previo: envolver en InvalidOperationException si no lo es ya
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al guardar la calificación.", ex);
             }
         }
@@ -51,16 +79,16 @@ namespace CapaNegocio
         /// </summary>
         public void Actualizar(Calificacion c, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Modificar"))
-                throw new InvalidOperationException("No tiene permisos para modificar calificaciones.");
-
-            Validar(c);
-
-            c.NotaFinal = CalcularNotaFinal(c.Nota1, c.Nota2);
-            c.Estado = CalcularEstado(c.NotaFinal, c.NotaMaxima);
-
             try
             {
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Modificar"))
+                    throw new InvalidOperationException("No tiene permisos para modificar calificaciones.");
+
+                Validar(c);
+
+                c.NotaFinal = CalcularNotaFinal(c.Nota1, c.Nota2);
+                c.Estado = CalcularEstado(c.NotaFinal, c.NotaMaxima);
+
                 repositorio.Actualizar(c);
 
                 bitacoraService.RegistrarAccion(
@@ -72,6 +100,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Calificaciones",
+                    "Modificar",
+                    $"Intentando actualizar calificación ID={(c != null ? c.IdCalificacion.ToString() : "null")}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al actualizar la calificación.", ex);
             }
         }
@@ -81,23 +119,26 @@ namespace CapaNegocio
         /// </summary>
         public void Eliminar(int idCalificacion, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Eliminar"))
-                throw new InvalidOperationException("No tiene permisos para eliminar calificaciones.");
-
-            if (idCalificacion <= 0)
-                throw new ArgumentException("El identificador de la calificación no es válido.");
-
-            string detalleCalificacion = $"ID {idCalificacion}";
             try
             {
-                var califPrev = repositorio.ObtenerPorId(idCalificacion);
-                if (califPrev != null)
-                    detalleCalificacion = $"ID {idCalificacion} (Matrícula ID: {califPrev.IdMatricula}, NotaFinal previa: {califPrev.NotaFinal})";
-            }
-            catch { }
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmCalificaciones", "Eliminar"))
+                    throw new InvalidOperationException("No tiene permisos para eliminar calificaciones.");
 
-            try
-            {
+                if (idCalificacion <= 0)
+                    throw new ArgumentException("El identificador de la calificación no es válido.");
+
+                string detalleCalificacion = $"ID {idCalificacion}";
+                try
+                {
+                    var califPrev = repositorio.ObtenerPorId(idCalificacion);
+                    if (califPrev != null)
+                        detalleCalificacion = $"ID {idCalificacion} (Matrícula ID: {califPrev.IdMatricula}, NotaFinal previa: {califPrev.NotaFinal})";
+                }
+                catch (Exception exObtener)
+                {
+                    RegistrarErrorEnBitacora(exObtener, idUsuarioLogueado, "Calificaciones", "Eliminar", $"Obteniendo detalle para ID={idCalificacion}");
+                }
+
                 repositorio.Eliminar(idCalificacion);
 
                 bitacoraService.RegistrarAccion(
@@ -109,6 +150,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Calificaciones",
+                    "Eliminar",
+                    $"Intentando eliminar calificación ID={idCalificacion}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al eliminar la calificación.", ex);
             }
         }
@@ -124,6 +175,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(ex, 0, "Calificaciones", "ObtenerTodos", "Obteniendo todas las calificaciones");
                 throw new InvalidOperationException("Error al obtener las calificaciones.", ex);
             }
         }
@@ -133,15 +185,16 @@ namespace CapaNegocio
         /// </summary>
         public Calificacion ObtenerPorId(int idCalificacion)
         {
-            if (idCalificacion <= 0)
-                throw new ArgumentException("El identificador de la calificación no es válido.");
-
             try
             {
+                if (idCalificacion <= 0)
+                    throw new ArgumentException("El identificador de la calificación no es válido.");
+
                 return repositorio.ObtenerPorId(idCalificacion);
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(ex, 0, "Calificaciones", "ObtenerPorId", $"Obteniendo calificación ID={idCalificacion}");
                 throw new InvalidOperationException("Error al obtener la calificación.", ex);
             }
         }
@@ -149,6 +202,9 @@ namespace CapaNegocio
         // VALIDACIONES (RN-04)
         private void Validar(Calificacion c)
         {
+            if (c == null)
+                throw new ArgumentNullException(nameof(c), "La calificación no puede ser nula.");
+
             if (c.IdMatricula <= 0)
                 throw new ArgumentException("Debe seleccionar una matrícula.");
 

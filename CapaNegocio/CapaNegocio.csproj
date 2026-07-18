@@ -48,6 +48,7 @@
     <Compile Include="DocenteServicio.cs" />
     <Compile Include="EstadoUsuarioServicio.cs" />
     <Compile Include="EstudianteServicio.cs" />
+    <Compile Include="Logging\FileLogger.cs" />
     <Compile Include="MatriculaServicio.cs" />
     <Compile Include="PeriodoAcademicoServicio.cs" />
     <Compile Include="PermisoServicio.cs" />

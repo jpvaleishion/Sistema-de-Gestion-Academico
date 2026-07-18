@@ -8,18 +8,22 @@ namespace CapaNegocio
     /// <summary>
     /// Servicio de negocio para la gestión de períodos académicos.
     /// Aplica validaciones de integridad, controla permisos y registra auditoría.
+    /// Se integra registro de errores en la bitácora sin cambiar firmas públicas.
     /// </summary>
     public class PeriodoAcademicoServicio
     {
-        private PeriodoAcademicoRepositorio repositorio = new PeriodoAcademicoRepositorio();
-        private PermisoServicio permisoService = new PermisoServicio();
-        private BitacoraServicio bitacoraService = new BitacoraServicio();
+        private readonly PeriodoAcademicoRepositorio repositorio = new PeriodoAcademicoRepositorio();
+        private readonly PermisoServicio permisoService = new PermisoServicio();
+        private readonly BitacoraServicio bitacoraService = new BitacoraServicio();
 
         /// <summary>
         /// Método auxiliar para validar período académico.
         /// </summary>
         private void ValidarPeriodo(PeriodoAcademico p)
         {
+            if (p == null)
+                throw new ArgumentNullException(nameof(p), "El período académico no puede ser nulo.");
+
             if (string.IsNullOrWhiteSpace(p.NombrePeriodo))
                 throw new ArgumentException("El nombre del período es obligatorio.");
 
@@ -37,17 +41,33 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
+        /// </summary>
+        private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
+        {
+            try
+            {
+                string descripcion = $"Contexto: {contexto} | Detalle: {ex.ToString()}";
+                bitacoraService.RegistrarAccion(idUsuario, modulo, "Error", descripcion);
+            }
+            catch
+            {
+                // No propagar excepciones desde la bitácora para no afectar la lógica de negocio.
+            }
+        }
+
+        /// <summary>
         /// Registra un nuevo período académico verificando permisos, validaciones y registrando auditoría.
         /// </summary>
         public void Guardar(PeriodoAcademico p, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodosAcademicos", "Crear"))
-                throw new InvalidOperationException("No tiene permisos para registrar períodos académicos.");
-
-            ValidarPeriodo(p);
-
             try
             {
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodosAcademicos", "Crear"))
+                    throw new InvalidOperationException("No tiene permisos para registrar períodos académicos.");
+
+                ValidarPeriodo(p);
+
                 repositorio.Insertar(p);
 
                 bitacoraService.RegistrarAccion(
@@ -59,6 +79,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Periodos Academicos",
+                    "Crear",
+                    $"Intentando guardar período: Nombre='{(p != null ? p.NombrePeriodo : "null")}', FechaInicio={(p != null ? p.FechaInicio.ToString("o") : "null")}, FechaFin={(p != null ? p.FechaFin.ToString("o") : "null")}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al guardar el período académico.", ex);
             }
         }
@@ -68,13 +98,13 @@ namespace CapaNegocio
         /// </summary>
         public void Actualizar(PeriodoAcademico p, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodosAcademicos", "Modificar"))
-                throw new InvalidOperationException("No tiene permisos para modificar períodos académicos.");
-
-            ValidarPeriodo(p);
-
             try
             {
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodosAcademicos", "Modificar"))
+                    throw new InvalidOperationException("No tiene permisos para modificar períodos académicos.");
+
+                ValidarPeriodo(p);
+
                 repositorio.Actualizar(p);
 
                 bitacoraService.RegistrarAccion(
@@ -86,6 +116,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Periodos Academicos",
+                    "Modificar",
+                    $"Intentando actualizar período ID={(p != null ? p.IdPeriodo.ToString() : "null")}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al actualizar el período académico.", ex);
             }
         }
@@ -95,23 +135,26 @@ namespace CapaNegocio
         /// </summary>
         public void Eliminar(int idPeriodo, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodosAcademicos", "Eliminar"))
-                throw new InvalidOperationException("No tiene permisos para eliminar períodos académicos.");
-
-            if (idPeriodo <= 0)
-                throw new ArgumentException("El identificador del período académico no es válido.");
-
-            string nombrePeriodo = $"ID {idPeriodo}";
             try
             {
-                var de_paso = repositorio.ObtenerPorId(idPeriodo);
-                if (de_paso != null)
-                    nombrePeriodo = $"'{de_paso.NombrePeriodo}' (ID: {idPeriodo})";
-            }
-            catch { }
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodosAcademicos", "Eliminar"))
+                    throw new InvalidOperationException("No tiene permisos para eliminar períodos académicos.");
 
-            try
-            {
+                if (idPeriodo <= 0)
+                    throw new ArgumentException("El identificador del período académico no es válido.");
+
+                string nombrePeriodo = $"ID {idPeriodo}";
+                try
+                {
+                    var de_paso = repositorio.ObtenerPorId(idPeriodo);
+                    if (de_paso != null)
+                        nombrePeriodo = $"'{de_paso.NombrePeriodo}' (ID: {idPeriodo})";
+                }
+                catch (Exception exObtener)
+                {
+                    RegistrarErrorEnBitacora(exObtener, idUsuarioLogueado, "Periodos Academicos", "Eliminar", $"Obteniendo nombre para ID={idPeriodo}");
+                }
+
                 repositorio.Eliminar(idPeriodo);
 
                 bitacoraService.RegistrarAccion(
@@ -123,6 +166,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Periodos Academicos",
+                    "Eliminar",
+                    $"Intentando eliminar período ID={idPeriodo}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al eliminar el período académico.", ex);
             }
         }
@@ -138,6 +191,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(ex, 0, "Periodos Academicos", "ObtenerTodos", "Obteniendo todos los períodos académicos");
                 throw new InvalidOperationException("Error al obtener los períodos académicos.", ex);
             }
         }
@@ -147,19 +201,24 @@ namespace CapaNegocio
         /// </summary>
         public PeriodoAcademico ObtenerPorId(int idPeriodo)
         {
-            if (idPeriodo <= 0)
-                throw new ArgumentException("El identificador del período académico no es válido.");
-
             try
             {
+                if (idPeriodo <= 0)
+                    throw new ArgumentException("El identificador del período académico no es válido.");
+
                 var periodo = repositorio.ObtenerPorId(idPeriodo);
                 if (periodo == null)
-                    throw new InvalidOperationException($"No existe un período académico con ID {idPeriodo}.");
+                {
+                    var ex = new InvalidOperationException($"No existe un período académico con ID {idPeriodo}.");
+                    RegistrarErrorEnBitacora(ex, 0, "Periodos Academicos", "ObtenerPorId", $"ID no encontrado: {idPeriodo}");
+                    throw ex;
+                }
 
                 return periodo;
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(ex, 0, "Periodos Academicos", "ObtenerPorId", $"Obteniendo período ID={idPeriodo}");
                 throw new InvalidOperationException("Error al obtener el período académico.", ex);
             }
         }

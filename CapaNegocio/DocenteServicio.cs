@@ -9,25 +9,30 @@ namespace CapaNegocio
     /// <summary>
     /// Servicio de negocio para la gestión de docentes.
     /// Aplica reglas de negocio, validaciones y registra auditoría mediante bitácora y permisos.
+    /// Se integra registro de errores en la bitácora sin cambiar firmas públicas.
     /// </summary>
     public class DocenteServicio
     {
-        private DocenteRepositorio repositorio = new DocenteRepositorio();
-        private PermisoServicio permisoService = new PermisoServicio();
-        private BitacoraServicio bitacoraService = new BitacoraServicio();
+        private readonly DocenteRepositorio repositorio = new DocenteRepositorio();
+        private readonly PermisoServicio permisoService = new PermisoServicio();
+        private readonly BitacoraServicio bitacoraService = new BitacoraServicio();
 
         /// <summary>
         /// Método auxiliar para validar docente.
         /// </summary>
         private void ValidarDocente(Docente d)
         {
+            if (d == null)
+                throw new ArgumentNullException(nameof(d), "El docente no puede ser nulo.");
+
             if (string.IsNullOrWhiteSpace(d.Nombres))
                 throw new ArgumentException("El nombre es obligatorio.");
 
             if (d.Nombres.Length < 2 || d.Nombres.Length > 50)
                 throw new ArgumentException("El nombre debe tener entre 2 y 50 caracteres.");
 
-            if (!Regex.IsMatch(d.Nombres, @"^[a-zA-Z\s]+$"))
+            // Permitir letras Unicode (acentos, ñ, etc.) y espacios
+            if (!Regex.IsMatch(d.Nombres, @"^[\p{L}\s]+$"))
                 throw new ArgumentException("El nombre solo puede contener letras y espacios.");
 
             if (string.IsNullOrWhiteSpace(d.Apellidos))
@@ -36,7 +41,7 @@ namespace CapaNegocio
             if (d.Apellidos.Length < 2 || d.Apellidos.Length > 50)
                 throw new ArgumentException("Los apellidos deben tener entre 2 y 50 caracteres.");
 
-            if (!Regex.IsMatch(d.Apellidos, @"^[a-zA-Z\s]+$"))
+            if (!Regex.IsMatch(d.Apellidos, @"^[\p{L}\s]+$"))
                 throw new ArgumentException("Los apellidos solo pueden contener letras y espacios.");
 
             if (string.IsNullOrWhiteSpace(d.Especialidad))
@@ -47,17 +52,33 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
+        /// </summary>
+        private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
+        {
+            try
+            {
+                string descripcion = $"Contexto: {contexto} | Detalle: {ex.ToString()}";
+                bitacoraService.RegistrarAccion(idUsuario, modulo, "Error", descripcion);
+            }
+            catch
+            {
+                // No propagar excepciones desde el registro de errores para no afectar la lógica de negocio.
+            }
+        }
+
+        /// <summary>
         /// Registra un nuevo docente aplicando validaciones de negocio y auditoría.
         /// </summary>
         public void Guardar(Docente d, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmDocentes", "Crear"))
-                throw new InvalidOperationException("No tiene permisos para registrar docentes.");
-
-            ValidarDocente(d);
-
             try
             {
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmDocentes", "Crear"))
+                    throw new InvalidOperationException("No tiene permisos para registrar docentes.");
+
+                ValidarDocente(d);
+
                 repositorio.Insertar(d);
 
                 bitacoraService.RegistrarAccion(
@@ -69,6 +90,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Docentes",
+                    "Crear",
+                    $"Intentando guardar docente: Nombres='{(d != null ? d.Nombres : "null")}', Apellidos='{(d != null ? d.Apellidos : "null")}', Especialidad='{(d != null ? d.Especialidad : "null")}'"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al guardar el docente.", ex);
             }
         }
@@ -78,13 +109,13 @@ namespace CapaNegocio
         /// </summary>
         public void Actualizar(Docente d, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmDocentes", "Modificar"))
-                throw new InvalidOperationException("No tiene permisos para modificar docentes.");
-
-            ValidarDocente(d);
-
             try
             {
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmDocentes", "Modificar"))
+                    throw new InvalidOperationException("No tiene permisos para modificar docentes.");
+
+                ValidarDocente(d);
+
                 repositorio.Actualizar(d);
 
                 bitacoraService.RegistrarAccion(
@@ -96,6 +127,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Docentes",
+                    "Modificar",
+                    $"Intentando actualizar docente ID={(d != null ? d.IdPersona.ToString() : "null")}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al actualizar el docente.", ex);
             }
         }
@@ -105,23 +146,26 @@ namespace CapaNegocio
         /// </summary>
         public void Eliminar(int idPersona, int idUsuarioLogueado)
         {
-            if (!permisoService.TienePermiso(idUsuarioLogueado, "frmDocentes", "Eliminar"))
-                throw new InvalidOperationException("No tiene permisos para eliminar docentes.");
-
-            if (idPersona <= 0)
-                throw new ArgumentException("El identificador del docente no es válido.");
-
-            string nombreDocente = $"ID {idPersona}";
             try
             {
-                var de_paso = repositorio.ObtenerPorId(idPersona);
-                if (de_paso != null)
-                    nombreDocente = $"'{de_paso.Nombres} {de_paso.Apellidos}' (ID: {idPersona})";
-            }
-            catch { }
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmDocentes", "Eliminar"))
+                    throw new InvalidOperationException("No tiene permisos para eliminar docentes.");
 
-            try
-            {
+                if (idPersona <= 0)
+                    throw new ArgumentException("El identificador del docente no es válido.");
+
+                string nombreDocente = $"ID {idPersona}";
+                try
+                {
+                    var de_paso = repositorio.ObtenerPorId(idPersona);
+                    if (de_paso != null)
+                        nombreDocente = $"'{de_paso.Nombres} {de_paso.Apellidos}' (ID: {idPersona})";
+                }
+                catch (Exception exObtener)
+                {
+                    RegistrarErrorEnBitacora(exObtener, idUsuarioLogueado, "Docentes", "Eliminar", $"Obteniendo datos para ID={idPersona}");
+                }
+
                 repositorio.Eliminar(idPersona);
 
                 bitacoraService.RegistrarAccion(
@@ -133,6 +177,16 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(
+                    ex,
+                    idUsuarioLogueado,
+                    "Docentes",
+                    "Eliminar",
+                    $"Intentando eliminar docente ID={idPersona}"
+                );
+
+                if (ex is InvalidOperationException || ex is ArgumentException)
+                    throw;
                 throw new InvalidOperationException("Error al eliminar el docente.", ex);
             }
         }
@@ -148,6 +202,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(ex, 0, "Docentes", "ObtenerTodos", "Obteniendo todos los docentes");
                 throw new InvalidOperationException("Error al obtener los docentes.", ex);
             }
         }
@@ -157,15 +212,16 @@ namespace CapaNegocio
         /// </summary>
         public Docente ObtenerPorId(int idPersona)
         {
-            if (idPersona <= 0)
-                throw new ArgumentException("El identificador del docente no es válido.");
-
             try
             {
+                if (idPersona <= 0)
+                    throw new ArgumentException("El identificador del docente no es válido.");
+
                 return repositorio.ObtenerPorId(idPersona);
             }
             catch (Exception ex)
             {
+                RegistrarErrorEnBitacora(ex, 0, "Docentes", "ObtenerPorId", $"Obteniendo docente ID={idPersona}");
                 throw new InvalidOperationException("Error al obtener el docente.", ex);
             }
         }
