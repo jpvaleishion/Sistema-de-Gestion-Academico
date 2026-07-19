@@ -1,4 +1,4 @@
-﻿using CapaDatos;
+using CapaDatos;
 using CapaEntidades.Entidades;
 using System;
 using System.Collections.Generic;
