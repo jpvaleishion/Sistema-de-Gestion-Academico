@@ -7,15 +7,22 @@ namespace CapaDatos
 {
     /// <summary>
     /// Repositorio encargado de gestionar las operaciones de acceso a datos para la entidad <see cref="PeriodoAcademico"/>.
+    /// Centraliza operaciones CRUD y mapeo entre filas de la base de datos y la entidad.
     /// </summary>
     public class PeriodoAcademicoRepositorio
     {
+        /// <summary>
+        /// Fábrica de conexiones utilizada por los métodos de la clase.
+        /// Mantenerla privada evita exponer detalles de infraestructura a capas superiores.
+        /// </summary>
         private Conexion con = new Conexion();
 
         /// <summary>
         /// Inserta un nuevo periodo académico en la base de datos.
         /// </summary>
-        /// <param name="p">Objeto <see cref="PeriodoAcademico"/> con los datos a insertar.</param>
+        /// <param name="p">Objeto <see cref="PeriodoAcademico"/> con los datos a insertar. No debe ser null.</param>
+        /// <returns>Void. Persiste el periodo en la tabla PeriodosAcademicos.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL (SqlException) con contexto adicional.</exception>
         public void Insertar(PeriodoAcademico p)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -23,6 +30,7 @@ namespace CapaDatos
                 string sql = "INSERT INTO PeriodosAcademicos (NombrePeriodo,FechaInicio,FechaFin,Estado) VALUES (@NombrePeriodo, @FechaInicio, @FechaFin, @Estado)";
                 try
                 {
+                    // Abrimos la conexión justo antes de ejecutar el comando para minimizar la ventana en la que el recurso está ocupado.
                     conexion.Open();
                     using (SqlCommand command = new SqlCommand(sql, conexion))
                     {
@@ -35,6 +43,7 @@ namespace CapaDatos
                 }
                 catch (SqlException ex)
                 {
+                    // POR QUÉ: encapsulamos la excepción para proporcionar contexto de la DAL y mantener la InnerException para diagnóstico.
                     throw new Exception("Error al insertar el periodo académico: " + ex.Message, ex);
                 }
             }
@@ -43,7 +52,9 @@ namespace CapaDatos
         /// <summary>
         /// Actualiza los datos de un periodo académico existente.
         /// </summary>
-        /// <param name="p">Objeto <see cref="PeriodoAcademico"/> con los datos actualizados.</param>
+        /// <param name="p">Objeto <see cref="PeriodoAcademico"/> con los datos actualizados. Debe contener IdPeriodo válido.</param>
+        /// <returns>Void. Si la fila no existe, la consulta no modificará registros.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public void Actualizar(PeriodoAcademico p)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -73,6 +84,8 @@ namespace CapaDatos
         /// Elimina un periodo académico de la base de datos según su identificador.
         /// </summary>
         /// <param name="idPeriodo">Identificador del periodo académico a eliminar.</param>
+        /// <returns>Void. Operación realiza un DELETE físico sobre la tabla PeriodosAcademicos.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public void Eliminar(int idPeriodo)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -97,7 +110,8 @@ namespace CapaDatos
         /// <summary>
         /// Obtiene la lista completa de periodos académicos registrados.
         /// </summary>
-        /// <returns>Lista de objetos <see cref="PeriodoAcademico"/>.</returns>
+        /// <returns>Lista de objetos <see cref="PeriodoAcademico"/>. Devuelve una lista vacía si no hay registros; nunca devuelve null.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public List<PeriodoAcademico> ObtenerTodos()
         {
             List<PeriodoAcademico> lista = new List<PeriodoAcademico>();
@@ -114,6 +128,7 @@ namespace CapaDatos
                         while (reader.Read())
                         {
                             PeriodoAcademico p = new PeriodoAcademico();
+                            // Mapeo explícito de columnas para controlar conversiones y nullables.
                             p.IdPeriodo = Convert.ToInt32(reader["IdPeriodo"]);
                             p.NombrePeriodo = reader["NombrePeriodo"].ToString();
                             p.FechaInicio = Convert.ToDateTime(reader["FechaInicio"]);
@@ -137,6 +152,7 @@ namespace CapaDatos
         /// </summary>
         /// <param name="idPeriodo">Identificador del periodo académico a buscar.</param>
         /// <returns>Objeto <see cref="PeriodoAcademico"/> encontrado, o <c>null</c> si no existe.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public PeriodoAcademico ObtenerPorId(int idPeriodo)
         {
             PeriodoAcademico p = null;
@@ -154,6 +170,7 @@ namespace CapaDatos
                         if (reader.Read())
                         {
                             p = new PeriodoAcademico();
+                            // Mapeo manual para asegurar tipos y nullables según contrato de la entidad.
                             p.IdPeriodo = Convert.ToInt32(reader["IdPeriodo"]);
                             p.NombrePeriodo = reader["NombrePeriodo"].ToString();
                             p.FechaInicio = Convert.ToDateTime(reader["FechaInicio"]);

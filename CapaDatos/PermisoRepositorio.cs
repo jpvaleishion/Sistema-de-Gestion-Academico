@@ -17,7 +17,8 @@ namespace CapaDatos
         /// Obtiene la lista completa de permisos asociados a un rol, utilizada para cargarlos en la sesión al iniciar sesión.
         /// </summary>
         /// <param name="idRol">Identificador del rol cuyos permisos se desean consultar.</param>
-        /// <returns>Lista de objetos <see cref="Permiso"/> asociados al rol.</returns>
+        /// <returns>Lista de objetos <see cref="Permiso"/> asociados al rol. Devuelve lista vacía si no hay registros.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL u otras ocurridas durante la operación.</exception>
         public List<Permiso> ObtenerPermisosPorRol(int idRol)
         {
             List<Permiso> lista = new List<Permiso>();
@@ -39,6 +40,7 @@ namespace CapaDatos
                     {
                         while (rdr.Read())
                         {
+                            // Mapeo manual para controlar conversiones y evitar dependencia en el orden de columnas.
                             lista.Add(new Permiso
                             {
                                 IdPermiso = Convert.ToInt32(rdr["IdPermiso"]),
@@ -65,6 +67,7 @@ namespace CapaDatos
         /// <param name="nombreFormulario">Nombre del formulario sobre el cual se consulta el permiso.</param>
         /// <param name="operacion">Operación a verificar (visualizar, crear, modificar o eliminar).</param>
         /// <returns><c>true</c> si el usuario tiene el permiso solicitado; de lo contrario, <c>false</c>.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL u otras ocurridas durante la operación.</exception>
         public bool TienePermiso(int idUsuario, string nombreFormulario, string operacion)
         {
             using (SqlConnection con = conexion.Conectar())

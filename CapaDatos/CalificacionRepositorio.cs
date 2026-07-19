@@ -10,12 +10,17 @@ namespace CapaDatos
     /// </summary>
     public class CalificacionRepositorio
     {
+        /// <summary>
+        /// Fábrica de conexiones utilizada por los métodos de la clase.
+        /// </summary>
         private Conexion con = new Conexion();
 
         /// <summary>
         /// Inserta una nueva calificación en la base de datos.
         /// </summary>
         /// <param name="c">Objeto <see cref="Calificacion"/> con los datos a insertar.</param>
+        /// <returns>Void. Persiste la calificación en la tabla correspondiente.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public void Insertar(Calificacion c)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -26,9 +31,11 @@ namespace CapaDatos
                     "@Observaciones, @FechaCalificacion)";
                 try
                 {
+                    // Abrimos la conexión lo más tarde posible para minimizar la ventana en la que está abierta.
                     conexion.Open();
                     using (SqlCommand command = new SqlCommand(sql, conexion))
                     {
+                        // Uso de parámetros para prevenir inyección SQL y garantizar conversiones correctas.
                         command.Parameters.AddWithValue("@IdMatricula", c.IdMatricula);
                         command.Parameters.AddWithValue("@Nota1", c.Nota1);
                         command.Parameters.AddWithValue("@Nota2", c.Nota2);
@@ -36,13 +43,15 @@ namespace CapaDatos
                         command.Parameters.AddWithValue("@NotaMaxima", c.NotaMaxima);
                         command.Parameters.AddWithValue("@Estado", c.Estado);
                         command.Parameters.AddWithValue("@Faltas", c.Faltas);
-                        command.Parameters.AddWithValue("@Observaciones", c.Observaciones);
+                        command.Parameters.AddWithValue("@Observaciones", c.Observaciones ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@FechaCalificacion", c.FechaCalificacion);
+
                         command.ExecuteNonQuery();
                     }
                 }
                 catch (SqlException ex)
                 {
+                    // POR QUÉ: encapsulamos la excepción para aportar contexto desde la DAL y conservar InnerException.
                     throw new Exception("Error al insertar la calificación: " + ex.Message, ex);
                 }
             }
@@ -52,6 +61,8 @@ namespace CapaDatos
         /// Actualiza los datos de una calificación existente.
         /// </summary>
         /// <param name="c">Objeto <see cref="Calificacion"/> con los datos actualizados.</param>
+        /// <returns>Void. Ejecuta la actualización sobre la fila identificada por IdCalificacion.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public void Actualizar(Calificacion c)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -72,7 +83,7 @@ namespace CapaDatos
                         command.Parameters.AddWithValue("@NotaMaxima", c.NotaMaxima);
                         command.Parameters.AddWithValue("@Estado", c.Estado);
                         command.Parameters.AddWithValue("@Faltas", c.Faltas);
-                        command.Parameters.AddWithValue("@Observaciones", c.Observaciones);
+                        command.Parameters.AddWithValue("@Observaciones", c.Observaciones ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@FechaCalificacion", c.FechaCalificacion);
                         command.ExecuteNonQuery();
                     }
@@ -88,6 +99,8 @@ namespace CapaDatos
         /// Elimina una calificación de la base de datos según su identificador.
         /// </summary>
         /// <param name="idCalificacion">Identificador de la calificación a eliminar.</param>
+        /// <returns>Void.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public void Eliminar(int idCalificacion)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -112,7 +125,8 @@ namespace CapaDatos
         /// <summary>
         /// Obtiene la lista completa de calificaciones registradas.
         /// </summary>
-        /// <returns>Lista de objetos <see cref="Calificacion"/>.</returns>
+        /// <returns>Lista de objetos <see cref="Calificacion"/>. Devuelve lista vacía si no hay registros.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public List<Calificacion> ObtenerTodos()
         {
             List<Calificacion> lista = new List<Calificacion>();
@@ -137,7 +151,7 @@ namespace CapaDatos
                             c.NotaMaxima = Convert.ToDecimal(reader["NotaMaxima"]);
                             c.Estado = reader["Estado"].ToString();
                             c.Faltas = Convert.ToInt32(reader["Faltas"]);
-                            c.Observaciones = reader["Observaciones"].ToString();
+                            c.Observaciones = reader["Observaciones"] != DBNull.Value ? reader["Observaciones"].ToString() : null;
                             c.FechaCalificacion = Convert.ToDateTime(reader["FechaCalificacion"]);
                             lista.Add(c);
                         }
@@ -157,6 +171,7 @@ namespace CapaDatos
         /// </summary>
         /// <param name="idCalificacion">Identificador de la calificación a buscar.</param>
         /// <returns>Objeto <see cref="Calificacion"/> encontrado, o <c>null</c> si no existe.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public Calificacion ObtenerPorId(int idCalificacion)
         {
             Calificacion c = null;
@@ -182,7 +197,7 @@ namespace CapaDatos
                             c.NotaMaxima = Convert.ToDecimal(reader["NotaMaxima"]);
                             c.Estado = reader["Estado"].ToString();
                             c.Faltas = Convert.ToInt32(reader["Faltas"]);
-                            c.Observaciones = reader["Observaciones"].ToString();
+                            c.Observaciones = reader["Observaciones"] != DBNull.Value ? reader["Observaciones"].ToString() : null;
                             c.FechaCalificacion = Convert.ToDateTime(reader["FechaCalificacion"]);
                         }
                     }

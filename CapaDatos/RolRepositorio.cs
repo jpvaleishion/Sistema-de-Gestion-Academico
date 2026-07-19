@@ -10,11 +10,16 @@ namespace CapaDatos
     /// </summary>
     public class RolRepositorio
     {
+        /// <summary>
+        /// Fábrica de conexiones de la capa de datos.
+        /// </summary>
         private Conexion con = new Conexion();
 
         /// <summary>
         /// Obtiene la lista completa de roles registrados, ordenados alfabéticamente por nombre.
         /// </summary>
+        /// <returns>Lista de <see cref="Rol"/>. Devuelve lista vacía si no hay registros.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL con contexto de la DAL.</exception>
         public List<Rol> ObtenerTodos()
         {
             List<Rol> lista = new List<Rol>();
@@ -30,6 +35,7 @@ namespace CapaDatos
                     {
                         while (reader.Read())
                         {
+                            // Mapeo explícito para evitar dependencia en el orden de columnas.
                             Rol r = new Rol
                             {
                                 IdRol = Convert.ToInt32(reader["IdRol"]),
@@ -41,6 +47,7 @@ namespace CapaDatos
                 }
                 catch (SqlException ex)
                 {
+                    // POR QUÉ: se encapsula la excepción para mantener la responsabilidad de la DAL en el manejo de errores.
                     throw new Exception("Error al obtener la lista de roles desde la base de datos: " + ex.Message, ex);
                 }
             }
@@ -53,6 +60,7 @@ namespace CapaDatos
         /// </summary>
         /// <param name="idRol">Identificador del rol.</param>
         /// <returns>Entidad Rol correspondiente o null si no existe.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL con contexto de la DAL.</exception>
         public Rol ObtenerPorId(int idRol)
         {
             Rol rol = null;

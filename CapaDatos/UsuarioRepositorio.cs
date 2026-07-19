@@ -12,12 +12,17 @@ namespace CapaDatos
     /// </summary>
     public class UsuarioRepositorio
     {
+        /// <summary>
+        /// Fábrica de conexiones usada por la capa de datos.
+        /// </summary>
         private Conexion con = new Conexion();
 
         /// <summary>
         /// Inserta un nuevo usuario en la base de datos con sus valores iniciales de seguridad y estado.
         /// </summary>
         /// <param name="u">Objeto <see cref="Usuario"/> con los datos a insertar.</param>
+        /// <returns>Void. Persiste un nuevo usuario en la tabla Usuarios.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL (SqlException) con contexto adicional.</exception>
         public void Insertar(Usuario u)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -26,6 +31,7 @@ namespace CapaDatos
                              "VALUES (@NombreUsuario, @Password, @IdRol, @IdEstado, @MotivoEstado, @Salt, @IntentosFallidos, @FechaBloqueo)";
                 try
                 {
+                    // Abrimos la conexión lo más tarde posible para reducir la ventana de ocupación del recurso.
                     conexion.Open();
                     using (SqlCommand command = new SqlCommand(sql, conexion))
                     {
@@ -52,6 +58,8 @@ namespace CapaDatos
         /// Actualiza los datos generales, de seguridad y el estado de un usuario existente.
         /// </summary>
         /// <param name="u">Objeto <see cref="Usuario"/> con los datos actualizados.</param>
+        /// <returns>Void. Ejecuta la actualización en la fila identificada por IdUsuario.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public void Actualizar(Usuario u)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -158,6 +166,12 @@ namespace CapaDatos
         /// </summary>
         /// <param name="idUsuario">Identificador del usuario a buscar.</param>
         /// <returns>Objeto <see cref="Usuario"/> encontrado, o <c>null</c> si no existe.</returns>
+        /// <summary>
+        /// Obtiene un usuario específico según su identificador, incluyendo su rol y estado.
+        /// </summary>
+        /// <param name="idUsuario">Identificador del usuario a buscar.</param>
+        /// <returns>Objeto <see cref="Usuario"/> encontrado, o <c>null</c> si no existe.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL (SqlException).</exception>
         public Usuario ObtenerPorId(int idUsuario)
         {
             Usuario u = null;
@@ -239,6 +253,8 @@ namespace CapaDatos
         /// <param name="idUsuario">Identificador del usuario a actualizar.</param>
         /// <param name="intentos">Nuevo número de intentos fallidos registrados.</param>
         /// <param name="fechaBloqueo">Nueva fecha de bloqueo, o <c>null</c> si el usuario no está bloqueado.</param>
+        /// <returns>Void. Actualiza los campos IntentosFallidos y FechaBloqueo en la fila del usuario.</returns>
+        /// <exception cref="System.Exception">Envuelve excepciones de SQL.</exception>
         public void ActualizarIntentosYBloqueo(int idUsuario, int intentos, DateTime? fechaBloqueo)
         {
             using (SqlConnection conexion = con.Conectar())
@@ -265,6 +281,8 @@ namespace CapaDatos
         /// <summary>
         /// Método auxiliar privado para centralizar y unificar el mapeo de la base de datos a la entidad Usuario.
         /// </summary>
+        /// <param name="reader">SqlDataReader posicionado en una fila válida de resultado.</param>
+        /// <returns>Instancia de <see cref="Usuario"/> poblada con los campos leídos de la fila.</returns>
         private Usuario MapearUsuario(SqlDataReader reader)
         {
             return new Usuario
