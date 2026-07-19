@@ -20,6 +20,9 @@ namespace CapaNegocio
         /// <summary>
         /// Método auxiliar para validar curso.
         /// </summary>
+        /// <param name="c">Instancia de <see cref="Curso"/> a validar.</param>
+        /// <exception cref="ArgumentNullException">Si el curso es nulo.</exception>
+        /// <exception cref="ArgumentException">Si alguna regla de negocio no se cumple.</exception>
         private void ValidarCurso(Curso c)
         {
             if (c == null)
@@ -31,7 +34,7 @@ namespace CapaNegocio
             if (c.NombreCurso.Length < 3 || c.NombreCurso.Length > 100)
                 throw new ArgumentException("El nombre del curso debe tener entre 3 y 100 caracteres.");
 
-            // Permitir letras Unicode (acentos, ñ, etc.) y espacios
+            // POR QUÉ: Permitimos letras Unicode (acentos, ñ, etc.) y espacios para admitir nombres reales de cursos.
             if (!Regex.IsMatch(c.NombreCurso, @"^[\p{L}\s]+$"))
                 throw new ArgumentException("El nombre del curso solo puede contener letras y espacios.");
 
@@ -42,6 +45,11 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
         /// </summary>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <param name="idUsuario">Id del usuario que origina la acción (0 si no aplica).</param>
+        /// <param name="modulo">Módulo origen del error.</param>
+        /// <param name="accion">Acción en la que ocurrió el error.</param>
+        /// <param name="contexto">Contexto adicional para depuración.</param>
         private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
         {
             try
@@ -51,13 +59,16 @@ namespace CapaNegocio
             }
             catch
             {
-                // No propagar excepciones desde el registro de errores para no afectar la lógica de negocio.
+                // POR QUÉ: No propagamos excepciones del logger para no afectar la ejecución del flujo de negocio.
             }
         }
 
         /// <summary>
         /// Registra un nuevo curso en el sistema aplicando validaciones y auditoría.
         /// </summary>
+        /// <param name="c">Curso a registrar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación (para auditoría).</param>
+        /// <exception cref="InvalidOperationException">Si el usuario no tiene permiso para crear cursos o si ocurre un error interno.</exception>
         public void Guardar(Curso c, int idUsuarioLogueado)
         {
             try
@@ -86,6 +97,7 @@ namespace CapaNegocio
                     $"Intentando guardar curso: Nombre='{(c != null ? c.NombreCurso : "null")}', Capacidad={(c != null ? c.Capacidad.ToString() : "null")}"
                 );
 
+                // POR QUÉ: Preservamos InvalidOperationException y ArgumentException para que el llamador los maneje; envolvemos otros errores para dar contexto.
                 if (ex is InvalidOperationException || ex is ArgumentException)
                     throw;
                 throw new InvalidOperationException("Error al guardar el curso.", ex);
@@ -95,6 +107,8 @@ namespace CapaNegocio
         /// <summary>
         /// Actualiza los datos de un curso existente aplicando validaciones y auditoría.
         /// </summary>
+        /// <param name="c">Curso con datos actualizados.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
         public void Actualizar(Curso c, int idUsuarioLogueado)
         {
             try
@@ -132,6 +146,8 @@ namespace CapaNegocio
         /// <summary>
         /// Elimina un curso del sistema y registra la acción en la bitácora.
         /// </summary>
+        /// <param name="idCurso">Identificador del curso a eliminar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
         public void Eliminar(int idCurso, int idUsuarioLogueado)
         {
             try
@@ -181,6 +197,8 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene todos los cursos registrados.
         /// </summary>
+        /// <returns>Lista de cursos.</returns>
+        /// <exception cref="InvalidOperationException">Si ocurre un error al recuperar los cursos.</exception>
         public List<Curso> ObtenerTodos()
         {
             try
@@ -197,6 +215,9 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene un curso por su identificador.
         /// </summary>
+        /// <param name="idCurso">Identificador del curso.</param>
+        /// <returns>Instancia de <see cref="Curso"/> o null si no existe.</returns>
+        /// <exception cref="InvalidOperationException">Si ocurre un error al recuperar el curso.</exception>
         public Curso ObtenerPorId(int idCurso)
         {
             try

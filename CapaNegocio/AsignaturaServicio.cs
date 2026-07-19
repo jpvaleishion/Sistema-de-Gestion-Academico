@@ -20,6 +20,9 @@ namespace CapaNegocio
         /// <summary>
         /// Método auxiliar para validar asignatura.
         /// </summary>
+        /// <param name="a">Instancia de <see cref="Asignatura"/> a validar.</param>
+        /// <exception cref="ArgumentNullException">Si la asignatura es nula.</exception>
+        /// <exception cref="ArgumentException">Si alguna propiedad no cumple las reglas de negocio.</exception>
         private void ValidarAsignatura(Asignatura a)
         {
             if (a == null)
@@ -31,7 +34,7 @@ namespace CapaNegocio
             if (a.Nombre.Length < 3 || a.Nombre.Length > 50)
                 throw new ArgumentException("El nombre de la asignatura debe tener entre 3 y 50 caracteres.");
 
-            // Permitir letras Unicode (acentos, ñ, etc.) y espacios
+            // POR QUÉ: Permitimos letras Unicode (acentos, ñ, etc.) y espacios para cubrir nombres reales.
             if (!Regex.IsMatch(a.Nombre, @"^[\p{L}\s]+$"))
                 throw new ArgumentException("El nombre de la asignatura solo puede contener letras y espacios.");
 
@@ -42,6 +45,11 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
         /// </summary>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <param name="idUsuario">Id del usuario que origina la acción (0 si no aplica).</param>
+        /// <param name="modulo">Módulo origen del error.</param>
+        /// <param name="accion">Acción en la que ocurrió el error.</param>
+        /// <param name="contexto">Contexto adicional para depuración.</param>
         private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
         {
             try
@@ -58,6 +66,9 @@ namespace CapaNegocio
         /// <summary>
         /// Registra una nueva asignatura en el sistema aplicando validaciones y auditoría.
         /// </summary>
+        /// <param name="a">Asignatura a registrar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación (para auditoría).</param>
+        /// <exception cref="InvalidOperationException">Si el usuario no tiene permiso para crear asignaturas.</exception>
         public void Guardar(Asignatura a, int idUsuarioLogueado)
         {
             try
@@ -92,6 +103,8 @@ namespace CapaNegocio
         /// <summary>
         /// Actualiza los datos de una asignatura existente aplicando validaciones y auditoría.
         /// </summary>
+        /// <param name="a">Asignatura con los datos actualizados.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
         public void Actualizar(Asignatura a, int idUsuarioLogueado)
         {
             try
@@ -126,6 +139,8 @@ namespace CapaNegocio
         /// <summary>
         /// Elimina una asignatura del sistema y registra la acción en la bitácora.
         /// </summary>
+        /// <param name="idAsignatura">Identificador de la asignatura a eliminar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
         public void Eliminar(int idAsignatura, int idUsuarioLogueado)
         {
             try
@@ -166,6 +181,7 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene todas las asignaturas registradas.
         /// </summary>
+        /// <returns>Lista de asignaturas.</returns>
         public List<Asignatura> ObtenerTodos()
         {
             try
@@ -182,6 +198,8 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene una asignatura por su identificador.
         /// </summary>
+        /// <param name="idAsignatura">Identificador de la asignatura.</param>
+        /// <returns>Instancia de <see cref="Asignatura"/> o null si no existe.</returns>
         public Asignatura ObtenerPorId(int idAsignatura)
         {
             try

@@ -52,8 +52,16 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// Registra un error en la bitácora. Usa idUsuario = 0 cuando no se dispone de usuario.
+        /// Registra un error en la bitácora. Intenta almacenar detalles mínimos del error sin alterar la estructura actual de la bitácora.
         /// </summary>
+        /// <remarks>
+        /// No se propagan excepciones desde este método para evitar que fallos en la auditoría cancelen la operación principal.
+        /// </remarks>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <param name="idUsuario">Identificador del usuario relacionado a la acción (0 si no aplica).</param>
+        /// <param name="modulo">Módulo origen del error.</param>
+        /// <param name="accion">Acción en la que ocurrió el error.</param>
+        /// <param name="contexto">Contexto adicional para diagnóstico.</param>
         private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
         {
             try
@@ -70,6 +78,9 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un nuevo estudiante aplicando validaciones y auditoría.
         /// </summary>
+        /// <param name="e">Objeto <see cref="Estudiante"/> a registrar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
+        /// <exception cref="InvalidOperationException">Si el usuario no dispone de permisos o ocurre un error interno.</exception>
         public void Guardar(Estudiante e, int idUsuarioLogueado)
         {
             try
@@ -107,6 +118,9 @@ namespace CapaNegocio
         /// <summary>
         /// Actualiza los datos de un estudiante aplicando validaciones y auditoría.
         /// </summary>
+        /// <param name="e">Objeto <see cref="Estudiante"/> con los datos a actualizar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
+        /// <exception cref="InvalidOperationException">Si el usuario no dispone de permisos o ocurre un error interno.</exception>
         public void Actualizar(Estudiante e, int idUsuarioLogueado)
         {
             try
@@ -194,6 +208,8 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene todos los estudiantes registrados.
         /// </summary>
+        /// <returns>Lista de <see cref="Estudiante"/> con los estudiantes registrados.</returns>
+        /// <exception cref="InvalidOperationException">Si ocurre un error al acceder al repositorio.</exception>
         public List<Estudiante> ObtenerTodos()
         {
             try
@@ -210,6 +226,10 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene un estudiante por su identificador.
         /// </summary>
+        /// <param name="idPersona">Identificador del estudiante a obtener.</param>
+        /// <returns>Instancia de <see cref="Estudiante"/> si se encuentra; de lo contrario lanza una excepción.</returns>
+        /// <exception cref="ArgumentException">Si el identificador proporcionado no es válido.</exception>
+        /// <exception cref="InvalidOperationException">Si no existe el estudiante o ocurre un error al acceder al repositorio.</exception>
         public Estudiante ObtenerPorId(int idPersona)
         {
             try

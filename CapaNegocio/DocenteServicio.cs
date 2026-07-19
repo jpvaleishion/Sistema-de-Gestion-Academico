@@ -18,8 +18,11 @@ namespace CapaNegocio
         private readonly BitacoraServicio bitacoraService = new BitacoraServicio();
 
         /// <summary>
-        /// Método auxiliar para validar docente.
+        /// Método auxiliar para validar un objeto <see cref="Docente"/> según reglas de negocio.
         /// </summary>
+        /// <param name="d">Instancia de <see cref="Docente"/> a validar.</param>
+        /// <exception cref="ArgumentNullException">Si el objeto docente es nulo.</exception>
+        /// <exception cref="ArgumentException">Si alguna propiedad no cumple las restricciones de negocio.</exception>
         private void ValidarDocente(Docente d)
         {
             if (d == null)
@@ -54,6 +57,11 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
         /// </summary>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <param name="idUsuario">Identificador del usuario relacionado con la acción.</param>
+        /// <param name="modulo">Módulo origen del error.</param>
+        /// <param name="accion">Acción en la que ocurrió el error.</param>
+        /// <param name="contexto">Contexto adicional para diagnóstico.</param>
         private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
         {
             try
@@ -70,6 +78,9 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un nuevo docente aplicando validaciones de negocio y auditoría.
         /// </summary>
+        /// <param name="d">Objeto <see cref="Docente"/> con los datos a guardar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
+        /// <exception cref="InvalidOperationException">Si el usuario no tiene permiso o ocurre un error interno.</exception>
         public void Guardar(Docente d, int idUsuarioLogueado)
         {
             try

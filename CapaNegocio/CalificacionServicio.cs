@@ -19,6 +19,11 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
         /// </summary>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <param name="idUsuario">Identificador del usuario relacionado con la acción (0 si no aplica).</param>
+        /// <param name="modulo">Nombre del módulo donde ocurrió el error.</param>
+        /// <param name="accion">Acción que se estaba ejecutando cuando ocurrió el error.</param>
+        /// <param name="contexto">Contexto adicional para diagnóstico.</param>
         private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
         {
             try
@@ -35,6 +40,9 @@ namespace CapaNegocio
         /// <summary>
         /// Registra una nueva calificación aplicando validaciones, cálculo de nota final y auditoría.
         /// </summary>
+        /// <param name="c">Objeto <see cref="Calificacion"/> con datos a guardar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
+        /// <exception cref="InvalidOperationException">Si el usuario no tiene permiso o ocurre un error interno.</exception>
         public void Guardar(Calificacion c, int idUsuarioLogueado)
         {
             try
@@ -67,7 +75,7 @@ namespace CapaNegocio
                     $"Intentando guardar calificación MatrículaID={(c != null ? c.IdMatricula.ToString() : "null")}, Nota1={(c != null ? c.Nota1.ToString() : "null")}, Nota2={(c != null ? c.Nota2.ToString() : "null")}"
                 );
 
-                // Mantener comportamiento previo: envolver en InvalidOperationException si no lo es ya
+                // POR QUÉ: Mantener comportamiento previo: envolver en InvalidOperationException si no lo es ya
                 if (ex is InvalidOperationException || ex is ArgumentException)
                     throw;
                 throw new InvalidOperationException("Error al guardar la calificación.", ex);
@@ -77,6 +85,8 @@ namespace CapaNegocio
         /// <summary>
         /// Actualiza una calificación existente aplicando validaciones, recálculo y auditoría.
         /// </summary>
+        /// <param name="c">Objeto <see cref="Calificacion"/> con los datos actualizados.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
         public void Actualizar(Calificacion c, int idUsuarioLogueado)
         {
             try
@@ -108,6 +118,7 @@ namespace CapaNegocio
                     $"Intentando actualizar calificación ID={(c != null ? c.IdCalificacion.ToString() : "null")}"
                 );
 
+                // POR QUÉ: Preservamos el comportamiento existente dejando que InvalidOperationException y ArgumentException se propaguen.
                 if (ex is InvalidOperationException || ex is ArgumentException)
                     throw;
                 throw new InvalidOperationException("Error al actualizar la calificación.", ex);
@@ -117,6 +128,8 @@ namespace CapaNegocio
         /// <summary>
         /// Elimina una calificación y registra la acción en la bitácora.
         /// </summary>
+        /// <param name="idCalificacion">Identificador de la calificación a eliminar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
         public void Eliminar(int idCalificacion, int idUsuarioLogueado)
         {
             try
@@ -158,6 +171,7 @@ namespace CapaNegocio
                     $"Intentando eliminar calificación ID={idCalificacion}"
                 );
 
+                // POR QUÉ: Preservamos InvalidOperationException y ArgumentException; otros errores se envuelven para contexto.
                 if (ex is InvalidOperationException || ex is ArgumentException)
                     throw;
                 throw new InvalidOperationException("Error al eliminar la calificación.", ex);
@@ -167,6 +181,8 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene todas las calificaciones registradas.
         /// </summary>
+        /// <returns>Lista de calificaciones.</returns>
+        /// <exception cref="InvalidOperationException">Si ocurre un error al recuperar las calificaciones.</exception>
         public List<Calificacion> ObtenerTodos()
         {
             try
@@ -183,6 +199,9 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene una calificación por su identificador.
         /// </summary>
+        /// <param name="idCalificacion">Identificador de la calificación.</param>
+        /// <returns>Instancia de <see cref="Calificacion"/> o null si no existe.</returns>
+        /// <exception cref="InvalidOperationException">Si ocurre un error al recuperar la calificación.</exception>
         public Calificacion ObtenerPorId(int idCalificacion)
         {
             try
@@ -200,6 +219,11 @@ namespace CapaNegocio
         }
 
         // VALIDACIONES (RN-04)
+        /// <summary>
+        /// Valida la entidad de calificación según reglas de negocio.
+        /// </summary>
+        /// <param name="c">Objeto <see cref="Calificacion"/> a validar.</param>
+        /// <exception cref="ArgumentNullException">Si la calificación es nula.</exception>
         private void Validar(Calificacion c)
         {
             if (c == null)
@@ -222,12 +246,24 @@ namespace CapaNegocio
         }
 
         // CALCULO NOTA FINAL (RN-06)
+        /// <summary>
+        /// Calcula la nota final promediando Nota1 y Nota2 con redondeo a dos decimales.
+        /// </summary>
+        /// <param name="nota1">Primera nota.</param>
+        /// <param name="nota2">Segunda nota.</param>
+        /// <returns>Nota final redondeada a 2 decimales.</returns>
         private decimal CalcularNotaFinal(decimal nota1, decimal nota2)
         {
             return Math.Round((nota1 + nota2) / 2m, 2);
         }
 
         // CALCULO ESTADO ACADEMICO (RN-07)
+        /// <summary>
+        /// Calcula el estado académico (Aprobado/Supletorio/Reprobado) según porcentaje sobre la nota máxima.
+        /// </summary>
+        /// <param name="notaFinal">Nota final calculada.</param>
+        /// <param name="notaMaxima">Valor de la nota máxima para la asignatura.</param>
+        /// <returns>Cadena con el estado académico.</returns>
         private string CalcularEstado(decimal notaFinal, decimal notaMaxima)
         {
             if (notaMaxima <= 0)

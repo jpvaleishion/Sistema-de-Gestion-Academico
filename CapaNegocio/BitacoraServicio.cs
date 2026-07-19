@@ -32,6 +32,8 @@ namespace CapaNegocio
         /// <param name="modulo">Módulo del sistema donde ocurre la acción.</param>
         /// <param name="accion">Acción realizada (Crear, Modificar, Eliminar, etc.).</param>
         /// <param name="descripcion">Descripción detallada de la acción.</param>
+        /// <exception cref="System.ArgumentException">Si alguno de los parámetros obligatorios es inválido.</exception>
+        /// <exception cref="System.InvalidOperationException">Si la persistencia en repositorio falla.</exception>
         public void RegistrarAccion(int idUsuario, string modulo, string accion, string descripcion)
         {
             if (idUsuario <= 0)
@@ -46,7 +48,7 @@ namespace CapaNegocio
             if (string.IsNullOrWhiteSpace(descripcion))
                 throw new ArgumentException("La descripción es obligatoria.", nameof(descripcion));
 
-            // Normalizar valores
+            // POR QUÉ: Normalizamos y limitamos la información aquí para evitar insertar valores con espacios innecesarios en BD y archivo.
             string mod = modulo.Trim();
             string acc = accion.Trim();
             string desc = descripcion.Trim();
@@ -75,6 +77,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
+                // POR QUÉ: Guardamos la excepción para notificar al llamador después de intentar el respaldo en archivo.
                 repoException = ex;
             }
 
@@ -85,13 +88,13 @@ namespace CapaNegocio
             }
             catch
             {
-                // No propagar excepciones de archivo; si el repositorio falló, lo reportamos abajo.
+                // POR QUÉ: No propagamos fallos de archivo para no enmascarar la causa original; la persistencia en BD es prioritaria.
             }
 
             // Si la inserción en repositorio falló, lanzar excepción controlada (manteniendo comportamiento previo)
             if (repoException != null)
             {
-                // Intentamos dejar rastro en archivo (ya intentado arriba), ahora lanzamos la excepción original envuelta.
+                // Intentamos dejar rastro en archivo (ya intentado arriba), ahora lanzamos la excepción original envuelta para mantener trazabilidad.
                 throw new InvalidOperationException("Error al registrar la acción en la bitácora.", repoException);
             }
         }

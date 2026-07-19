@@ -18,6 +18,11 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un error en la bitácora. Usa idUsuario = 0 cuando no se dispone de usuario.
         /// </summary>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <param name="idUsuario">Identificador del usuario relacionado a la acción (0 si no aplica).</param>
+        /// <param name="modulo">Módulo origen del error.</param>
+        /// <param name="accion">Acción en la que ocurrió el error.</param>
+        /// <param name="contexto">Contexto adicional para diagnóstico.</param>
         private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
         {
             try

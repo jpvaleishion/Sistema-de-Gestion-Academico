@@ -17,8 +17,12 @@ namespace CapaNegocio
         private readonly BitacoraServicio bitacoraService = new BitacoraServicio();
 
         /// <summary>
-        /// Método auxiliar para validar período académico.
+        /// Valida la instancia de <see cref="PeriodoAcademico"/> conforme a reglas básicas de integridad.
         /// </summary>
+        /// <param name="p">Instancia de <see cref="PeriodoAcademico"/> a validar.</param>
+        /// <exception cref="ArgumentNullException">Si <paramref name="p"/> es nulo.</exception>
+        /// <exception cref="ArgumentException">Si alguna propiedad obligatoria no cumple las reglas de formato o tamaño.</exception>
+        /// <exception cref="InvalidOperationException">Si la fecha de fin es anterior o igual a la fecha de inicio.</exception>
         private void ValidarPeriodo(PeriodoAcademico p)
         {
             if (p == null)
@@ -43,6 +47,11 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
         /// </summary>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <param name="idUsuario">Identificador del usuario relacionado con la acción.</param>
+        /// <param name="modulo">Módulo origen del error.</param>
+        /// <param name="accion">Acción en la que ocurrió el error.</param>
+        /// <param name="contexto">Contexto adicional para diagnóstico.</param>
         private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
         {
             try
@@ -59,6 +68,9 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un nuevo período académico verificando permisos, validaciones y registrando auditoría.
         /// </summary>
+        /// <param name="p">Instancia de <see cref="PeriodoAcademico"/> a registrar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
+        /// <exception cref="InvalidOperationException">Si el usuario no tiene permiso o ocurre un error interno.</exception>
         public void Guardar(PeriodoAcademico p, int idUsuarioLogueado)
         {
             try

@@ -23,6 +23,11 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un error en la bitácora para centralizar el diagnóstico.
         /// </summary>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <param name="idUsuario">Identificador del usuario relacionado con la acción (0 si no aplica).</param>
+        /// <param name="modulo">Módulo origen del error.</param>
+        /// <param name="accion">Acción en la que ocurrió el error.</param>
+        /// <param name="contexto">Contexto adicional para diagnóstico.</param>
         private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
         {
             try
@@ -33,6 +38,12 @@ namespace CapaNegocio
             catch { /* Evitar propagar errores de la bitácora */ }
         }
 
+        /// <summary>
+        /// Crea un nuevo usuario en el sistema aplicando validaciones, encriptación de contraseña y registro en bitácora.
+        /// </summary>
+        /// <param name="u">Entidad <see cref="Usuario"/> a crear.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
+        /// <exception cref="InvalidOperationException">Si el usuario que realiza la acción no cuenta con permisos o si ocurre un error interno.</exception>
         public void Guardar(Usuario u, int idUsuarioLogueado)
         {
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Crear"))
@@ -63,6 +74,12 @@ namespace CapaNegocio
             }
         }
 
+        /// <summary>
+        /// Actualiza los datos de un usuario aplicando validaciones, gestión segura de contraseña y registro en bitácora.
+        /// </summary>
+        /// <param name="u">Entidad <see cref="Usuario"/> con los datos actualizados.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la operación.</param>
+        /// <exception cref="InvalidOperationException">Si el usuario que realiza la acción no cuenta con permisos o si ocurre un error interno.</exception>
         public void Actualizar(Usuario u, int idUsuarioLogueado)
         {
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Modificar"))
@@ -101,6 +118,12 @@ namespace CapaNegocio
             }
         }
 
+        /// <summary>
+        /// Elimina un usuario registrado y deja registro en bitácora.
+        /// </summary>
+        /// <param name="idUsuario">Identificador del usuario a eliminar.</param>
+        /// <param name="idUsuarioLogueado">Identificador del usuario que realiza la acción.</param>
+        /// <exception cref="InvalidOperationException">Si el usuario que realiza la acción no tiene permisos o ocurre un error interno.</exception>
         public void Eliminar(int idUsuario, int idUsuarioLogueado)
         {
             if (!permisoService.TienePermiso(idUsuarioLogueado, "frmUsuarios", "Eliminar"))
@@ -124,6 +147,11 @@ namespace CapaNegocio
             }
         }
 
+        /// <summary>
+        /// Obtiene la lista completa de usuarios registrados en el sistema.
+        /// </summary>
+        /// <returns>Lista de <see cref="Usuario"/> con los usuarios registrados.</returns>
+        /// <exception cref="InvalidOperationException">Si no se encuentran usuarios o ocurre un error en el repositorio.</exception>
         public List<Usuario> ObtenerTodos()
         {
             try
@@ -140,6 +168,13 @@ namespace CapaNegocio
             }
         }
 
+        /// <summary>
+        /// Obtiene un usuario por su identificador.
+        /// </summary>
+        /// <param name="idUsuario">Identificador del usuario a obtener.</param>
+        /// <returns>Entidad <see cref="Usuario"/> correspondiente.</returns>
+        /// <exception cref="ArgumentException">Si <paramref name="idUsuario"/> no es válido.</exception>
+        /// <exception cref="InvalidOperationException">Si no se encuentra el usuario o ocurre un error en el repositorio.</exception>
         public Usuario ObtenerPorId(int idUsuario)
         {
             if (idUsuario <= 0) throw new ArgumentException("El identificador del usuario no es válido.");
@@ -157,6 +192,14 @@ namespace CapaNegocio
             }
         }
 
+        /// <summary>
+        /// Intenta iniciar sesión con las credenciales proporcionadas.
+        /// </summary>
+        /// <param name="nombreUsuario">Nombre de usuario que intenta autenticarse.</param>
+        /// <param name="password">Contraseña en texto plano proporcionada para verificación.</param>
+        /// <returns>Entidad <see cref="Usuario"/> autenticada si las credenciales son correctas.</returns>
+        /// <exception cref="ArgumentException">Si las credenciales están incompletas.</exception>
+        /// <exception cref="InvalidOperationException">Si las credenciales son inválidas, la cuenta está bloqueada o el usuario está inactivo.</exception>
         public Usuario IniciarSesion(string nombreUsuario, string password)
         {
             if (string.IsNullOrWhiteSpace(nombreUsuario) || string.IsNullOrWhiteSpace(password))
@@ -213,6 +256,10 @@ namespace CapaNegocio
         }
 
         #region Métodos Criptográficos
+        /// <summary>
+        /// Genera un salt criptográficamente seguro codificado en Base64.
+        /// </summary>
+        /// <returns>Salt en Base64.</returns>
         private string GenerarSalt()
         {
             byte[] bytesSalt = new byte[16];
@@ -220,6 +267,12 @@ namespace CapaNegocio
             return Convert.ToBase64String(bytesSalt);
         }
 
+        /// <summary>
+        /// Deriva un hash seguro de la contraseña usando PBKDF2 (Rfc2898) con SHA-256.
+        /// </summary>
+        /// <param name="password">Contraseña en texto plano.</param>
+        /// <param name="saltBase64">Salt en Base64.</param>
+        /// <returns>Hash de contraseña codificado en Base64.</returns>
         private string EncriptarPassword(string password, string saltBase64)
         {
             byte[] salt = Convert.FromBase64String(saltBase64);
@@ -229,6 +282,13 @@ namespace CapaNegocio
             }
         }
 
+        /// <summary>
+        /// Verifica que la contraseña proporcionada corresponda con el hash almacenado.
+        /// </summary>
+        /// <param name="password">Contraseña en texto plano a verificar.</param>
+        /// <param name="saltBase64">Salt almacenado en Base64.</param>
+        /// <param name="hashAlmacenadoBase64">Hash almacenado en Base64.</param>
+        /// <returns>True si la contraseña coincide; false en caso contrario o si ocurre un error durante la verificación.</returns>
         private bool VerificarPassword(string password, string saltBase64, string hashAlmacenadoBase64)
         {
             try
@@ -243,6 +303,12 @@ namespace CapaNegocio
             catch { return false; }
         }
 
+        /// <summary>
+        /// Compara dos arreglos en tiempo constante para mitigar ataques por temporización.
+        /// </summary>
+        /// <param name="a">Primer arreglo de bytes.</param>
+        /// <param name="b">Segundo arreglo de bytes.</param>
+        /// <returns>True si los arreglos son idénticos; false en caso contrario.</returns>
         private bool CompararEnTiempoConstante(byte[] a, byte[] b)
         {
             if (a == null || b == null || a.Length != b.Length) return false;
@@ -251,6 +317,11 @@ namespace CapaNegocio
             return resultado == 0;
         }
 
+        /// <summary>
+        /// Valida la longitud y contenido básico del nombre de usuario.
+        /// </summary>
+        /// <param name="nombreUsuario">Nombre de usuario a validar.</param>
+        /// <returns>True si el nombre de usuario cumple las reglas; false en caso contrario.</returns>
         private bool EsNombreUsuarioValido(string nombreUsuario)
         {
             return !string.IsNullOrWhiteSpace(nombreUsuario) && nombreUsuario.Length >= 3 && nombreUsuario.Length <= 100;

@@ -17,8 +17,11 @@ namespace CapaNegocio
         private readonly BitacoraServicio bitacoraService = new BitacoraServicio();
 
         /// <summary>
-        /// Método auxiliar para validar matrícula.
+        /// Método auxiliar para validar la entidad <see cref="Matricula"/> según las reglas de negocio.
         /// </summary>
+        /// <param name="m">Instancia de <see cref="Matricula"/> a validar.</param>
+        /// <exception cref="ArgumentNullException">Si la matrícula es nula.</exception>
+        /// <exception cref="ArgumentException">Si alguna propiedad obligatoria no cumple las reglas de negocio.</exception>
         private void ValidarMatricula(Matricula m)
         {
             if (m == null)
@@ -41,8 +44,16 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
+        /// Registra un error en la bitácora. Intenta almacenar detalles mínimos del error sin alterar la estructura actual de la bitácora.
         /// </summary>
+        /// <remarks>
+        /// No se propagan excepciones desde este método para evitar que fallos en la auditoría cancelen la operación principal.
+        /// </remarks>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <param name="idUsuario">Identificador del usuario relacionado con la acción.</param>
+        /// <param name="modulo">Módulo origen del error.</param>
+        /// <param name="accion">Acción en la que ocurrió el error.</param>
+        /// <param name="contexto">Contexto adicional para diagnóstico.</param>
         private void RegistrarErrorEnBitacora(Exception ex, int idUsuario, string modulo, string accion, string contexto)
         {
             try
@@ -183,6 +194,8 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene todas las matrículas registradas.
         /// </summary>
+        /// <returns>Lista de <see cref="Matricula"/> con las matrículas registradas.</returns>
+        /// <exception cref="InvalidOperationException">Si ocurre un error al acceder al repositorio.</exception>
         public List<Matricula> ObtenerTodos()
         {
             try
@@ -199,6 +212,10 @@ namespace CapaNegocio
         /// <summary>
         /// Obtiene una matrícula por su identificador.
         /// </summary>
+        /// <param name="idMatricula">Identificador de la matrícula a obtener.</param>
+        /// <returns>Instancia de <see cref="Matricula"/> si se encuentra; de lo contrario lanza una excepción.</returns>
+        /// <exception cref="ArgumentException">Si el identificador proporcionado no es válido.</exception>
+        /// <exception cref="InvalidOperationException">Si no existe la matrícula o ocurre un error al acceder al repositorio.</exception>
         public Matricula ObtenerPorId(int idMatricula)
         {
             try

@@ -17,6 +17,10 @@ namespace CapaNegocio
         /// <summary>
         /// Registra un error en la bitácora. Usa idUsuario = 0 para acciones del sistema.
         /// </summary>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <param name="modulo">Módulo relacionado con la acción.</param>
+        /// <param name="accion">Acción durante la cual ocurrió el error.</param>
+        /// <param name="contexto">Contexto adicional para diagnóstico.</param>
         private void RegistrarErrorEnBitacora(Exception ex, string modulo, string accion, string contexto)
         {
             try
@@ -34,6 +38,7 @@ namespace CapaNegocio
         /// Obtiene todos los estados disponibles en el sistema para mapear en la interfaz de usuario.
         /// </summary>
         /// <returns>Una lista de objetos EstadoUsuario.</returns>
+        /// <exception cref="InvalidOperationException">Si no se encuentran estados o ocurre un error interno.</exception>
         public List<EstadoUsuario> ObtenerTodos()
         {
             try
@@ -62,6 +67,8 @@ namespace CapaNegocio
         /// </summary>
         /// <param name="idEstado">Identificador del estado de usuario.</param>
         /// <returns>Entidad EstadoUsuario correspondiente.</returns>
+        /// <exception cref="ArgumentException">Si el identificador proporcionado no es válido.</exception>
+        /// <exception cref="InvalidOperationException">Si no existe un estado con el identificador dado o si ocurre un error interno.</exception>
         public EstadoUsuario ObtenerPorId(int idEstado)
         {
             if (idEstado <= 0)
