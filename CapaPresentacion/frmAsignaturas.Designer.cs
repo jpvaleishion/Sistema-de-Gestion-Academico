@@ -39,11 +39,9 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.dataGridView2 = new System.Windows.Forms.DataGridView();
             this.dgvAsignaturas = new System.Windows.Forms.DataGridView();
             this.cboModalidad = new System.Windows.Forms.ComboBox();
             this.numCreditos = new System.Windows.Forms.NumericUpDown();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAsignaturas)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCreditos)).BeginInit();
             this.SuspendLayout();
@@ -166,16 +164,6 @@
             this.label1.TabIndex = 48;
             this.label1.Text = "Nombre:";
             // 
-            // dataGridView2
-            // 
-            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView2.Location = new System.Drawing.Point(603, 112);
-            this.dataGridView2.Margin = new System.Windows.Forms.Padding(4);
-            this.dataGridView2.Name = "dataGridView2";
-            this.dataGridView2.RowHeadersWidth = 51;
-            this.dataGridView2.Size = new System.Drawing.Size(11, 10);
-            this.dataGridView2.TabIndex = 47;
-            // 
             // dgvAsignaturas
             // 
             this.dgvAsignaturas.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -222,13 +210,11 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.dataGridView2);
             this.Controls.Add(this.dgvAsignaturas);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "frmAsignaturas";
             this.Text = "frmAsignaturas";
             this.Load += new System.EventHandler(this.frmAsignaturas_Load_1);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAsignaturas)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCreditos)).EndInit();
             this.ResumeLayout(false);
@@ -249,7 +235,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.DataGridView dataGridView2;
         private System.Windows.Forms.DataGridView dgvAsignaturas;
         private System.Windows.Forms.ComboBox cboModalidad;
         private System.Windows.Forms.NumericUpDown numCreditos;
