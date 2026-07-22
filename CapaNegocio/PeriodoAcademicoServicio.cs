@@ -75,7 +75,7 @@ namespace CapaNegocio
         {
             try
             {
-                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodosAcademicos", "Crear"))
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodos", "Crear"))
                     throw new InvalidOperationException("No tiene permisos para registrar períodos académicos.");
 
                 ValidarPeriodo(p);
@@ -112,7 +112,7 @@ namespace CapaNegocio
         {
             try
             {
-                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodosAcademicos", "Modificar"))
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodos", "Modificar"))
                     throw new InvalidOperationException("No tiene permisos para modificar períodos académicos.");
 
                 ValidarPeriodo(p);
@@ -149,7 +149,7 @@ namespace CapaNegocio
         {
             try
             {
-                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodosAcademicos", "Eliminar"))
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmPeriodos", "Eliminar"))
                     throw new InvalidOperationException("No tiene permisos para eliminar períodos académicos.");
 
                 if (idPeriodo <= 0)
