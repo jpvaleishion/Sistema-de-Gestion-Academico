@@ -1,4 +1,4 @@
-﻿namespace CapaPresentacion
+namespace CapaPresentacion
 {
     partial class frmAsignaturas
     {
@@ -42,6 +42,7 @@
             this.dgvAsignaturas = new System.Windows.Forms.DataGridView();
             this.cboModalidad = new System.Windows.Forms.ComboBox();
             this.numCreditos = new System.Windows.Forms.NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAsignaturas)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCreditos)).BeginInit();
             this.SuspendLayout();
@@ -49,7 +50,7 @@
             // btnLimpiar
             // 
             this.btnLimpiar.Location = new System.Drawing.Point(973, 542);
-            this.btnLimpiar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnLimpiar.Margin = new System.Windows.Forms.Padding(4);
             this.btnLimpiar.Name = "btnLimpiar";
             this.btnLimpiar.Size = new System.Drawing.Size(179, 47);
             this.btnLimpiar.TabIndex = 64;
@@ -60,7 +61,7 @@
             // btnEliminar
             // 
             this.btnEliminar.Location = new System.Drawing.Point(973, 484);
-            this.btnEliminar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnEliminar.Margin = new System.Windows.Forms.Padding(4);
             this.btnEliminar.Name = "btnEliminar";
             this.btnEliminar.Size = new System.Drawing.Size(179, 47);
             this.btnEliminar.TabIndex = 63;
@@ -71,7 +72,7 @@
             // btnEditar
             // 
             this.btnEditar.Location = new System.Drawing.Point(973, 423);
-            this.btnEditar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnEditar.Margin = new System.Windows.Forms.Padding(4);
             this.btnEditar.Name = "btnEditar";
             this.btnEditar.Size = new System.Drawing.Size(179, 47);
             this.btnEditar.TabIndex = 62;
@@ -82,7 +83,7 @@
             // btnGuardar
             // 
             this.btnGuardar.Location = new System.Drawing.Point(973, 361);
-            this.btnGuardar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnGuardar.Margin = new System.Windows.Forms.Padding(4);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(179, 47);
             this.btnGuardar.TabIndex = 61;
@@ -93,7 +94,7 @@
             // btnNuevo
             // 
             this.btnNuevo.Location = new System.Drawing.Point(973, 304);
-            this.btnNuevo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnNuevo.Margin = new System.Windows.Forms.Padding(4);
             this.btnNuevo.Name = "btnNuevo";
             this.btnNuevo.Size = new System.Drawing.Size(179, 47);
             this.btnNuevo.TabIndex = 60;
@@ -110,7 +111,7 @@
             "Sin Cupos",
             "Retirada"});
             this.cboEstado.Location = new System.Drawing.Point(187, 436);
-            this.cboEstado.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cboEstado.Margin = new System.Windows.Forms.Padding(4);
             this.cboEstado.Name = "cboEstado";
             this.cboEstado.Size = new System.Drawing.Size(232, 24);
             this.cboEstado.TabIndex = 58;
@@ -118,7 +119,7 @@
             // txtNombre
             // 
             this.txtNombre.Location = new System.Drawing.Point(188, 316);
-            this.txtNombre.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtNombre.Margin = new System.Windows.Forms.Padding(4);
             this.txtNombre.Multiline = true;
             this.txtNombre.Name = "txtNombre";
             this.txtNombre.Size = new System.Drawing.Size(232, 29);
@@ -173,7 +174,7 @@
             // 
             this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView2.Location = new System.Drawing.Point(603, 112);
-            this.dataGridView2.Margin = new System.Windows.Forms.Padding(4);
+            this.dataGridView2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dataGridView2.Name = "dataGridView2";
             this.dataGridView2.RowHeadersWidth = 51;
             this.dataGridView2.Size = new System.Drawing.Size(11, 10);
@@ -181,9 +182,10 @@
             // 
             // dgvAsignaturas
             // 
+            this.dgvAsignaturas.AllowUserToAddRows = false;
             this.dgvAsignaturas.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvAsignaturas.Location = new System.Drawing.Point(305, 30);
-            this.dgvAsignaturas.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dgvAsignaturas.Margin = new System.Windows.Forms.Padding(4);
             this.dgvAsignaturas.Name = "dgvAsignaturas";
             this.dgvAsignaturas.RowHeadersWidth = 51;
             this.dgvAsignaturas.Size = new System.Drawing.Size(563, 262);
@@ -200,7 +202,7 @@
             "Nocturna",
             "Hibrida"});
             this.cboModalidad.Location = new System.Drawing.Point(187, 398);
-            this.cboModalidad.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cboModalidad.Margin = new System.Windows.Forms.Padding(4);
             this.cboModalidad.Name = "cboModalidad";
             this.cboModalidad.Size = new System.Drawing.Size(232, 24);
             this.cboModalidad.TabIndex = 65;
@@ -208,17 +210,40 @@
             // numCreditos
             // 
             this.numCreditos.Location = new System.Drawing.Point(191, 357);
-            this.numCreditos.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numCreditos.Margin = new System.Windows.Forms.Padding(4);
             this.numCreditos.Name = "numCreditos";
             this.numCreditos.Size = new System.Drawing.Size(231, 22);
             this.numCreditos.TabIndex = 66;
             this.numCreditos.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.numCreditos_KeyPress);
+            // 
+            // txtBuscar
+            // 
+            this.txtBuscar.Location = new System.Drawing.Point(608, 316);
+            this.txtBuscar.Margin = new System.Windows.Forms.Padding(4);
+            this.txtBuscar.Multiline = true;
+            this.txtBuscar.Name = "txtBuscar";
+            this.txtBuscar.Size = new System.Drawing.Size(232, 29);
+            this.txtBuscar.TabIndex = 68;
+            this.txtBuscar.TextChanged += new System.EventHandler(this.txtBuscar_TextChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(479, 316);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(100, 29);
+            this.label4.TabIndex = 67;
+            this.label4.Text = "Buscar:";
             // 
             // frmAsignaturas
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1200, 609);
+            this.Controls.Add(this.txtBuscar);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.numCreditos);
             this.Controls.Add(this.cboModalidad);
             this.Controls.Add(this.btnLimpiar);
@@ -235,6 +260,7 @@
             this.Controls.Add(this.dgvAsignaturas);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "frmAsignaturas";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "frmAsignaturas";
             this.Load += new System.EventHandler(this.frmAsignaturas_Load_1);
             ((System.ComponentModel.ISupportInitialize)(this.dgvAsignaturas)).EndInit();
@@ -260,5 +286,7 @@
         private System.Windows.Forms.DataGridView dgvAsignaturas;
         private System.Windows.Forms.ComboBox cboModalidad;
         private System.Windows.Forms.NumericUpDown numCreditos;
+        private System.Windows.Forms.TextBox txtBuscar;
+        private System.Windows.Forms.Label label4;
     }
 }

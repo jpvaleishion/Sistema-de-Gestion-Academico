@@ -40,10 +40,10 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.dataGridView2 = new System.Windows.Forms.DataGridView();
             this.dgvCursos = new System.Windows.Forms.DataGridView();
             this.numCapacidad = new System.Windows.Forms.NumericUpDown();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
+            this.txtBuscar = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCursos)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCapacidad)).BeginInit();
             this.SuspendLayout();
@@ -179,20 +179,11 @@
             this.label1.TabIndex = 68;
             this.label1.Text = "Nombre:";
             // 
-            // dataGridView2
-            // 
-            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView2.Location = new System.Drawing.Point(563, 106);
-            this.dataGridView2.Margin = new System.Windows.Forms.Padding(4);
-            this.dataGridView2.Name = "dataGridView2";
-            this.dataGridView2.RowHeadersWidth = 51;
-            this.dataGridView2.Size = new System.Drawing.Size(11, 10);
-            this.dataGridView2.TabIndex = 67;
-            // 
             // dgvCursos
             // 
+            this.dgvCursos.AllowUserToAddRows = false;
             this.dgvCursos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvCursos.Location = new System.Drawing.Point(201, 13);
+            this.dgvCursos.Location = new System.Drawing.Point(160, 13);
             this.dgvCursos.Margin = new System.Windows.Forms.Padding(4);
             this.dgvCursos.Name = "dgvCursos";
             this.dgvCursos.RowHeadersWidth = 51;
@@ -208,11 +199,34 @@
             this.numCapacidad.TabIndex = 80;
             this.numCapacidad.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.numCapacidad_KeyPress);
             // 
+            // txtBuscar
+            // 
+            this.txtBuscar.Location = new System.Drawing.Point(492, 310);
+            this.txtBuscar.Margin = new System.Windows.Forms.Padding(4);
+            this.txtBuscar.Multiline = true;
+            this.txtBuscar.Name = "txtBuscar";
+            this.txtBuscar.Size = new System.Drawing.Size(193, 29);
+            this.txtBuscar.TabIndex = 82;
+            this.txtBuscar.TextChanged += new System.EventHandler(this.txtBuscar_TextChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(389, 310);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(100, 29);
+            this.label4.TabIndex = 81;
+            this.label4.Text = "Buscar:";
+            // 
             // frmCursos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(901, 594);
+            this.Controls.Add(this.txtBuscar);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.numCapacidad);
             this.Controls.Add(this.btnLimpiar);
             this.Controls.Add(this.btnEliminar);
@@ -226,12 +240,10 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.dataGridView2);
             this.Controls.Add(this.dgvCursos);
             this.Name = "frmCursos";
             this.Text = "frmCursos";
             this.Load += new System.EventHandler(this.frmCursos_Load_1);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCursos)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCapacidad)).EndInit();
             this.ResumeLayout(false);
@@ -252,8 +264,9 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.DataGridView dataGridView2;
         private System.Windows.Forms.DataGridView dgvCursos;
         private System.Windows.Forms.NumericUpDown numCapacidad;
+        private System.Windows.Forms.TextBox txtBuscar;
+        private System.Windows.Forms.Label label4;
     }
 }

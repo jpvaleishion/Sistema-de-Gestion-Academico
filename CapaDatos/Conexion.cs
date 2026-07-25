@@ -11,7 +11,7 @@ namespace CapaDatos
         /// <summary>
         /// Cadena de conexión utilizada por la aplicación. Mantenerla centralizada facilita pruebas y cambios de entorno.
         /// </summary>
-        private string cadenaConexion = @"Server=DESKTOP-11827PU;Database=AcademicoDB;Integrated Security=True;TrustServerCertificate=True;";
+        private string cadenaConexion = @"Server=JEAN;Database=AcademicoDB;Integrated Security=True;TrustServerCertificate=True;";
 
         /// <summary>
         /// Crea y retorna una nueva instancia de conexión SQL configurada con la cadena de conexión del sistema.

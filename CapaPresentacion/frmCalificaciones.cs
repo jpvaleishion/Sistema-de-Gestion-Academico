@@ -18,6 +18,8 @@ namespace CapaPresentacion
         // *cambio* - Almacenamos el ID del usuario logueado en esta sesión
         private int idUsuarioLogueado;
         private int idSeleccionado = 0;
+        private BindingSource bindingSource = new BindingSource();
+        private List<CalificacionDto> listaOriginalCalificaciones = new List<CalificacionDto>();
         // *cambio* - Constructor recomendado: Recibe el ID del usuario logueado
         public frmCalificaciones(int idUsuario)
         {
@@ -63,13 +65,61 @@ namespace CapaPresentacion
                 FechaCalificacion = calificacion.FechaCalificacion
             }).ToList();
 
-            dgvCalificaciones.DataSource = calificacionesDto;
+            listaOriginalCalificaciones = calificacionesDto;
+            bindingSource.DataSource = listaOriginalCalificaciones;
+            dgvCalificaciones.DataSource = bindingSource;
 
             FormatearGrid();
 
             //var matricula = matriculaNegocio.ObtenerPorId(calificacion.IdMatricula);
         }
         // metodo que sirve para formatear el grid y mostrar los nombres de las columnas de manera más amigable sin tanto id
+        private void txtBuscar_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                string textoBusqueda = txtBuscar.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(textoBusqueda))
+                {
+                    bindingSource.DataSource = listaOriginalCalificaciones;
+                    return;
+                }
+
+                var columnasFiltrables = dgvCalificaciones.Columns.Cast<DataGridViewColumn>()
+                    .Where(col => col.Visible && !string.IsNullOrWhiteSpace(col.DataPropertyName))
+                    .ToList();
+
+                var calificacionesFiltradas = listaOriginalCalificaciones
+                    .Where(calificacion =>
+                    {
+                        foreach (var columna in columnasFiltrables)
+                        {
+                            var propiedad = calificacion.GetType().GetProperty(columna.DataPropertyName);
+                            if (propiedad == null)
+                            {
+                                continue;
+                            }
+
+                            var valor = propiedad.GetValue(calificacion, null);
+                            if (valor?.ToString()?.IndexOf(textoBusqueda, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    })
+                    .ToList();
+
+                bindingSource.DataSource = calificacionesFiltradas;
+            }
+            catch (Exception)
+            {
+                bindingSource.DataSource = listaOriginalCalificaciones;
+            }
+        }
+
         private void FormatearGrid()
         {
             dgvCalificaciones.Columns["IdCalificacion"].Visible = true;

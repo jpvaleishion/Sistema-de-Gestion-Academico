@@ -1,6 +1,8 @@
 ﻿using CapaEntidades.Entidades;
 using CapaNegocio;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CapaPresentacion
@@ -20,6 +22,8 @@ namespace CapaPresentacion
         // *cambio* - Variable para retener el ID del usuario con la sesión activa
         private int idUsuarioLogueado;
         private int idSeleccionado = 0;
+        private BindingSource bindingSource = new BindingSource();
+        private List<Matricula> listaOriginalMatriculas = new List<Matricula>();
 
         // *cambio* - Constructor que recibe el ID de usuario (Patrón Consistente)
         public frmMatriculas(int idUsuario)
@@ -87,10 +91,45 @@ namespace CapaPresentacion
 
         private void CargarGrid()
         {
-            dgvMatriculas.DataSource = null;
-            dgvMatriculas.DataSource = matriculaNegocio.ObtenerTodos();
-
+            listaOriginalMatriculas = matriculaNegocio.ObtenerTodos();
+            bindingSource.DataSource = listaOriginalMatriculas;
+            dgvMatriculas.DataSource = bindingSource;
             FormatearGrid();
+        }
+
+        private void txtBuscar_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                string textoBuscado = txtBuscar.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(textoBuscado))
+                {
+                    bindingSource.DataSource = listaOriginalMatriculas;
+                    return;
+                }
+
+                var propiedades = dgvMatriculas.Columns.Cast<DataGridViewColumn>()
+                    .Where(col => col.Visible && !string.IsNullOrWhiteSpace(col.DataPropertyName))
+                    .Select(col => col.DataPropertyName)
+                    .Distinct()
+                    .ToList();
+
+                var filtradas = listaOriginalMatriculas
+                    .Where(m => propiedades.Any(propiedad =>
+                    {
+                        var propiedadInfo = typeof(Matricula).GetProperty(propiedad);
+                        var valor = propiedadInfo != null ? propiedadInfo.GetValue(m, null) : null;
+                        return valor != null && valor.ToString().IndexOf(textoBuscado, StringComparison.OrdinalIgnoreCase) >= 0;
+                    }))
+                    .ToList();
+
+                bindingSource.DataSource = filtradas;
+            }
+            catch (Exception)
+            {
+                bindingSource.DataSource = listaOriginalMatriculas;
+            }
         }
 
         private void FormatearGrid()

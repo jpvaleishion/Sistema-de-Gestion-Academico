@@ -39,17 +39,17 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.dataGridView2 = new System.Windows.Forms.DataGridView();
             this.dgvPeriodos = new System.Windows.Forms.DataGridView();
             this.dtpFechaInicio = new System.Windows.Forms.DateTimePicker();
             this.dtpFechaFin = new System.Windows.Forms.DateTimePicker();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
+            this.txtBuscar = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvPeriodos)).BeginInit();
             this.SuspendLayout();
             // 
             // btnLimpiar
             // 
-            this.btnLimpiar.Location = new System.Drawing.Point(591, 527);
+            this.btnLimpiar.Location = new System.Drawing.Point(661, 529);
             this.btnLimpiar.Margin = new System.Windows.Forms.Padding(4);
             this.btnLimpiar.Name = "btnLimpiar";
             this.btnLimpiar.Size = new System.Drawing.Size(179, 47);
@@ -60,7 +60,7 @@
             // 
             // btnEliminar
             // 
-            this.btnEliminar.Location = new System.Drawing.Point(591, 470);
+            this.btnEliminar.Location = new System.Drawing.Point(661, 472);
             this.btnEliminar.Margin = new System.Windows.Forms.Padding(4);
             this.btnEliminar.Name = "btnEliminar";
             this.btnEliminar.Size = new System.Drawing.Size(179, 47);
@@ -71,7 +71,7 @@
             // 
             // btnEditar
             // 
-            this.btnEditar.Location = new System.Drawing.Point(591, 410);
+            this.btnEditar.Location = new System.Drawing.Point(661, 412);
             this.btnEditar.Margin = new System.Windows.Forms.Padding(4);
             this.btnEditar.Name = "btnEditar";
             this.btnEditar.Size = new System.Drawing.Size(179, 47);
@@ -82,7 +82,7 @@
             // 
             // btnGuardar
             // 
-            this.btnGuardar.Location = new System.Drawing.Point(591, 347);
+            this.btnGuardar.Location = new System.Drawing.Point(661, 349);
             this.btnGuardar.Margin = new System.Windows.Forms.Padding(4);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(179, 47);
@@ -93,7 +93,7 @@
             // 
             // btnNuevo
             // 
-            this.btnNuevo.Location = new System.Drawing.Point(591, 290);
+            this.btnNuevo.Location = new System.Drawing.Point(661, 292);
             this.btnNuevo.Margin = new System.Windows.Forms.Padding(4);
             this.btnNuevo.Name = "btnNuevo";
             this.btnNuevo.Size = new System.Drawing.Size(179, 47);
@@ -170,20 +170,11 @@
             this.label1.TabIndex = 83;
             this.label1.Text = "Nombre:";
             // 
-            // dataGridView2
-            // 
-            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView2.Location = new System.Drawing.Point(570, 106);
-            this.dataGridView2.Margin = new System.Windows.Forms.Padding(4);
-            this.dataGridView2.Name = "dataGridView2";
-            this.dataGridView2.RowHeadersWidth = 51;
-            this.dataGridView2.Size = new System.Drawing.Size(11, 10);
-            this.dataGridView2.TabIndex = 82;
-            // 
             // dgvPeriodos
             // 
+            this.dgvPeriodos.AllowUserToAddRows = false;
             this.dgvPeriodos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvPeriodos.Location = new System.Drawing.Point(113, 20);
+            this.dgvPeriodos.Location = new System.Drawing.Point(155, 22);
             this.dgvPeriodos.Margin = new System.Windows.Forms.Padding(4);
             this.dgvPeriodos.Name = "dgvPeriodos";
             this.dgvPeriodos.RowHeadersWidth = 51;
@@ -205,11 +196,34 @@
             this.dtpFechaFin.Size = new System.Drawing.Size(232, 22);
             this.dtpFechaFin.TabIndex = 96;
             // 
+            // txtBuscar
+            // 
+            this.txtBuscar.Location = new System.Drawing.Point(500, 310);
+            this.txtBuscar.Margin = new System.Windows.Forms.Padding(4);
+            this.txtBuscar.Multiline = true;
+            this.txtBuscar.Name = "txtBuscar";
+            this.txtBuscar.Size = new System.Drawing.Size(153, 29);
+            this.txtBuscar.TabIndex = 98;
+            this.txtBuscar.TextChanged += new System.EventHandler(this.txtBuscar_TextChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(398, 310);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(100, 29);
+            this.label4.TabIndex = 97;
+            this.label4.Text = "Buscar:";
+            // 
             // frmPeriodos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 584);
+            this.ClientSize = new System.Drawing.Size(853, 584);
+            this.Controls.Add(this.txtBuscar);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.dtpFechaFin);
             this.Controls.Add(this.dtpFechaInicio);
             this.Controls.Add(this.btnLimpiar);
@@ -223,12 +237,10 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.dataGridView2);
             this.Controls.Add(this.dgvPeriodos);
             this.Name = "frmPeriodos";
             this.Text = "frmPeriodos";
             this.Load += new System.EventHandler(this.frmPeriodos_Load_1);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvPeriodos)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -247,9 +259,10 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.DataGridView dataGridView2;
         private System.Windows.Forms.DataGridView dgvPeriodos;
         private System.Windows.Forms.DateTimePicker dtpFechaInicio;
         private System.Windows.Forms.DateTimePicker dtpFechaFin;
+        private System.Windows.Forms.TextBox txtBuscar;
+        private System.Windows.Forms.Label label4;
     }
 }

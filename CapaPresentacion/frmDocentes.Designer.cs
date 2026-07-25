@@ -45,9 +45,9 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.dataGridView2 = new System.Windows.Forms.DataGridView();
             this.dgvDocentes = new System.Windows.Forms.DataGridView();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
+            this.txtBuscar = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDocentes)).BeginInit();
             this.SuspendLayout();
             // 
@@ -232,18 +232,9 @@
             this.label1.TabIndex = 25;
             this.label1.Text = "Nombre:";
             // 
-            // dataGridView2
-            // 
-            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView2.Location = new System.Drawing.Point(594, 116);
-            this.dataGridView2.Margin = new System.Windows.Forms.Padding(4);
-            this.dataGridView2.Name = "dataGridView2";
-            this.dataGridView2.RowHeadersWidth = 51;
-            this.dataGridView2.Size = new System.Drawing.Size(11, 10);
-            this.dataGridView2.TabIndex = 24;
-            // 
             // dgvDocentes
             // 
+            this.dgvDocentes.AllowUserToAddRows = false;
             this.dgvDocentes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvDocentes.Location = new System.Drawing.Point(213, 38);
             this.dgvDocentes.Margin = new System.Windows.Forms.Padding(4);
@@ -253,11 +244,34 @@
             this.dgvDocentes.TabIndex = 23;
             this.dgvDocentes.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvDocentes_CellDoubleClick);
             // 
+            // txtBuscar
+            // 
+            this.txtBuscar.Location = new System.Drawing.Point(628, 320);
+            this.txtBuscar.Margin = new System.Windows.Forms.Padding(4);
+            this.txtBuscar.Multiline = true;
+            this.txtBuscar.Name = "txtBuscar";
+            this.txtBuscar.Size = new System.Drawing.Size(232, 29);
+            this.txtBuscar.TabIndex = 47;
+            this.txtBuscar.TextChanged += new System.EventHandler(this.txtBuscar_TextChanged);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.Location = new System.Drawing.Point(499, 320);
+            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(100, 29);
+            this.label7.TabIndex = 46;
+            this.label7.Text = "Buscar:";
+            // 
             // frmDocentes
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1189, 607);
+            this.Controls.Add(this.txtBuscar);
+            this.Controls.Add(this.label7);
             this.Controls.Add(this.btnLimpiar);
             this.Controls.Add(this.btnEliminar);
             this.Controls.Add(this.btnEditar);
@@ -275,12 +289,10 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.dataGridView2);
             this.Controls.Add(this.dgvDocentes);
             this.Name = "frmDocentes";
             this.Text = "frmDocentes";
             this.Load += new System.EventHandler(this.frmDocentes_Load_1);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDocentes)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -306,7 +318,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.DataGridView dataGridView2;
         private System.Windows.Forms.DataGridView dgvDocentes;
+        private System.Windows.Forms.TextBox txtBuscar;
+        private System.Windows.Forms.Label label7;
     }
 }

@@ -48,6 +48,8 @@
             this.cboAsignatura = new System.Windows.Forms.ComboBox();
             this.cboDocente = new System.Windows.Forms.ComboBox();
             this.cboPeriodo = new System.Windows.Forms.ComboBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.txtBuscar = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMatriculas)).BeginInit();
             this.SuspendLayout();
             // 
@@ -60,7 +62,7 @@
             // 
             // btnLimpiar
             // 
-            this.btnLimpiar.Location = new System.Drawing.Point(776, 602);
+            this.btnLimpiar.Location = new System.Drawing.Point(925, 615);
             this.btnLimpiar.Margin = new System.Windows.Forms.Padding(4);
             this.btnLimpiar.Name = "btnLimpiar";
             this.btnLimpiar.Size = new System.Drawing.Size(179, 47);
@@ -71,7 +73,7 @@
             // 
             // btnEliminar
             // 
-            this.btnEliminar.Location = new System.Drawing.Point(776, 545);
+            this.btnEliminar.Location = new System.Drawing.Point(925, 558);
             this.btnEliminar.Margin = new System.Windows.Forms.Padding(4);
             this.btnEliminar.Name = "btnEliminar";
             this.btnEliminar.Size = new System.Drawing.Size(179, 47);
@@ -82,7 +84,7 @@
             // 
             // btnEditar
             // 
-            this.btnEditar.Location = new System.Drawing.Point(776, 485);
+            this.btnEditar.Location = new System.Drawing.Point(925, 498);
             this.btnEditar.Margin = new System.Windows.Forms.Padding(4);
             this.btnEditar.Name = "btnEditar";
             this.btnEditar.Size = new System.Drawing.Size(179, 47);
@@ -93,7 +95,7 @@
             // 
             // btnGuardar
             // 
-            this.btnGuardar.Location = new System.Drawing.Point(776, 422);
+            this.btnGuardar.Location = new System.Drawing.Point(925, 435);
             this.btnGuardar.Margin = new System.Windows.Forms.Padding(4);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(179, 47);
@@ -104,7 +106,7 @@
             // 
             // btnNuevo
             // 
-            this.btnNuevo.Location = new System.Drawing.Point(776, 365);
+            this.btnNuevo.Location = new System.Drawing.Point(925, 378);
             this.btnNuevo.Margin = new System.Windows.Forms.Padding(4);
             this.btnNuevo.Name = "btnNuevo";
             this.btnNuevo.Size = new System.Drawing.Size(179, 47);
@@ -169,6 +171,7 @@
             // 
             // dgvMatriculas
             // 
+            this.dgvMatriculas.AllowUserToAddRows = false;
             this.dgvMatriculas.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvMatriculas.Location = new System.Drawing.Point(145, 65);
             this.dgvMatriculas.Margin = new System.Windows.Forms.Padding(4);
@@ -261,11 +264,32 @@
             this.cboPeriodo.Size = new System.Drawing.Size(232, 24);
             this.cboPeriodo.TabIndex = 119;
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(594, 378);
+            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(100, 29);
+            this.label8.TabIndex = 120;
+            this.label8.Text = "Buscar:";
+            // 
+            // txtBuscar
+            // 
+            this.txtBuscar.Location = new System.Drawing.Point(702, 384);
+            this.txtBuscar.Name = "txtBuscar";
+            this.txtBuscar.Size = new System.Drawing.Size(182, 22);
+            this.txtBuscar.TabIndex = 121;
+            this.txtBuscar.TextChanged += new System.EventHandler(this.txtBuscar_TextChanged);
+            // 
             // frmMatriculas
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1167, 744);
+            this.Controls.Add(this.txtBuscar);
+            this.Controls.Add(this.label8);
             this.Controls.Add(this.cboPeriodo);
             this.Controls.Add(this.cboDocente);
             this.Controls.Add(this.cboAsignatura);
@@ -318,5 +342,7 @@
         private System.Windows.Forms.ComboBox cboAsignatura;
         private System.Windows.Forms.ComboBox cboDocente;
         private System.Windows.Forms.ComboBox cboPeriodo;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox txtBuscar;
     }
 }

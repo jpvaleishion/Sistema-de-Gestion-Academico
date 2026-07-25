@@ -41,9 +41,9 @@
             this.mnuAdministracion = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuUsuarios = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuSalir = new System.Windows.Forms.ToolStripMenuItem();
+            this.cerrarSesionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblUsuarioActivo = new System.Windows.Forms.ToolStripStatusLabel();
-            this.cerrarSesionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -59,8 +59,8 @@
             this.cerrarSesionToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(907, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(1209, 28);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -73,41 +73,41 @@
             this.mnuCursos,
             this.mnuPeriodos});
             this.mnuMantenimiento.Name = "mnuMantenimiento";
-            this.mnuMantenimiento.Size = new System.Drawing.Size(101, 20);
+            this.mnuMantenimiento.Size = new System.Drawing.Size(124, 24);
             this.mnuMantenimiento.Text = "Mantenimiento";
             // 
             // mnuDocentes
             // 
             this.mnuDocentes.Name = "mnuDocentes";
-            this.mnuDocentes.Size = new System.Drawing.Size(224, 26);
+            this.mnuDocentes.Size = new System.Drawing.Size(136, 22);
             this.mnuDocentes.Text = "Docente";
             this.mnuDocentes.Click += new System.EventHandler(this.mnuDocentes_Click);
             // 
             // mnuEstudiantes
             // 
             this.mnuEstudiantes.Name = "mnuEstudiantes";
-            this.mnuEstudiantes.Size = new System.Drawing.Size(224, 26);
+            this.mnuEstudiantes.Size = new System.Drawing.Size(136, 22);
             this.mnuEstudiantes.Text = "Estudiante";
             this.mnuEstudiantes.Click += new System.EventHandler(this.mnuEstudiantes_Click);
             // 
             // mnuAsignaturas
             // 
             this.mnuAsignaturas.Name = "mnuAsignaturas";
-            this.mnuAsignaturas.Size = new System.Drawing.Size(224, 26);
+            this.mnuAsignaturas.Size = new System.Drawing.Size(136, 22);
             this.mnuAsignaturas.Text = "Asignaturas";
             this.mnuAsignaturas.Click += new System.EventHandler(this.mnuAsignaturas_Click);
             // 
             // mnuCursos
             // 
             this.mnuCursos.Name = "mnuCursos";
-            this.mnuCursos.Size = new System.Drawing.Size(224, 26);
+            this.mnuCursos.Size = new System.Drawing.Size(136, 22);
             this.mnuCursos.Text = "Cursos";
             this.mnuCursos.Click += new System.EventHandler(this.mnuCursos_Click);
             // 
             // mnuPeriodos
             // 
             this.mnuPeriodos.Name = "mnuPeriodos";
-            this.mnuPeriodos.Size = new System.Drawing.Size(224, 26);
+            this.mnuPeriodos.Size = new System.Drawing.Size(136, 22);
             this.mnuPeriodos.Text = "Períodos";
             this.mnuPeriodos.Click += new System.EventHandler(this.mnuPeriodos_Click);
             // 
@@ -117,20 +117,20 @@
             this.mnuMatriculas,
             this.mnuCalificaciones});
             this.mnuProcesos.Name = "mnuProcesos";
-            this.mnuProcesos.Size = new System.Drawing.Size(66, 20);
+            this.mnuProcesos.Size = new System.Drawing.Size(81, 24);
             this.mnuProcesos.Text = "Procesos";
             // 
             // mnuMatriculas
             // 
             this.mnuMatriculas.Name = "mnuMatriculas";
-            this.mnuMatriculas.Size = new System.Drawing.Size(224, 26);
+            this.mnuMatriculas.Size = new System.Drawing.Size(147, 22);
             this.mnuMatriculas.Text = "Matrículas";
             this.mnuMatriculas.Click += new System.EventHandler(this.mnuMatriculas_Click);
             // 
             // mnuCalificaciones
             // 
             this.mnuCalificaciones.Name = "mnuCalificaciones";
-            this.mnuCalificaciones.Size = new System.Drawing.Size(224, 26);
+            this.mnuCalificaciones.Size = new System.Drawing.Size(147, 22);
             this.mnuCalificaciones.Text = "Calificaciones";
             this.mnuCalificaciones.Click += new System.EventHandler(this.mnuCalificaciones_Click);
             // 
@@ -139,57 +139,57 @@
             this.mnuAdministracion.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuUsuarios});
             this.mnuAdministracion.Name = "mnuAdministracion";
-            this.mnuAdministracion.Size = new System.Drawing.Size(100, 20);
+            this.mnuAdministracion.Size = new System.Drawing.Size(123, 24);
             this.mnuAdministracion.Text = "Administracion";
             // 
             // mnuUsuarios
             // 
             this.mnuUsuarios.Name = "mnuUsuarios";
-            this.mnuUsuarios.Size = new System.Drawing.Size(119, 22);
+            this.mnuUsuarios.Size = new System.Drawing.Size(148, 26);
             this.mnuUsuarios.Text = "Usuarios";
             this.mnuUsuarios.Click += new System.EventHandler(this.mnuUsuarios_Click);
             // 
             // mnuSalir
             // 
             this.mnuSalir.Name = "mnuSalir";
-            this.mnuSalir.Size = new System.Drawing.Size(41, 20);
+            this.mnuSalir.Size = new System.Drawing.Size(52, 24);
             this.mnuSalir.Text = "Salir";
             this.mnuSalir.Click += new System.EventHandler(this.mnuSalir_Click);
+            // 
+            // cerrarSesionToolStripMenuItem
+            // 
+            this.cerrarSesionToolStripMenuItem.Name = "cerrarSesionToolStripMenuItem";
+            this.cerrarSesionToolStripMenuItem.Size = new System.Drawing.Size(110, 24);
+            this.cerrarSesionToolStripMenuItem.Text = "Cerrar Sesion";
+            this.cerrarSesionToolStripMenuItem.Click += new System.EventHandler(this.cerrarSesionToolStripMenuItem_Click_1);
             // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblUsuarioActivo});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 602);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 742);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 10, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(907, 22);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 13, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(1209, 26);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // lblUsuarioActivo
             // 
             this.lblUsuarioActivo.Name = "lblUsuarioActivo";
-            this.lblUsuarioActivo.Size = new System.Drawing.Size(118, 17);
+            this.lblUsuarioActivo.Size = new System.Drawing.Size(151, 20);
             this.lblUsuarioActivo.Text = "toolStripStatusLabel1";
-            // 
-            // cerrarSesionToolStripMenuItem
-            // 
-            this.cerrarSesionToolStripMenuItem.Name = "cerrarSesionToolStripMenuItem";
-            this.cerrarSesionToolStripMenuItem.Size = new System.Drawing.Size(88, 20);
-            this.cerrarSesionToolStripMenuItem.Text = "Cerrar Sesion";
-            this.cerrarSesionToolStripMenuItem.Click += new System.EventHandler(this.cerrarSesionToolStripMenuItem_Click_1);
             // 
             // frmPrincipal
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(907, 624);
+            this.ClientSize = new System.Drawing.Size(1209, 768);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "frmPrincipal";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "frmPrincipal";

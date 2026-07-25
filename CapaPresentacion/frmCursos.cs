@@ -1,6 +1,8 @@
 ﻿using CapaEntidades.Entidades;
 using CapaNegocio;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CapaPresentacion
@@ -15,6 +17,8 @@ namespace CapaPresentacion
         // *cambio* - Variable para guardar el usuario activo
         private int idUsuarioLogueado;
         private int idSeleccionado = 0;
+        private BindingSource bindingSource = new BindingSource();
+        private List<Curso> listaOriginalCursos = new List<Curso>();
         // *cambio* - Constructor recomendado para pasar el ID del usuario
         public frmCursos(int idUsuario)
         {
@@ -29,8 +33,55 @@ namespace CapaPresentacion
 
         private void CargarGrid()
         {
-            dgvCursos.DataSource = null;
-            dgvCursos.DataSource = cursoNegocio.ObtenerTodos();
+            listaOriginalCursos = cursoNegocio.ObtenerTodos();
+            bindingSource.DataSource = listaOriginalCursos;
+            dgvCursos.DataSource = bindingSource;
+        }
+
+        private void txtBuscar_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                string textoBusqueda = txtBuscar.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(textoBusqueda))
+                {
+                    bindingSource.DataSource = listaOriginalCursos;
+                    return;
+                }
+
+                var columnasFiltrables = dgvCursos.Columns.Cast<DataGridViewColumn>()
+                    .Where(col => col.Visible && !string.IsNullOrWhiteSpace(col.DataPropertyName))
+                    .ToList();
+
+                var cursosFiltrados = listaOriginalCursos
+                    .Where(curso =>
+                    {
+                        foreach (var columna in columnasFiltrables)
+                        {
+                            var propiedad = curso.GetType().GetProperty(columna.DataPropertyName);
+                            if (propiedad == null)
+                            {
+                                continue;
+                            }
+
+                            var valor = propiedad.GetValue(curso, null);
+                            if (valor?.ToString()?.IndexOf(textoBusqueda, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    })
+                    .ToList();
+
+                bindingSource.DataSource = cursosFiltrados;
+            }
+            catch (Exception)
+            {
+                bindingSource.DataSource = listaOriginalCursos;
+            }
         }
 
         private Curso ObtenerCursoDelFormulario()

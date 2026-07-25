@@ -1,6 +1,8 @@
 ﻿using CapaEntidades.Entidades;
 using CapaNegocio;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CapaPresentacion
@@ -15,6 +17,8 @@ namespace CapaPresentacion
         // *cambio* - Variable para almacenar el usuario que tiene la sesión activa
         private int idUsuarioLogueado;
         private int idSeleccionado = 0;
+        private BindingSource bindingSource = new BindingSource();
+        private List<Asignatura> listaOriginalAsignaturas = new List<Asignatura>();
         // *cambio* - Constructor recomendado: Recibe el ID del usuario desde el Menú Principal o Login
         public frmAsignaturas(int idUsuario)
         {
@@ -29,10 +33,56 @@ namespace CapaPresentacion
 
         private void CargarGrid()
         {
-            dgvAsignaturas.DataSource = null;
-            dgvAsignaturas.DataSource = asignaturaNegocio.ObtenerTodos();
+            listaOriginalAsignaturas = asignaturaNegocio.ObtenerTodos();
+            bindingSource.DataSource = listaOriginalAsignaturas;
+            dgvAsignaturas.DataSource = bindingSource;
         }
 
+        private void txtBuscar_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                string textoBusqueda = txtBuscar.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(textoBusqueda))
+                {
+                    bindingSource.DataSource = listaOriginalAsignaturas;
+                    return;
+                }
+
+                var columnasFiltrables = dgvAsignaturas.Columns.Cast<DataGridViewColumn>()
+                    .Where(col => col.Visible && !string.IsNullOrWhiteSpace(col.DataPropertyName))
+                    .ToList();
+
+                var asignaturasFiltradas = listaOriginalAsignaturas
+                    .Where(asignatura =>
+                    {
+                        foreach (var columna in columnasFiltrables)
+                        {
+                            var propiedad = asignatura.GetType().GetProperty(columna.DataPropertyName);
+                            if (propiedad == null)
+                            {
+                                continue;
+                            }
+
+                            var valor = propiedad.GetValue(asignatura, null);
+                            if (valor?.ToString()?.IndexOf(textoBusqueda, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    })
+                    .ToList();
+
+                bindingSource.DataSource = asignaturasFiltradas;
+            }
+            catch (Exception)
+            {
+                bindingSource.DataSource = listaOriginalAsignaturas;
+            }
+        }
 
         private Asignatura ObtenerAsignaturaDelFormulario()
         {

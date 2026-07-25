@@ -1,6 +1,8 @@
 ﻿using CapaEntidades.Entidades;
 using CapaNegocio;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CapaPresentacion
@@ -15,6 +17,8 @@ namespace CapaPresentacion
         // *cambio* - Almacenamos el ID del usuario activo localmente
         private int idUsuarioLogueado;
         private int idSeleccionado = 0;
+        private BindingSource bindingSource = new BindingSource();
+        private List<Estudiante> listaOriginalEstudiantes = new List<Estudiante>();
 
         // *cambio* - Constructor uniforme que recibe el ID de sesión
         public frmEstudiantes(int idUsuario)
@@ -29,10 +33,56 @@ namespace CapaPresentacion
         }
         private void CargarGrid()
         {
-            dgvEstudiantes.DataSource = null;
-            dgvEstudiantes.DataSource = estudianteNegocio.ObtenerTodos();
+            listaOriginalEstudiantes = estudianteNegocio.ObtenerTodos();
+            bindingSource.DataSource = listaOriginalEstudiantes;
+            dgvEstudiantes.DataSource = bindingSource;
         }
 
+        private void txtBuscar_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                string textoBusqueda = txtBuscar.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(textoBusqueda))
+                {
+                    bindingSource.DataSource = listaOriginalEstudiantes;
+                    return;
+                }
+
+                var columnasFiltrables = dgvEstudiantes.Columns.Cast<DataGridViewColumn>()
+                    .Where(col => col.Visible && !string.IsNullOrWhiteSpace(col.DataPropertyName))
+                    .ToList();
+
+                var estudiantesFiltrados = listaOriginalEstudiantes
+                    .Where(estudiante =>
+                    {
+                        foreach (var columna in columnasFiltrables)
+                        {
+                            var propiedad = estudiante.GetType().GetProperty(columna.DataPropertyName);
+                            if (propiedad == null)
+                            {
+                                continue;
+                            }
+
+                            var valor = propiedad.GetValue(estudiante, null);
+                            if (valor?.ToString()?.IndexOf(textoBusqueda, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    })
+                    .ToList();
+
+                bindingSource.DataSource = estudiantesFiltrados;
+            }
+            catch (Exception)
+            {
+                bindingSource.DataSource = listaOriginalEstudiantes;
+            }
+        }
 
         private Estudiante ObtenerEstudianteDelFormulario()
         {

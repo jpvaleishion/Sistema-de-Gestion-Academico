@@ -1,6 +1,8 @@
 ﻿using CapaEntidades.Entidades;
 using CapaNegocio;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CapaPresentacion
@@ -15,6 +17,8 @@ namespace CapaPresentacion
         // *cambio* - Variable para retener el ID del usuario activo
         private int idUsuarioLogueado;
         private int idSeleccionado = 0;
+        private BindingSource bindingSource = new BindingSource();
+        private List<PeriodoAcademico> listaOriginalPeriodos = new List<PeriodoAcademico>();
 
         // *cambio* - Constructor que recibe el ID de usuario (Patrón Estándar)
         public frmPeriodos(int idUsuario)
@@ -29,10 +33,45 @@ namespace CapaPresentacion
         }
         private void CargarGrid()
         {
-            dgvPeriodos.DataSource = null;
-            dgvPeriodos.DataSource = periodoNegocio.ObtenerTodos();
+            listaOriginalPeriodos = periodoNegocio.ObtenerTodos() ?? new List<PeriodoAcademico>();
+            bindingSource.DataSource = listaOriginalPeriodos;
+            dgvPeriodos.DataSource = bindingSource;
         }
 
+        private void txtBuscar_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                string textoBuscado = txtBuscar.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(textoBuscado))
+                {
+                    bindingSource.DataSource = listaOriginalPeriodos;
+                    return;
+                }
+
+                var propiedades = dgvPeriodos.Columns.Cast<DataGridViewColumn>()
+                    .Where(col => col.Visible && !string.IsNullOrWhiteSpace(col.DataPropertyName))
+                    .Select(col => col.DataPropertyName)
+                    .Distinct()
+                    .ToList();
+
+                var filtrados = listaOriginalPeriodos
+                    .Where(p => propiedades.Any(propiedad =>
+                    {
+                        var propiedadInfo = typeof(PeriodoAcademico).GetProperty(propiedad);
+                        var valor = propiedadInfo != null ? propiedadInfo.GetValue(p, null) : null;
+                        return valor != null && valor.ToString().IndexOf(textoBuscado, StringComparison.OrdinalIgnoreCase) >= 0;
+                    }))
+                    .ToList();
+
+                bindingSource.DataSource = filtrados;
+            }
+            catch (Exception)
+            {
+                bindingSource.DataSource = listaOriginalPeriodos;
+            }
+        }
 
         private PeriodoAcademico ObtenerPeriodoDelFormulario()
         {
