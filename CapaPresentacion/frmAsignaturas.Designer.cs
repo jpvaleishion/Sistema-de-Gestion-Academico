@@ -277,7 +277,6 @@ namespace CapaPresentacion
         private System.Windows.Forms.DataGridView dgvAsignaturas;
         private System.Windows.Forms.ComboBox cboModalidad;
         private System.Windows.Forms.NumericUpDown numCreditos;
-        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox txtBuscar;
         private System.Windows.Forms.Label label6;
     }
