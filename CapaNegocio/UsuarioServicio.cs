@@ -213,7 +213,7 @@ namespace CapaNegocio
             catch (Exception ex)
             {
                 RegistrarErrorEnBitacora(ex, 0, "Seguridad", "Login", $"Fallo en consulta BD para usuario {nombreUsuario}");
-                throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO, ex);
+                throw new InvalidOperationException("Error al intentar iniciar sesión.", ex);
             }
 
             if (u == null) throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO);
@@ -221,7 +221,7 @@ namespace CapaNegocio
             if (u.FechaBloqueo.HasValue && u.FechaBloqueo.Value > DateTime.Now)
             {
                 bitacoraNegocio.RegistrarAccion(u.IdUsuario, "Seguridad", "Acceso Denegado", "Intento en cuenta bloqueada.");
-                throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO);
+                throw new InvalidOperationException("Acceso Denegado, Intento en cuenta bloqueada.");
             }
 
             if (!VerificarPassword(password, u.Salt, u.Password))

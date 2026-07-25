@@ -36,6 +36,12 @@ namespace CapaEntidades.Entidades
         /// Identificador del periodo académico correspondiente a la matrícula.
         /// </summary>
         public int IdPeriodo { get; set; }
+        //Variables para que el grid muestre los nombres en base al ID 
+        public string NombreEstudiante { get; set; }
+        public string NombreAsignatura { get; set; }
+        public string NombreDocente { get; set; }
+        public string NombreCurso { get; set; }
+        public string NombrePeriodo { get; set; }
 
         /// <summary>
         /// Fecha en que se realizó la matrícula.
@@ -47,9 +53,13 @@ namespace CapaEntidades.Entidades
         /// </summary>
         public string Estado { get; set; }
 
+        //Para que carguen los nombres en el comboBox del formulario Calificaciones
+
+        public string NombreCompleto { get; set; }
         /// <summary>
         /// Inicializa una nueva instancia vacía de la clase <see cref="Matricula"/>.
         /// </summary>
+        /// 
         public Matricula() { }
 
         /// <summary>

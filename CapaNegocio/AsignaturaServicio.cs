@@ -212,7 +212,7 @@ namespace CapaNegocio
             catch (Exception ex)
             {
                 RegistrarErrorEnBitacora(ex, 0, "Asignaturas", "ObtenerPorId", $"Obteniendo asignatura ID={idAsignatura}");
-                throw;
+                throw new InvalidOperationException("Error al obtener la asignatura.");
             }
         }
     }

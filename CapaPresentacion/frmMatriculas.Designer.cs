@@ -288,6 +288,7 @@
             this.Controls.Add(this.dgvMatriculas);
             this.Name = "frmMatriculas";
             this.Text = "frmMatriculas";
+            this.Activated += new System.EventHandler(this.frmMatriculas_Activated);
             this.Load += new System.EventHandler(this.frmMatriculas_Load_1);
             ((System.ComponentModel.ISupportInitialize)(this.dgvMatriculas)).EndInit();
             this.ResumeLayout(false);

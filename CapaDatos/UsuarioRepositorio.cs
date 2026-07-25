@@ -1,7 +1,6 @@
 ﻿using CapaEntidades.Entidades;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 
 namespace CapaDatos
@@ -110,8 +109,10 @@ namespace CapaDatos
                     conexion.Open();
                     using (SqlCommand command = new SqlCommand(sql, conexion))
                     {
+                        command.Parameters.AddWithValue("@Estado", "Inactivo");
                         command.Parameters.AddWithValue("@IdUsuario", idUsuario);
                         command.ExecuteNonQuery();
+                        conexion.Close();
                     }
                 }
                 catch (SqlException ex)

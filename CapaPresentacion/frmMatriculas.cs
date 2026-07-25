@@ -89,8 +89,26 @@ namespace CapaPresentacion
         {
             dgvMatriculas.DataSource = null;
             dgvMatriculas.DataSource = matriculaNegocio.ObtenerTodos();
+
+            FormatearGrid();
         }
 
+        private void FormatearGrid()
+        {
+            dgvMatriculas.Columns["IdMatricula"].Visible = true;
+            dgvMatriculas.Columns["IdEstudiante"].Visible = false;
+            dgvMatriculas.Columns["IdAsignatura"].Visible = false;
+            dgvMatriculas.Columns["IdDocente"].Visible = false;
+            dgvMatriculas.Columns["IdCurso"].Visible = false;
+            dgvMatriculas.Columns["IdPeriodo"].Visible = false;
+            dgvMatriculas.Columns["NombreEstudiante"].HeaderText = "Estudiante";
+            dgvMatriculas.Columns["NombreAsignatura"].HeaderText = "Asignatura";
+            dgvMatriculas.Columns["NombreDocente"].HeaderText = "Docente";
+            dgvMatriculas.Columns["NombreCurso"].HeaderText = "Curso";
+            dgvMatriculas.Columns["NombrePeriodo"].HeaderText = "Periodo";
+            dgvMatriculas.Columns["FechaMatricula"].HeaderText = "Fecha de Matrícula";
+            dgvMatriculas.Columns["Estado"].HeaderText = "Estado";
+        }
 
         private Matricula ObtenerMatriculaDelFormulario()
         {
@@ -239,6 +257,11 @@ namespace CapaPresentacion
             cboPeriodo.SelectedValue = matricula.IdPeriodo;
             dtpFechaMatricula.Value = matricula.FechaMatricula;
             cboEstado.Text = matricula.Estado;
+        }
+
+        private void frmMatriculas_Activated(object sender, EventArgs e)
+        {
+            CargarCombos();
         }
     }
 }

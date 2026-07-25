@@ -1,9 +1,7 @@
 ﻿using CapaEntidades.Entidades;
 using CapaNegocio;
 using System;
-using System.Linq;
 using System.Windows.Forms;
-using static CapaPresentacion.Program;
 
 namespace CapaPresentacion
 {
@@ -202,6 +200,15 @@ namespace CapaPresentacion
             txtCodigo.Text = estudiante.CodigoEstudiante;
             dtpFechaInscripcion.Value = estudiante.FechaInscripcion;
             cboTipo.Text = estudiante.Tipo;
+        }
+
+        private void txtTelefono_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Si no es un número y tampoco es la tecla de borrar (backspace)
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true; // Cancela la acción de la tecla
+            }
         }
     }
 }

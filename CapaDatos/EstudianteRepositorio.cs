@@ -100,14 +100,17 @@ namespace CapaDatos
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                string sql = "DELETE FROM Estudiantes WHERE IdPersona=@IdPersona";
+                string sql = "UPDATE Estudiantes SET Estado=@Estado WHERE IdPersona=@IdPersona";
                 try
                 {
                     conexion.Open();
+
                     using (SqlCommand command = new SqlCommand(sql, conexion))
                     {
+                        command.Parameters.AddWithValue("@Estado", "Inactivo");
                         command.Parameters.AddWithValue("@IdPersona", idPersona);
                         command.ExecuteNonQuery();
+                        conexion.Close();
                     }
                 }
                 catch (SqlException ex)
@@ -128,33 +131,26 @@ namespace CapaDatos
 
             using (SqlConnection conexion = con.Conectar())
             {
-                string sql = "SELECT * FROM Estudiantes";
-                try
+                conexion.Open();
+                string sql = "SELECT * FROM Estudiantes WHERE Estado = 'Activo'";
+                using (SqlCommand command = new SqlCommand(sql, conexion))
                 {
-                    conexion.Open();
-                    using (SqlCommand command = new SqlCommand(sql, conexion))
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
                     {
-                        SqlDataReader reader = command.ExecuteReader();
-                        while (reader.Read())
-                        {
-                            Estudiante e = new Estudiante();
-                            // Mapeo explícito para controlar conversiones y valores nulos.
-                            e.IdPersona = Convert.ToInt32(reader["IdPersona"]);
-                            e.Nombres = reader["Nombres"].ToString();
-                            e.Apellidos = reader["Apellidos"].ToString();
-                            e.Email = reader["Email"].ToString();
-                            e.Telefono = reader["Telefono"].ToString();
-                            e.Estado = reader["Estado"].ToString();
-                            e.CodigoEstudiante = reader["CodigoEstudiante"].ToString();
-                            e.FechaInscripcion = Convert.ToDateTime(reader["FechaInscripcion"]);
-                            e.Tipo = reader["Tipo"].ToString();
-                            lista.Add(e);
-                        }
+                        Estudiante e = new Estudiante();
+                        e.IdPersona = Convert.ToInt32(reader["IdPersona"]);
+                        e.Nombres = reader["Nombres"].ToString();
+                        e.Apellidos = reader["Apellidos"].ToString();
+                        e.Email = reader["Email"].ToString();
+                        e.Telefono = reader["Telefono"].ToString();
+                        e.Estado = reader["Estado"].ToString();
+                        e.CodigoEstudiante = reader["CodigoEstudiante"].ToString();
+                        e.FechaInscripcion = Convert.ToDateTime(reader["FechaInscripcion"]);
+                        e.Tipo = reader["Tipo"].ToString();
+                        lista.Add(e);
                     }
-                }
-                catch (SqlException ex)
-                {
-                    throw new Exception("Error al obtener los estudiantes: " + ex.Message, ex);
+                    conexion.Close();
                 }
             }
 

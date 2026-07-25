@@ -61,7 +61,7 @@
             this.cboMatricula.Location = new System.Drawing.Point(349, 406);
             this.cboMatricula.Margin = new System.Windows.Forms.Padding(4);
             this.cboMatricula.Name = "cboMatricula";
-            this.cboMatricula.Size = new System.Drawing.Size(232, 24);
+            this.cboMatricula.Size = new System.Drawing.Size(317, 24);
             this.cboMatricula.TabIndex = 136;
             // 
             // label7
@@ -101,7 +101,7 @@
             // 
             this.dtpFechaCalificacion.Location = new System.Drawing.Point(349, 665);
             this.dtpFechaCalificacion.Name = "dtpFechaCalificacion";
-            this.dtpFechaCalificacion.Size = new System.Drawing.Size(232, 22);
+            this.dtpFechaCalificacion.Size = new System.Drawing.Size(317, 22);
             this.dtpFechaCalificacion.TabIndex = 131;
             // 
             // btnLimpiar
@@ -205,12 +205,14 @@
             // 
             // dgvCalificaciones
             // 
+            this.dgvCalificaciones.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.ColumnHeader;
             this.dgvCalificaciones.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvCalificaciones.Location = new System.Drawing.Point(131, 92);
+            this.dgvCalificaciones.Location = new System.Drawing.Point(13, 92);
             this.dgvCalificaciones.Margin = new System.Windows.Forms.Padding(4);
             this.dgvCalificaciones.Name = "dgvCalificaciones";
+            this.dgvCalificaciones.ReadOnly = true;
             this.dgvCalificaciones.RowHeadersWidth = 51;
-            this.dgvCalificaciones.Size = new System.Drawing.Size(932, 262);
+            this.dgvCalificaciones.Size = new System.Drawing.Size(1164, 262);
             this.dgvCalificaciones.TabIndex = 120;
             this.dgvCalificaciones.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCalificaciones_CellDoubleClick);
             // 
@@ -219,36 +221,40 @@
             this.txtObservaciones.Location = new System.Drawing.Point(349, 625);
             this.txtObservaciones.Multiline = true;
             this.txtObservaciones.Name = "txtObservaciones";
-            this.txtObservaciones.Size = new System.Drawing.Size(232, 22);
+            this.txtObservaciones.Size = new System.Drawing.Size(317, 22);
             this.txtObservaciones.TabIndex = 141;
             // 
             // numNota1
             // 
             this.numNota1.Location = new System.Drawing.Point(349, 452);
             this.numNota1.Name = "numNota1";
-            this.numNota1.Size = new System.Drawing.Size(232, 22);
+            this.numNota1.Size = new System.Drawing.Size(317, 22);
             this.numNota1.TabIndex = 142;
+            this.numNota1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.numNota1_KeyPress);
             // 
             // numNota2
             // 
             this.numNota2.Location = new System.Drawing.Point(349, 497);
             this.numNota2.Name = "numNota2";
-            this.numNota2.Size = new System.Drawing.Size(232, 22);
+            this.numNota2.Size = new System.Drawing.Size(317, 22);
             this.numNota2.TabIndex = 143;
+            this.numNota2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.numNota2_KeyPress);
             // 
             // numNotaMaxima
             // 
             this.numNotaMaxima.Location = new System.Drawing.Point(349, 536);
             this.numNotaMaxima.Name = "numNotaMaxima";
-            this.numNotaMaxima.Size = new System.Drawing.Size(232, 22);
+            this.numNotaMaxima.Size = new System.Drawing.Size(317, 22);
             this.numNotaMaxima.TabIndex = 144;
+            this.numNotaMaxima.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.numNotaMaxima_KeyPress);
             // 
             // numFaltas
             // 
             this.numFaltas.Location = new System.Drawing.Point(349, 576);
             this.numFaltas.Name = "numFaltas";
-            this.numFaltas.Size = new System.Drawing.Size(232, 22);
+            this.numFaltas.Size = new System.Drawing.Size(317, 22);
             this.numFaltas.TabIndex = 145;
+            this.numFaltas.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.numFaltas_KeyPress);
             // 
             // frmCalificaciones
             // 
@@ -277,6 +283,7 @@
             this.Controls.Add(this.dgvCalificaciones);
             this.Name = "frmCalificaciones";
             this.Text = "frmCalificaciones";
+            this.Activated += new System.EventHandler(this.frmCalificaciones_Activated);
             this.Load += new System.EventHandler(this.frmCalificaciones_Load_1);
             ((System.ComponentModel.ISupportInitialize)(this.dgvCalificaciones)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numNota1)).EndInit();

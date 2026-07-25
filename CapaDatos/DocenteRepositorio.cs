@@ -96,14 +96,17 @@ namespace CapaDatos
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                string sql = "DELETE FROM Docentes WHERE IdPersona=@IdPersona";
+                string sql = "UPDATE Docentes SET Estado=@Estado WHERE IdPersona=@IdPersona";
                 try
                 {
                     conexion.Open();
+
                     using (SqlCommand command = new SqlCommand(sql, conexion))
                     {
+                        command.Parameters.AddWithValue("@Estado", "Inactivo");
                         command.Parameters.AddWithValue("@IdPersona", idPersona);
                         command.ExecuteNonQuery();
+                        conexion.Close();
                     }
                 }
                 catch (SqlException ex)

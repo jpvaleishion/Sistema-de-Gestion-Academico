@@ -49,7 +49,7 @@
             // btnLimpiar
             // 
             this.btnLimpiar.Location = new System.Drawing.Point(973, 542);
-            this.btnLimpiar.Margin = new System.Windows.Forms.Padding(4);
+            this.btnLimpiar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnLimpiar.Name = "btnLimpiar";
             this.btnLimpiar.Size = new System.Drawing.Size(179, 47);
             this.btnLimpiar.TabIndex = 64;
@@ -60,7 +60,7 @@
             // btnEliminar
             // 
             this.btnEliminar.Location = new System.Drawing.Point(973, 484);
-            this.btnEliminar.Margin = new System.Windows.Forms.Padding(4);
+            this.btnEliminar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnEliminar.Name = "btnEliminar";
             this.btnEliminar.Size = new System.Drawing.Size(179, 47);
             this.btnEliminar.TabIndex = 63;
@@ -71,7 +71,7 @@
             // btnEditar
             // 
             this.btnEditar.Location = new System.Drawing.Point(973, 423);
-            this.btnEditar.Margin = new System.Windows.Forms.Padding(4);
+            this.btnEditar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnEditar.Name = "btnEditar";
             this.btnEditar.Size = new System.Drawing.Size(179, 47);
             this.btnEditar.TabIndex = 62;
@@ -82,7 +82,7 @@
             // btnGuardar
             // 
             this.btnGuardar.Location = new System.Drawing.Point(973, 361);
-            this.btnGuardar.Margin = new System.Windows.Forms.Padding(4);
+            this.btnGuardar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(179, 47);
             this.btnGuardar.TabIndex = 61;
@@ -93,7 +93,7 @@
             // btnNuevo
             // 
             this.btnNuevo.Location = new System.Drawing.Point(973, 304);
-            this.btnNuevo.Margin = new System.Windows.Forms.Padding(4);
+            this.btnNuevo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnNuevo.Name = "btnNuevo";
             this.btnNuevo.Size = new System.Drawing.Size(179, 47);
             this.btnNuevo.TabIndex = 60;
@@ -104,8 +104,13 @@
             // cboEstado
             // 
             this.cboEstado.FormattingEnabled = true;
+            this.cboEstado.Items.AddRange(new object[] {
+            " ",
+            "Disponible",
+            "Sin Cupos",
+            "Retirada"});
             this.cboEstado.Location = new System.Drawing.Point(187, 436);
-            this.cboEstado.Margin = new System.Windows.Forms.Padding(4);
+            this.cboEstado.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.cboEstado.Name = "cboEstado";
             this.cboEstado.Size = new System.Drawing.Size(232, 24);
             this.cboEstado.TabIndex = 58;
@@ -113,7 +118,7 @@
             // txtNombre
             // 
             this.txtNombre.Location = new System.Drawing.Point(188, 316);
-            this.txtNombre.Margin = new System.Windows.Forms.Padding(4);
+            this.txtNombre.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtNombre.Multiline = true;
             this.txtNombre.Name = "txtNombre";
             this.txtNombre.Size = new System.Drawing.Size(232, 29);
@@ -164,11 +169,21 @@
             this.label1.TabIndex = 48;
             this.label1.Text = "Nombre:";
             // 
+            // dataGridView2
+            // 
+            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView2.Location = new System.Drawing.Point(603, 112);
+            this.dataGridView2.Margin = new System.Windows.Forms.Padding(4);
+            this.dataGridView2.Name = "dataGridView2";
+            this.dataGridView2.RowHeadersWidth = 51;
+            this.dataGridView2.Size = new System.Drawing.Size(11, 10);
+            this.dataGridView2.TabIndex = 47;
+            // 
             // dgvAsignaturas
             // 
             this.dgvAsignaturas.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvAsignaturas.Location = new System.Drawing.Point(305, 29);
-            this.dgvAsignaturas.Margin = new System.Windows.Forms.Padding(4);
+            this.dgvAsignaturas.Location = new System.Drawing.Point(305, 30);
+            this.dgvAsignaturas.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dgvAsignaturas.Name = "dgvAsignaturas";
             this.dgvAsignaturas.RowHeadersWidth = 51;
             this.dgvAsignaturas.Size = new System.Drawing.Size(563, 262);
@@ -178,8 +193,14 @@
             // cboModalidad
             // 
             this.cboModalidad.FormattingEnabled = true;
+            this.cboModalidad.Items.AddRange(new object[] {
+            " ",
+            "Presencial",
+            "Vespertina",
+            "Nocturna",
+            "Hibrida"});
             this.cboModalidad.Location = new System.Drawing.Point(187, 398);
-            this.cboModalidad.Margin = new System.Windows.Forms.Padding(4);
+            this.cboModalidad.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.cboModalidad.Name = "cboModalidad";
             this.cboModalidad.Size = new System.Drawing.Size(232, 24);
             this.cboModalidad.TabIndex = 65;
@@ -187,10 +208,11 @@
             // numCreditos
             // 
             this.numCreditos.Location = new System.Drawing.Point(191, 357);
-            this.numCreditos.Margin = new System.Windows.Forms.Padding(4);
+            this.numCreditos.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.numCreditos.Name = "numCreditos";
             this.numCreditos.Size = new System.Drawing.Size(231, 22);
             this.numCreditos.TabIndex = 66;
+            this.numCreditos.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.numCreditos_KeyPress);
             // 
             // frmAsignaturas
             // 

@@ -99,14 +99,16 @@ namespace CapaDatos
         {
             using (SqlConnection conexion = con.Conectar())
             {
-                string sql = "DELETE FROM Matriculas WHERE IdMatricula=@IdMatricula";
+                string sql = "UPDATE Matriculas SET Estado=@Estado WHERE IdMatricula=@IdMatricula";
                 try
                 {
                     conexion.Open();
                     using (SqlCommand command = new SqlCommand(sql, conexion))
                     {
+                        command.Parameters.AddWithValue("@Estado", "Inactivo");
                         command.Parameters.AddWithValue("@IdMatricula", idMatricula);
                         command.ExecuteNonQuery();
+                        conexion.Close();
                     }
                 }
                 catch (SqlException ex)
@@ -201,6 +203,42 @@ namespace CapaDatos
             }
 
             return m;
+        }
+
+        public List<Matricula> ObtenerPorCalificacion(int idCalificacion)
+        {
+            List<Matricula> lista = new List<Matricula>();
+            using (SqlConnection conexion = con.Conectar())
+            {
+                string sql = "SELECT * FROM Matriculas WHERE IdCalificacion=@IdCalificacion";
+                try
+                {
+                    conexion.Open();
+                    using (SqlCommand command = new SqlCommand(sql, conexion))
+                    {
+                        command.Parameters.AddWithValue("@IdCalificacion", idCalificacion);
+                        SqlDataReader reader = command.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            Matricula m = new Matricula();
+                            m.IdMatricula = Convert.ToInt32(reader["IdMatricula"]);
+                            m.IdEstudiante = Convert.ToInt32(reader["IdEstudiante"]);
+                            m.IdAsignatura = Convert.ToInt32(reader["IdAsignatura"]);
+                            m.IdDocente = Convert.ToInt32(reader["IdDocente"]);
+                            m.IdCurso = Convert.ToInt32(reader["IdCurso"]);
+                            m.IdPeriodo = Convert.ToInt32(reader["IdPeriodo"]);
+                            m.FechaMatricula = Convert.ToDateTime(reader["FechaMatricula"]);
+                            m.Estado = reader["Estado"].ToString();
+                            lista.Add(m);
+                        }
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    throw new Exception("Error al obtener las matrículas de la calificación: " + ex.Message, ex);
+                }
+            }
+            return lista;
         }
     }
 }

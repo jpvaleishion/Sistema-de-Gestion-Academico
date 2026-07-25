@@ -57,9 +57,9 @@ namespace CapaPresentacion
             catch (InvalidOperationException ex)
             {
                 // *cambio* - Captura errores controlados de negocio (Contraseña incorrecta, cuenta bloqueada, etc.)
-                lblMensaje.Text = ex.Message; 
+                lblMensaje.Text = "Error: " + ex.Message;
                 RegistrarFalloBitacora(nombreUsuarioIntento, ex.Message);
-                
+
                 txtPassword.Clear();
                 txtPassword.Focus();
             }
@@ -69,7 +69,7 @@ namespace CapaPresentacion
                 // Mostramos un mensaje amigable al usuario y ocultamos el error técnico real por seguridad
                 lblMensaje.Text = "Servicio no disponible temporalmente. Intente más tarde.";
                 RegistrarFalloBitacora(nombreUsuarioIntento, $"Error crítico del sistema: {ex.Message}");
-                
+
                 txtPassword.Clear();
             }
         }

@@ -114,6 +114,31 @@ namespace CapaPresentacion
             // Si el permiso existe y tiene Visualizar en true, se muestra
             menu.Visible = permiso != null && permiso.Visualizar;
         }
+
+     
+        private void cerrarSesionToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            DialogResult r = MessageBox.Show(
+        "¿Desea cerrar la sesión?",
+        "Cerrar sesión",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question);
+
+            if (r == DialogResult.Yes)
+            {
+
+                SesionActual.UsuarioLogueado = null;
+                SesionActual.Permisos = null;
+
+
+                frmLogin login = new frmLogin();
+                login.Show();
+
+
+                this.Hide();
+            }
+        }
     }
-}
+    }
+
 

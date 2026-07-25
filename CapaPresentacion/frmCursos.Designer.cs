@@ -206,6 +206,7 @@
             this.numCapacidad.Name = "numCapacidad";
             this.numCapacidad.Size = new System.Drawing.Size(231, 22);
             this.numCapacidad.TabIndex = 80;
+            this.numCapacidad.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.numCapacidad_KeyPress);
             // 
             // frmCursos
             // 

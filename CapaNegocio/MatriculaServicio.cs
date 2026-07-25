@@ -13,6 +13,10 @@ namespace CapaNegocio
     public class MatriculaServicio
     {
         private readonly MatriculaRepositorio repositorio = new MatriculaRepositorio();
+        private readonly DocenteServicio docente = new DocenteServicio();
+        private readonly CursoServicio curso = new CursoServicio();
+        private readonly AsignaturaServicio asignatura = new AsignaturaServicio();
+        private readonly PeriodoAcademicoServicio periodo = new PeriodoAcademicoServicio();
         private readonly PermisoServicio permisoService = new PermisoServicio();
         private readonly BitacoraServicio bitacoraService = new BitacoraServicio();
 
@@ -196,6 +200,8 @@ namespace CapaNegocio
         /// </summary>
         /// <returns>Lista de <see cref="Matricula"/> con las matrículas registradas.</returns>
         /// <exception cref="InvalidOperationException">Si ocurre un error al acceder al repositorio.</exception>
+        /*
+         * 
         public List<Matricula> ObtenerTodos()
         {
             try
@@ -209,6 +215,7 @@ namespace CapaNegocio
             }
         }
 
+        */
         /// <summary>
         /// Obtiene una matrícula por su identificador.
         /// </summary>
@@ -238,6 +245,114 @@ namespace CapaNegocio
                 RegistrarErrorEnBitacora(ex, 0, "Matriculas", "ObtenerPorId", $"Obteniendo matrícula ID={idMatricula}");
                 throw new InvalidOperationException("Error al obtener la matrícula.", ex);
             }
+        }
+
+        public List<Matricula> ObtenerPorCalificacion(int idCalificacion)
+        {
+            try
+            {
+                if (idCalificacion <= 0)
+                    throw new ArgumentException("El identificador de la calificación no es válido.");
+                return repositorio.ObtenerPorCalificacion(idCalificacion);
+            }
+            catch (Exception ex)
+            {
+                RegistrarErrorEnBitacora(ex, 0, "Matriculas", "ObtenerPorCalificacion", $"Obteniendo matrículas para Calificación ID={idCalificacion}");
+                throw new InvalidOperationException("Error al obtener las matrículas para la calificación.", ex);
+            }
+        }
+
+        public string ObtenerNombreDocentePorId(int idDocente)
+        {
+            return docente.ObtenerPorId(idDocente).Nombres;
+        }
+        public string ObtenerNombreEstudiantePorId(int idMatricula)
+        {
+            Matricula matricula = repositorio.ObtenerPorId(idMatricula);
+            if (matricula == null) return "Sin estudiante";
+
+            Estudiante estudiante = new EstudianteRepositorio().ObtenerPorId(matricula.IdEstudiante);
+            if (estudiante == null) return "Sin estudiante";
+
+            return estudiante.Nombres + " " + estudiante.Apellidos;
+        }
+        public string ObtenerNombreCursoPorId(int idCurso)
+        {
+            Curso b = curso.ObtenerPorId(idCurso);
+            //valida en caso que sea null no se cuelgue el programa y devuelva un mensaje de error para curso
+            if (b != null)
+                return b.NombreCurso;
+
+            return "Sin curso";
+        }
+        public string ObtenerNombreAsignaturaPorId(int idAsignatura)
+        {
+            Asignatura a = asignatura.ObtenerPorId(idAsignatura);
+            //valida en caso que sea null no se cuelgue el programa y devuelva un mensaje de error para la materia
+            if (a != null)
+            {
+                return a.Nombre;
+            }
+            return "Sin asignatura";
+        }
+
+        //este metodo es para obtener los datos de la tabla de matriculas y mostrarlos en un combobox
+        public List<Matricula> ObtenerParaCombo()
+        {
+            List<Matricula> matriculas = repositorio.ObtenerTodos();
+            List<Matricula> lista = new List<Matricula>();
+
+            foreach (Matricula m in matriculas)
+            {
+                Estudiante estudiante = new EstudianteRepositorio().ObtenerPorId(m.IdEstudiante);
+                Asignatura asignatura = new AsignaturaRepositorio().ObtenerPorId(m.IdAsignatura);
+                Curso curso = new CursoRepositorio().ObtenerPorId(m.IdCurso);
+
+                string nombreEstudiante = estudiante != null ? estudiante.Nombres + " " + estudiante.Apellidos : "Sin estudiante";
+                string nombreAsignatura = asignatura != null ? asignatura.Nombre : "Sin asignatura";
+                string nombrecurso = curso != null ? curso.NombreCurso : "Sin curso";
+
+                Matricula dto = new Matricula();
+                dto.IdMatricula = m.IdMatricula;
+                dto.NombreCompleto = nombreEstudiante + " - " + nombreAsignatura + " - " + nombrecurso;
+                lista.Add(dto);
+            }
+
+            return lista;
+        }
+        //metodo para mostrar los nombres de estudiante, asignatura, docente, curso y periodo en la tabla de matriculas
+        public List<Matricula> ObtenerTodos()
+        {
+            List<Matricula> matriculas = repositorio.ObtenerTodos();
+            List<Matricula> lista = new List<Matricula>();
+
+            foreach (Matricula m in matriculas)
+            {
+                Estudiante estudiante = new EstudianteRepositorio().ObtenerPorId(m.IdEstudiante);
+                Asignatura asignatura = new AsignaturaRepositorio().ObtenerPorId(m.IdAsignatura);
+                Docente docente = new DocenteRepositorio().ObtenerPorId(m.IdDocente);
+                Curso curso = new CursoRepositorio().ObtenerPorId(m.IdCurso);
+                PeriodoAcademico periodo = new PeriodoAcademicoRepositorio().ObtenerPorId(m.IdPeriodo);
+
+                Matricula dto = new Matricula();
+                dto.IdMatricula = m.IdMatricula;
+                dto.IdEstudiante = m.IdEstudiante;
+                dto.IdAsignatura = m.IdAsignatura;
+                dto.IdDocente = m.IdDocente;
+                dto.IdCurso = m.IdCurso;
+                dto.IdPeriodo = m.IdPeriodo;
+                dto.NombreEstudiante = estudiante != null ? estudiante.Nombres + " " + estudiante.Apellidos : "Sin estudiante";
+                dto.NombreAsignatura = asignatura != null ? asignatura.Nombre : "Sin asignatura";
+                dto.NombreDocente = docente != null ? docente.Nombres + " " + docente.Apellidos : "Sin docente";
+                dto.NombreCurso = curso != null ? curso.NombreCurso : "Sin curso";
+                dto.NombrePeriodo = periodo != null ? periodo.NombrePeriodo : "Sin período";
+                dto.FechaMatricula = m.FechaMatricula;
+                dto.NombreCompleto = matriculas != null ? dto.NombreEstudiante : "Sin información completa";
+                dto.Estado = m.Estado;
+                lista.Add(dto);
+            }
+
+            return lista;
         }
     }
 }
