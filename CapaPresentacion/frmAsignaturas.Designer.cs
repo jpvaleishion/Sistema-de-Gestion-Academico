@@ -42,7 +42,8 @@ namespace CapaPresentacion
             this.dgvAsignaturas = new System.Windows.Forms.DataGridView();
             this.cboModalidad = new System.Windows.Forms.ComboBox();
             this.numCreditos = new System.Windows.Forms.NumericUpDown();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
+            this.txtBuscar = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAsignaturas)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCreditos)).BeginInit();
             this.SuspendLayout();
@@ -170,16 +171,6 @@ namespace CapaPresentacion
             this.label1.TabIndex = 48;
             this.label1.Text = "Nombre:";
             // 
-            // dataGridView2
-            // 
-            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView2.Location = new System.Drawing.Point(603, 112);
-            this.dataGridView2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.dataGridView2.Name = "dataGridView2";
-            this.dataGridView2.RowHeadersWidth = 51;
-            this.dataGridView2.Size = new System.Drawing.Size(11, 10);
-            this.dataGridView2.TabIndex = 47;
-            // 
             // dgvAsignaturas
             // 
             this.dgvAsignaturas.AllowUserToAddRows = false;
@@ -218,7 +209,7 @@ namespace CapaPresentacion
             // 
             // txtBuscar
             // 
-            this.txtBuscar.Location = new System.Drawing.Point(608, 316);
+            this.txtBuscar.Location = new System.Drawing.Point(611, 316);
             this.txtBuscar.Margin = new System.Windows.Forms.Padding(4);
             this.txtBuscar.Multiline = true;
             this.txtBuscar.Name = "txtBuscar";
@@ -226,16 +217,16 @@ namespace CapaPresentacion
             this.txtBuscar.TabIndex = 68;
             this.txtBuscar.TextChanged += new System.EventHandler(this.txtBuscar_TextChanged);
             // 
-            // label4
+            // label6
             // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(479, 316);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(100, 29);
-            this.label4.TabIndex = 67;
-            this.label4.Text = "Buscar:";
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(482, 316);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(100, 29);
+            this.label6.TabIndex = 67;
+            this.label6.Text = "Buscar:";
             // 
             // frmAsignaturas
             // 
@@ -243,7 +234,7 @@ namespace CapaPresentacion
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1200, 609);
             this.Controls.Add(this.txtBuscar);
-            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.numCreditos);
             this.Controls.Add(this.cboModalidad);
             this.Controls.Add(this.btnLimpiar);
@@ -286,7 +277,8 @@ namespace CapaPresentacion
         private System.Windows.Forms.DataGridView dgvAsignaturas;
         private System.Windows.Forms.ComboBox cboModalidad;
         private System.Windows.Forms.NumericUpDown numCreditos;
-        private System.Windows.Forms.TextBox txtBuscar;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox txtBuscar;
+        private System.Windows.Forms.Label label6;
     }
 }
