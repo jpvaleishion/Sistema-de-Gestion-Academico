@@ -43,6 +43,16 @@ namespace CapaNegocio
                 throw new ArgumentException("Debe seleccionar un período académico.");
             if (m.FechaMatricula == DateTime.MinValue)
                 throw new ArgumentException("La fecha de inscripción no es válida.");
+
+            var periodoSel = periodo.ObtenerPorId(m.IdPeriodo);
+            if (periodoSel == null)
+                throw new ArgumentException("No existe el período académico seleccionado.");
+
+            var fechaInicioVentana = periodoSel.FechaInicio.Date.AddDays(-15);
+            var fechaFinVentana = periodoSel.FechaInicio.Date.AddDays(-5);
+            if (m.FechaMatricula.Date < fechaInicioVentana || m.FechaMatricula.Date > fechaFinVentana)
+                throw new ArgumentException($"La fecha de matrícula debe estar entre {fechaInicioVentana:dd/MM/yyyy} y {fechaFinVentana:dd/MM/yyyy}.");
+
             if (string.IsNullOrWhiteSpace(m.Estado))
                 throw new ArgumentException("El estado de la matrícula es obligatorio.");
         }

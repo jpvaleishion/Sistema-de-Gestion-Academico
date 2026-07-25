@@ -55,6 +55,7 @@
             // 
             // dtpFechaMatricula
             // 
+            this.dtpFechaMatricula.Enabled = false;
             this.dtpFechaMatricula.Location = new System.Drawing.Point(340, 600);
             this.dtpFechaMatricula.Name = "dtpFechaMatricula";
             this.dtpFechaMatricula.Size = new System.Drawing.Size(232, 22);
@@ -117,6 +118,7 @@
             // 
             // cboCurso
             // 
+            this.cboCurso.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboCurso.FormattingEnabled = true;
             this.cboCurso.Location = new System.Drawing.Point(340, 505);
             this.cboCurso.Margin = new System.Windows.Forms.Padding(4);
@@ -216,6 +218,7 @@
             // 
             // cboEstado
             // 
+            this.cboEstado.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboEstado.FormattingEnabled = true;
             this.cboEstado.Items.AddRange(new object[] {
             " ",
@@ -230,6 +233,7 @@
             // 
             // cboEstudiante
             // 
+            this.cboEstudiante.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboEstudiante.FormattingEnabled = true;
             this.cboEstudiante.Location = new System.Drawing.Point(340, 383);
             this.cboEstudiante.Margin = new System.Windows.Forms.Padding(4);
@@ -239,6 +243,7 @@
             // 
             // cboAsignatura
             // 
+            this.cboAsignatura.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboAsignatura.FormattingEnabled = true;
             this.cboAsignatura.Location = new System.Drawing.Point(340, 426);
             this.cboAsignatura.Margin = new System.Windows.Forms.Padding(4);
@@ -248,6 +253,7 @@
             // 
             // cboDocente
             // 
+            this.cboDocente.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboDocente.FormattingEnabled = true;
             this.cboDocente.Location = new System.Drawing.Point(340, 467);
             this.cboDocente.Margin = new System.Windows.Forms.Padding(4);
@@ -257,12 +263,14 @@
             // 
             // cboPeriodo
             // 
+            this.cboPeriodo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboPeriodo.FormattingEnabled = true;
             this.cboPeriodo.Location = new System.Drawing.Point(340, 552);
             this.cboPeriodo.Margin = new System.Windows.Forms.Padding(4);
             this.cboPeriodo.Name = "cboPeriodo";
             this.cboPeriodo.Size = new System.Drawing.Size(232, 24);
             this.cboPeriodo.TabIndex = 119;
+            this.cboPeriodo.SelectionChangeCommitted += new System.EventHandler(this.cboPeriodo_SelectionChangeCommitted);
             // 
             // label8
             // 

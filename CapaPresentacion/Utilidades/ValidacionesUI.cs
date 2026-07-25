@@ -1,3 +1,4 @@
+using CapaEntidades.Entidades;
 using System;
 using System.Windows.Forms;
 
@@ -89,6 +90,30 @@ namespace CapaPresentacion.Utilidades
             }
 
             e.Handled = true;
+        }
+
+        public static bool ValidarFechasMatriculaPeriodo(PeriodoAcademico periodo, out string mensaje)
+        {
+            mensaje = string.Empty;
+            if (periodo == null) return true;
+
+            DateTime hoy = DateTime.Now.Date;
+            DateTime fechaApertura = periodo.FechaInicio.AddDays(-15).Date;
+            DateTime fechaLimite = periodo.FechaInicio.AddDays(-5).Date;
+
+            if (hoy < fechaApertura)
+            {
+                mensaje = $"Atención: Aún no está abierto el período de matrícula para este ciclo.\n\nAbre oficialmente el: {fechaApertura:dd/MM/yyyy}.";
+                return false;
+            }
+
+            if (hoy > fechaLimite)
+            {
+                mensaje = $"Atención: El plazo de matrícula para este período ya finalizó.\n\nLa fecha límite fue el: {fechaLimite:dd/MM/yyyy} (5 días antes del inicio del período).";
+                return false;
+            }
+
+            return true;
         }
     }
 }

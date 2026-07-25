@@ -1,5 +1,6 @@
 ﻿using CapaEntidades.Entidades;
 using CapaNegocio;
+using CapaPresentacion.Utilidades;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,22 +25,27 @@ namespace CapaPresentacion
         private int idSeleccionado = 0;
         private BindingSource bindingSource = new BindingSource();
         private List<Matricula> listaOriginalMatriculas = new List<Matricula>();
+        private bool cargandoCombo = false;
+        private bool mostrandoAlertaPeriodo = false;
 
         // *cambio* - Constructor que recibe el ID de usuario (Patrón Consistente)
         public frmMatriculas(int idUsuario)
         {
             InitializeComponent();
+            cboPeriodo.SelectionChangeCommitted += cboPeriodo_SelectionChangeCommitted;
             this.idUsuarioLogueado = idUsuario;
         }
         // Constructor vacío requerido por el Diseñador de Visual Studio
         public frmMatriculas()
         {
             InitializeComponent();
+            cboPeriodo.SelectionChangeCommitted += cboPeriodo_SelectionChangeCommitted;
         }
         private void frmMatriculas_Load_1(object sender, EventArgs e)
         {
             CargarCombos();
             CargarGrid();
+            dtpFechaMatricula.Value = DateTime.Now;
             AplicarPermisosVisuales(); // *cambio* - Aplicamos restricciones visuales al cargar
         }
         // *cambio* - Habilita o deshabilita la UI basándose en el rol del usuario logueado
@@ -63,30 +69,34 @@ namespace CapaPresentacion
         }
         private void CargarCombos()
         {
+            cargandoCombo = true;
+            try
+            {
+                cboEstudiante.DisplayMember = "Nombres";
+                cboEstudiante.ValueMember = "IdPersona";
+                cboEstudiante.DataSource = estudianteNegocio.ObtenerTodos();
 
-            cboEstudiante.DisplayMember = "Nombres";
-            cboEstudiante.ValueMember = "IdPersona";
-            cboEstudiante.DataSource = estudianteNegocio.ObtenerTodos();
+                cboAsignatura.DisplayMember = "Nombre";
+                cboAsignatura.ValueMember = "IdAsignatura";
+                cboAsignatura.DataSource = asignaturaNegocio.ObtenerTodos();
 
+                cboDocente.DisplayMember = "Nombres";
+                cboDocente.ValueMember = "IdPersona";
+                cboDocente.DataSource = docenteNegocio.ObtenerTodos();
 
-            cboAsignatura.DisplayMember = "Nombre";
-            cboAsignatura.ValueMember = "IdAsignatura";
-            cboAsignatura.DataSource = asignaturaNegocio.ObtenerTodos();
+                cboCurso.DisplayMember = "NombreCurso";
+                cboCurso.ValueMember = "IdCurso";
+                cboCurso.DataSource = cursoNegocio.ObtenerTodos();
 
-
-            cboDocente.DisplayMember = "Nombres";
-            cboDocente.ValueMember = "IdPersona";
-            cboDocente.DataSource = docenteNegocio.ObtenerTodos();
-
-
-            cboCurso.DisplayMember = "NombreCurso";
-            cboCurso.ValueMember = "IdCurso";
-            cboCurso.DataSource = cursoNegocio.ObtenerTodos();
-
-
-            cboPeriodo.DisplayMember = "NombrePeriodo";
-            cboPeriodo.ValueMember = "IdPeriodo";
-            cboPeriodo.DataSource = periodoNegocio.ObtenerTodos();
+                cboPeriodo.DisplayMember = "NombrePeriodo";
+                cboPeriodo.ValueMember = "IdPeriodo";
+                cboPeriodo.DataSource = periodoNegocio.ObtenerTodos();
+                cboPeriodo.SelectedIndex = -1;
+            }
+            finally
+            {
+                cargandoCombo = false;
+            }
         }
 
         private void CargarGrid()
@@ -174,7 +184,35 @@ namespace CapaPresentacion
             cboCurso.SelectedIndex = -1;
             cboPeriodo.SelectedIndex = -1;
             dtpFechaMatricula.Value = DateTime.Now;
+            dtpFechaMatricula.Enabled = false;
             cboEstado.SelectedIndex = -1;
+        }
+
+        private void cboPeriodo_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            // Si ya estamos mostrando la alerta o cargando el combo, ignoramos cualquier evento por pérdida/recuperación de foco
+            if (mostrandoAlertaPeriodo || cargandoCombo) return;
+
+            if (cboPeriodo.SelectedValue != null && int.TryParse(cboPeriodo.SelectedValue.ToString(), out int idPeriodo) && idPeriodo > 0)
+            {
+                var periodoSel = periodoNegocio.ObtenerPorId(idPeriodo);
+                if (!ValidacionesUI.ValidarFechasMatriculaPeriodo(periodoSel, out string mensaje))
+                {
+                    try
+                    {
+                        mostrandoAlertaPeriodo = true; // Bloqueamos reentradas
+
+                        MessageBox.Show(mensaje, "Período No Disponible", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                        // Deseleccionamos el período no válido para que el usuario elija otro
+                        cboPeriodo.SelectedIndex = -1;
+                    }
+                    finally
+                    {
+                        mostrandoAlertaPeriodo = false; // Liberamos el bloqueo al terminar
+                    }
+                }
+            }
         }
 
         private void btnGuardar_Click_1(object sender, EventArgs e)

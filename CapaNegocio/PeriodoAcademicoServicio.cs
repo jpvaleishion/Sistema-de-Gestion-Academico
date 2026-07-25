@@ -40,8 +40,8 @@ namespace CapaNegocio
             if (p.FechaFin == DateTime.MinValue)
                 throw new ArgumentException("La fecha de fin no es válida.");
 
-            if (p.FechaFin <= p.FechaInicio)
-                throw new InvalidOperationException("La fecha de fin debe ser posterior a la fecha de inicio.");
+            if (p.FechaFin.Date <= p.FechaInicio.Date)
+                throw new ArgumentException("La fecha de fin debe ser posterior a la fecha de inicio.");
         }
 
         /// <summary>
