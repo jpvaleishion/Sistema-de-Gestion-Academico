@@ -110,6 +110,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilidades\ValidacionesUI.cs" />
     <EmbeddedResource Include="frmAsignaturas.resx">
       <DependentUpon>frmAsignaturas.cs</DependentUpon>
     </EmbeddedResource>

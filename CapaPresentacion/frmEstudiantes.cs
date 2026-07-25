@@ -254,11 +254,17 @@ namespace CapaPresentacion
 
         private void txtTelefono_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Si no es un número y tampoco es la tecla de borrar (backspace)
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
-            {
-                e.Handled = true; // Cancela la acción de la tecla
-            }
+            Utilidades.ValidacionesUI.PermitirSoloNumerosTelefono(sender, e);
+        }
+
+        private void txtNombres_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            Utilidades.ValidacionesUI.PermitirSoloLetrasYEspacio(sender, e);
+        }
+
+        private void txtApellidos_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            Utilidades.ValidacionesUI.PermitirSoloLetrasYEspacio(sender, e);
         }
     }
 }
