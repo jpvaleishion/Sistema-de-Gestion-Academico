@@ -85,25 +85,31 @@ namespace CapaNegocio
             var nombresNorm = (d.Nombres ?? string.Empty).Trim().ToLowerInvariant();
             var apellidosNorm = (d.Apellidos ?? string.Empty).Trim().ToLowerInvariant();
             var emailNorm = (d.Email ?? string.Empty).Trim().ToLowerInvariant();
+            var telefonoNorm = (d.Telefono ?? string.Empty).Trim().ToLowerInvariant();
 
             bool existeNombreApellidos;
             bool existeEmail;
+            bool existeTelefono;
 
             if (esNuevo)
             {
                 existeNombreApellidos = lista.Exists(x => (x.Nombres ?? string.Empty).Trim().ToLowerInvariant() == nombresNorm && (x.Apellidos ?? string.Empty).Trim().ToLowerInvariant() == apellidosNorm);
                 existeEmail = lista.Exists(x => (x.Email ?? string.Empty).Trim().ToLowerInvariant() == emailNorm);
+                existeTelefono = !string.IsNullOrWhiteSpace(d.Telefono) && lista.Exists(x => !string.IsNullOrWhiteSpace(x.Telefono) && (x.Telefono ?? string.Empty).Trim().ToLowerInvariant() == telefonoNorm);
             }
             else
             {
                 existeNombreApellidos = lista.Exists(x => x.IdPersona != d.IdPersona && (x.Nombres ?? string.Empty).Trim().ToLowerInvariant() == nombresNorm && (x.Apellidos ?? string.Empty).Trim().ToLowerInvariant() == apellidosNorm);
                 existeEmail = lista.Exists(x => x.IdPersona != d.IdPersona && (x.Email ?? string.Empty).Trim().ToLowerInvariant() == emailNorm);
+                existeTelefono = !string.IsNullOrWhiteSpace(d.Telefono) && lista.Exists(x => x.IdPersona != d.IdPersona && !string.IsNullOrWhiteSpace(x.Telefono) && (x.Telefono ?? string.Empty).Trim().ToLowerInvariant() == telefonoNorm);
             }
 
             if (existeNombreApellidos)
                 throw new ArgumentException("Ya existe un docente con los mismos nombres y apellidos.");
             if (existeEmail)
                 throw new ArgumentException("Ya existe un docente registrado con el mismo email.");
+            if (existeTelefono)
+                throw new ArgumentException("Ya existe un docente registrado con el mismo teléfono.");
         }
 
         /// <summary>

@@ -17,6 +17,32 @@ namespace CapaNegocio
         private readonly BitacoraServicio bitacoraService = new BitacoraServicio();
 
         /// <summary>
+        /// Valida que no exista otra calificación para la misma matrícula.
+        /// </summary>
+        /// <param name="cal">Calificación a validar.</param>
+        /// <param name="esNuevo">True si es un registro nuevo; False si es una actualización.</param>
+        private void ValidarCalificacionDuplicada(Calificacion cal, bool esNuevo)
+        {
+            if (cal == null)
+                throw new ArgumentNullException(nameof(cal));
+
+            var lista = repositorio.ObtenerTodos();
+
+            bool existeDuplicado;
+            if (esNuevo)
+            {
+                existeDuplicado = lista.Exists(x => x.IdMatricula == cal.IdMatricula);
+            }
+            else
+            {
+                existeDuplicado = lista.Exists(x => x.IdCalificacion != cal.IdCalificacion && x.IdMatricula == cal.IdMatricula);
+            }
+
+            if (existeDuplicado)
+                throw new ArgumentException("Ya existe una calificación registrada para esta matrícula.");
+        }
+
+        /// <summary>
         /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
         /// </summary>
         /// <param name="ex">Excepción capturada.</param>
@@ -51,6 +77,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para registrar calificaciones.");
 
                 Validar(c);
+                ValidarCalificacionDuplicada(c, true);
 
                 c.NotaFinal = CalcularNotaFinal(c.Nota1, c.Nota2);
                 c.Estado = CalcularEstado(c.NotaFinal, c.NotaMaxima);
@@ -95,6 +122,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para modificar calificaciones.");
 
                 Validar(c);
+                ValidarCalificacionDuplicada(c, false);
 
                 c.NotaFinal = CalcularNotaFinal(c.Nota1, c.Nota2);
                 c.Estado = CalcularEstado(c.NotaFinal, c.NotaMaxima);

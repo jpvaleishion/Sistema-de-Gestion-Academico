@@ -43,6 +43,33 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Valida que no exista otra asignatura con el mismo nombre.
+        /// </summary>
+        /// <param name="a">Asignatura a validar.</param>
+        /// <param name="esNuevo">True si es un registro nuevo; False si es una actualización.</param>
+        private void ValidarAsignaturaDuplicada(Asignatura a, bool esNuevo)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            var lista = repositorio.ObtenerTodos();
+            var nombreNorm = (a.Nombre ?? string.Empty).Trim().ToLowerInvariant();
+
+            bool existeDuplicado;
+            if (esNuevo)
+            {
+                existeDuplicado = lista.Exists(x => (x.Nombre ?? string.Empty).Trim().ToLowerInvariant() == nombreNorm);
+            }
+            else
+            {
+                existeDuplicado = lista.Exists(x => x.IdAsignatura != a.IdAsignatura && (x.Nombre ?? string.Empty).Trim().ToLowerInvariant() == nombreNorm);
+            }
+
+            if (existeDuplicado)
+                throw new ArgumentException("Ya existe una asignatura con el mismo nombre.");
+        }
+
+        /// <summary>
         /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
         /// </summary>
         /// <param name="ex">Excepción capturada.</param>
@@ -77,6 +104,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para registrar asignaturas.");
 
                 ValidarAsignatura(a);
+                ValidarAsignaturaDuplicada(a, true);
 
                 repositorio.Insertar(a);
 
@@ -113,6 +141,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para modificar asignaturas.");
 
                 ValidarAsignatura(a);
+                ValidarAsignaturaDuplicada(a, false);
 
                 repositorio.Actualizar(a);
 

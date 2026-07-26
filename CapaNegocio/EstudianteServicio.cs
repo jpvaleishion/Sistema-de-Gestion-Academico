@@ -77,28 +77,34 @@ namespace CapaNegocio
             var apellidosNorm = (e.Apellidos ?? string.Empty).Trim().ToLowerInvariant();
             var emailNorm = (e.Email ?? string.Empty).Trim().ToLowerInvariant();
             var codigoNorm = (e.CodigoEstudiante ?? string.Empty).Trim().ToLowerInvariant();
+            var telefonoNorm = (e.Telefono ?? string.Empty).Trim().ToLowerInvariant();
 
             bool existeNombreApellidos;
             bool existeEmail;
             bool existeCodigo;
+            bool existeTelefono;
 
             if (esNuevo)
             {
                 existeNombreApellidos = lista.Exists(x => (x.Nombres ?? string.Empty).Trim().ToLowerInvariant() == nombresNorm && (x.Apellidos ?? string.Empty).Trim().ToLowerInvariant() == apellidosNorm);
                 existeEmail = lista.Exists(x => (x.Email ?? string.Empty).Trim().ToLowerInvariant() == emailNorm);
                 existeCodigo = lista.Exists(x => (x.CodigoEstudiante ?? string.Empty).Trim().ToLowerInvariant() == codigoNorm);
+                existeTelefono = !string.IsNullOrWhiteSpace(e.Telefono) && lista.Exists(x => !string.IsNullOrWhiteSpace(x.Telefono) && (x.Telefono ?? string.Empty).Trim().ToLowerInvariant() == telefonoNorm);
             }
             else
             {
                 existeNombreApellidos = lista.Exists(x => x.IdPersona != e.IdPersona && (x.Nombres ?? string.Empty).Trim().ToLowerInvariant() == nombresNorm && (x.Apellidos ?? string.Empty).Trim().ToLowerInvariant() == apellidosNorm);
                 existeEmail = lista.Exists(x => x.IdPersona != e.IdPersona && (x.Email ?? string.Empty).Trim().ToLowerInvariant() == emailNorm);
                 existeCodigo = lista.Exists(x => x.IdPersona != e.IdPersona && (x.CodigoEstudiante ?? string.Empty).Trim().ToLowerInvariant() == codigoNorm);
+                existeTelefono = !string.IsNullOrWhiteSpace(e.Telefono) && lista.Exists(x => x.IdPersona != e.IdPersona && !string.IsNullOrWhiteSpace(x.Telefono) && (x.Telefono ?? string.Empty).Trim().ToLowerInvariant() == telefonoNorm);
             }
 
             if (existeNombreApellidos)
                 throw new ArgumentException("Ya existe un estudiante con los mismos nombres y apellidos.");
             if (existeEmail)
                 throw new ArgumentException("Ya existe un estudiante registrado con el mismo email.");
+            if (existeTelefono)
+                throw new ArgumentException("Ya existe un estudiante registrado con el mismo teléfono.");
             if (existeCodigo)
                 throw new ArgumentException("Ya existe un estudiante con el mismo código estudiantil.");
         }

@@ -43,6 +43,42 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Valida que no exista otro curso con la misma combinación de nombre y paralelo.
+        /// Permite repetir el nombre si el paralelo es diferente (ej. "Primero A" y "Primero B").
+        /// </summary>
+        /// <param name="c">Curso a validar.</param>
+        /// <param name="esNuevo">True si es un registro nuevo; False si es una actualización.</param>
+        private void ValidarCursoDuplicado(Curso c, bool esNuevo)
+        {
+            if (c == null)
+                throw new ArgumentNullException(nameof(c));
+
+            var lista = repositorio.ObtenerTodos();
+            var nombreNorm = (c.NombreCurso ?? string.Empty).Trim().ToLowerInvariant();
+            var paraleloNorm = (c.Paralelo ?? string.Empty).Trim().ToLowerInvariant();
+
+            bool existeDuplicado;
+            if (esNuevo)
+            {
+                // Para nuevo registro: verifica que no exista otro curso con el mismo Nombre Y Paralelo
+                existeDuplicado = lista.Exists(x =>
+                    (x.NombreCurso ?? string.Empty).Trim().ToLowerInvariant() == nombreNorm &&
+                    (x.Paralelo ?? string.Empty).Trim().ToLowerInvariant() == paraleloNorm);
+            }
+            else
+            {
+                // Para edición: excluye el curso actual (por IdCurso) y verifica Nombre Y Paralelo
+                existeDuplicado = lista.Exists(x =>
+                    x.IdCurso != c.IdCurso &&
+                    (x.NombreCurso ?? string.Empty).Trim().ToLowerInvariant() == nombreNorm &&
+                    (x.Paralelo ?? string.Empty).Trim().ToLowerInvariant() == paraleloNorm);
+            }
+
+            if (existeDuplicado)
+                throw new ArgumentException($"Ya existe un curso con el nombre '{c.NombreCurso}' y paralelo '{c.Paralelo}'.");
+        }
+
+        /// <summary>
         /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
         /// </summary>
         /// <param name="ex">Excepción capturada.</param>
@@ -77,6 +113,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para registrar cursos.");
 
                 ValidarCurso(c);
+                ValidarCursoDuplicado(c, true);
 
                 repositorio.Insertar(c);
 
@@ -117,6 +154,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para modificar cursos.");
 
                 ValidarCurso(c);
+                ValidarCursoDuplicado(c, false);
 
                 repositorio.Actualizar(c);
 
