@@ -54,6 +54,12 @@
     <Compile Include="frmAsignaturas.Designer.cs">
       <DependentUpon>frmAsignaturas.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmBitacora.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmBitacora.Designer.cs">
+      <DependentUpon>frmBitacora.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmCalificaciones.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -113,6 +119,9 @@
     <Compile Include="Utilidades\ValidacionesUI.cs" />
     <EmbeddedResource Include="frmAsignaturas.resx">
       <DependentUpon>frmAsignaturas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmBitacora.resx">
+      <DependentUpon>frmBitacora.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmCalificaciones.resx">
       <DependentUpon>frmCalificaciones.cs</DependentUpon>

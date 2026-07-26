@@ -28,12 +28,10 @@ namespace CapaPresentacion
             }
 
             formularioHijo.MdiParent = this;
-
             formularioHijo.FormBorderStyle = FormBorderStyle.None;
             formularioHijo.ControlBox = false;
             formularioHijo.Text = "";
-
-            formularioHijo.WindowState = FormWindowState.Maximized;
+            formularioHijo.Dock = DockStyle.Fill;
             formularioHijo.Show();
         }
 
@@ -62,6 +60,9 @@ namespace CapaPresentacion
         private void mnuUsuarios_Click(object sender, EventArgs e) =>
             AbrirHija(new frmUsuarios(SesionActual.UsuarioLogueado.IdUsuario));
 
+        private void bitacoraToolStripMenuItem_Click(object sender, EventArgs e) =>
+            AbrirHija(new frmBitacora());
+
         private void mnuSalir_Click(object sender, EventArgs e) => Application.Exit();
         private void frmPrincipal_Load(object sender, EventArgs e)
         {
@@ -79,11 +80,12 @@ namespace CapaPresentacion
             ConfigurarVisibilidad(mnuMatriculas, "frmMatriculas");
             ConfigurarVisibilidad(mnuCalificaciones, "frmCalificaciones");
             ConfigurarVisibilidad(mnuUsuarios, "frmUsuarios");
+            ConfigurarVisibilidad(bitacoraToolStripMenuItem, "frmBitacora");
 
             // SOLUCIÓN AL BUG: Usamos .Available en lugar de .Visible para leer el estado real de los hijos
 
-            // El menú de administración solo es visible si puedes ver la gestión de usuarios
-            mnuAdministracion.Visible = mnuUsuarios.Available;
+            // El menú de administración solo es visible si puedes ver la gestión de usuarios o la bitácora
+            mnuAdministracion.Visible = mnuUsuarios.Available || bitacoraToolStripMenuItem.Available;
 
             // Mantenimiento solo es visible si tienes permisos para ver estudiantes, docentes, asignaturas, cursos o periodos
             mnuMantenimiento.Visible = mnuEstudiantes.Available ||
@@ -100,6 +102,8 @@ namespace CapaPresentacion
         // *cambio* - Método auxiliar para ocultar menús de forma dinámica
         private void ConfigurarVisibilidad(ToolStripMenuItem menu, string nombreFormulario)
         {
+            if (menu == null) return;
+
             if (SesionActual.Permisos == null)
             {
                 menu.Visible = false;
@@ -139,6 +143,6 @@ namespace CapaPresentacion
             }
         }
     }
-    }
+}
 
 

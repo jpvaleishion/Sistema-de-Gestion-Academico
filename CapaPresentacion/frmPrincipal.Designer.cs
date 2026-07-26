@@ -40,8 +40,9 @@
             this.mnuCalificaciones = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuAdministracion = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuUsuarios = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuSalir = new System.Windows.Forms.ToolStripMenuItem();
+            this.bitacoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cerrarSesionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuSalir = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblUsuarioActivo = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1.SuspendLayout();
@@ -55,8 +56,8 @@
             this.mnuMantenimiento,
             this.mnuProcesos,
             this.mnuAdministracion,
-            this.mnuSalir,
-            this.cerrarSesionToolStripMenuItem});
+            this.cerrarSesionToolStripMenuItem,
+            this.mnuSalir});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
@@ -79,35 +80,35 @@
             // mnuDocentes
             // 
             this.mnuDocentes.Name = "mnuDocentes";
-            this.mnuDocentes.Size = new System.Drawing.Size(136, 22);
+            this.mnuDocentes.Size = new System.Drawing.Size(169, 26);
             this.mnuDocentes.Text = "Docente";
             this.mnuDocentes.Click += new System.EventHandler(this.mnuDocentes_Click);
             // 
             // mnuEstudiantes
             // 
             this.mnuEstudiantes.Name = "mnuEstudiantes";
-            this.mnuEstudiantes.Size = new System.Drawing.Size(136, 22);
+            this.mnuEstudiantes.Size = new System.Drawing.Size(169, 26);
             this.mnuEstudiantes.Text = "Estudiante";
             this.mnuEstudiantes.Click += new System.EventHandler(this.mnuEstudiantes_Click);
             // 
             // mnuAsignaturas
             // 
             this.mnuAsignaturas.Name = "mnuAsignaturas";
-            this.mnuAsignaturas.Size = new System.Drawing.Size(136, 22);
+            this.mnuAsignaturas.Size = new System.Drawing.Size(169, 26);
             this.mnuAsignaturas.Text = "Asignaturas";
             this.mnuAsignaturas.Click += new System.EventHandler(this.mnuAsignaturas_Click);
             // 
             // mnuCursos
             // 
             this.mnuCursos.Name = "mnuCursos";
-            this.mnuCursos.Size = new System.Drawing.Size(136, 22);
+            this.mnuCursos.Size = new System.Drawing.Size(169, 26);
             this.mnuCursos.Text = "Cursos";
             this.mnuCursos.Click += new System.EventHandler(this.mnuCursos_Click);
             // 
             // mnuPeriodos
             // 
             this.mnuPeriodos.Name = "mnuPeriodos";
-            this.mnuPeriodos.Size = new System.Drawing.Size(136, 22);
+            this.mnuPeriodos.Size = new System.Drawing.Size(169, 26);
             this.mnuPeriodos.Text = "Períodos";
             this.mnuPeriodos.Click += new System.EventHandler(this.mnuPeriodos_Click);
             // 
@@ -123,21 +124,22 @@
             // mnuMatriculas
             // 
             this.mnuMatriculas.Name = "mnuMatriculas";
-            this.mnuMatriculas.Size = new System.Drawing.Size(147, 22);
+            this.mnuMatriculas.Size = new System.Drawing.Size(183, 26);
             this.mnuMatriculas.Text = "Matrículas";
             this.mnuMatriculas.Click += new System.EventHandler(this.mnuMatriculas_Click);
             // 
             // mnuCalificaciones
             // 
             this.mnuCalificaciones.Name = "mnuCalificaciones";
-            this.mnuCalificaciones.Size = new System.Drawing.Size(147, 22);
+            this.mnuCalificaciones.Size = new System.Drawing.Size(183, 26);
             this.mnuCalificaciones.Text = "Calificaciones";
             this.mnuCalificaciones.Click += new System.EventHandler(this.mnuCalificaciones_Click);
             // 
             // mnuAdministracion
             // 
             this.mnuAdministracion.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuUsuarios});
+            this.mnuUsuarios,
+            this.bitacoraToolStripMenuItem});
             this.mnuAdministracion.Name = "mnuAdministracion";
             this.mnuAdministracion.Size = new System.Drawing.Size(123, 24);
             this.mnuAdministracion.Text = "Administracion";
@@ -149,12 +151,12 @@
             this.mnuUsuarios.Text = "Usuarios";
             this.mnuUsuarios.Click += new System.EventHandler(this.mnuUsuarios_Click);
             // 
-            // mnuSalir
+            // bitacoraToolStripMenuItem
             // 
-            this.mnuSalir.Name = "mnuSalir";
-            this.mnuSalir.Size = new System.Drawing.Size(52, 24);
-            this.mnuSalir.Text = "Salir";
-            this.mnuSalir.Click += new System.EventHandler(this.mnuSalir_Click);
+            this.bitacoraToolStripMenuItem.Name = "bitacoraToolStripMenuItem";
+            this.bitacoraToolStripMenuItem.Size = new System.Drawing.Size(148, 26);
+            this.bitacoraToolStripMenuItem.Text = "Bitacora";
+            this.bitacoraToolStripMenuItem.Click += new System.EventHandler(this.bitacoraToolStripMenuItem_Click);
             // 
             // cerrarSesionToolStripMenuItem
             // 
@@ -162,6 +164,13 @@
             this.cerrarSesionToolStripMenuItem.Size = new System.Drawing.Size(110, 24);
             this.cerrarSesionToolStripMenuItem.Text = "Cerrar Sesion";
             this.cerrarSesionToolStripMenuItem.Click += new System.EventHandler(this.cerrarSesionToolStripMenuItem_Click_1);
+            // 
+            // mnuSalir
+            // 
+            this.mnuSalir.Name = "mnuSalir";
+            this.mnuSalir.Size = new System.Drawing.Size(52, 24);
+            this.mnuSalir.Text = "Salir";
+            this.mnuSalir.Click += new System.EventHandler(this.mnuSalir_Click);
             // 
             // statusStrip1
             // 
@@ -186,8 +195,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1209, 768);
-            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.statusStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "frmPrincipal";
@@ -221,5 +230,6 @@
             private System.Windows.Forms.StatusStrip statusStrip1;
             private System.Windows.Forms.ToolStripStatusLabel lblUsuarioActivo;
         private System.Windows.Forms.ToolStripMenuItem cerrarSesionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bitacoraToolStripMenuItem;
     }
     }
