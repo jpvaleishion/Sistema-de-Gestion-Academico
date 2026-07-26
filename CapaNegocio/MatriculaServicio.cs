@@ -2,6 +2,7 @@
 using CapaEntidades.Entidades;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CapaNegocio
 {
@@ -26,6 +27,22 @@ namespace CapaNegocio
         /// <param name="m">Instancia de <see cref="Matricula"/> a validar.</param>
         /// <exception cref="ArgumentNullException">Si la matrícula es nula.</exception>
         /// <exception cref="ArgumentException">Si alguna propiedad obligatoria no cumple las reglas de negocio.</exception>
+        private void ValidarMatriculaDuplicada(Matricula m)
+        {
+            if (m == null)
+                return;
+
+            var todasLasMatriculas = repositorio.ObtenerTodos();
+            bool existeDuplicada = todasLasMatriculas.Any(x =>
+                x.IdEstudiante == m.IdEstudiante &&
+                x.IdAsignatura == m.IdAsignatura &&
+                x.IdPeriodo == m.IdPeriodo &&
+                x.IdMatricula != m.IdMatricula);
+
+            if (existeDuplicada)
+                throw new InvalidOperationException("El estudiante ya se encuentra matriculado en esta asignatura para el período seleccionado.");
+        }
+
         private void ValidarMatricula(Matricula m)
         {
             if (m == null)
@@ -55,6 +72,8 @@ namespace CapaNegocio
 
             if (string.IsNullOrWhiteSpace(m.Estado))
                 throw new ArgumentException("El estado de la matrícula es obligatorio.");
+
+            ValidarMatriculaDuplicada(m);
         }
 
         /// <summary>
