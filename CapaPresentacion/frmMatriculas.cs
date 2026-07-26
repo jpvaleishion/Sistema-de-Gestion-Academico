@@ -45,7 +45,7 @@ namespace CapaPresentacion
         {
             CargarCombos();
             CargarGrid();
-            dtpFechaMatricula.Value = DateTime.Now;
+            dtpFechaMatricula.Value = DateTime.Now; 
             AplicarPermisosVisuales(); // *cambio* - Aplicamos restricciones visuales al cargar
         }
         // *cambio* - Habilita o deshabilita la UI basándose en el rol del usuario logueado
@@ -67,6 +67,7 @@ namespace CapaPresentacion
                 btnEliminar.Enabled = false;
             }
         }
+        //este metodo hace que se carguen los combos con los datos de la base de datos usando el valor de DisplayMember y ValueMember para mostrar el nombre y guardar el id
         private void CargarCombos()
         {
             cargandoCombo = true;
@@ -113,7 +114,7 @@ namespace CapaPresentacion
             {
                 string textoBuscado = txtBuscar.Text.Trim();
 
-                if (string.IsNullOrWhiteSpace(textoBuscado))
+                if (string.IsNullOrWhiteSpace(textoBuscado)) // esta linea hace que si el textbox esta vacio se muestren todos los registros
                 {
                     bindingSource.DataSource = listaOriginalMatriculas;
                     return;
@@ -126,7 +127,7 @@ namespace CapaPresentacion
                     .ToList();
 
                 var filtradas = listaOriginalMatriculas
-                    .Where(m => propiedades.Any(propiedad =>
+                    .Where(m => propiedades.Any(propiedad => // Verificamos si la propiedad existe y contiene el texto buscado
                     {
                         var propiedadInfo = typeof(Matricula).GetProperty(propiedad);
                         var valor = propiedadInfo != null ? propiedadInfo.GetValue(m, null) : null;
@@ -187,7 +188,8 @@ namespace CapaPresentacion
             dtpFechaMatricula.Enabled = false;
             cboEstado.SelectedIndex = -1;
         }
-
+        //este metodo hace que cuando se seleccione un periodo en el combo se valide si la fecha de matricula
+        //esta dentro del periodo seleccionado y si no lo esta se muestra un mensaje de alerta y se deselecciona el periodo
         private void cboPeriodo_SelectionChangeCommitted(object sender, EventArgs e)
         {
             // Si ya estamos mostrando la alerta o cargando el combo, ignoramos cualquier evento por pérdida/recuperación de foco

@@ -17,7 +17,7 @@ namespace CapaPresentacion
         // *cambio* - Almacenamos el ID del usuario activo localmente
         private int idUsuarioLogueado;
         private int idSeleccionado = 0;
-        private BindingSource bindingSource = new BindingSource();
+        private BindingSource bindingSource = new BindingSource(); //esto es para enlazar la lista de estudiantes con el DataGridView
         private List<Estudiante> listaOriginalEstudiantes = new List<Estudiante>();
 
         // *cambio* - Constructor uniforme que recibe el ID de sesión

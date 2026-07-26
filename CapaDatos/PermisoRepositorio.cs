@@ -31,7 +31,7 @@ namespace CapaDatos
                                  INNER JOIN Menus M ON P.IdMenu = M.IdMenu
                                  WHERE P.IdRol = @IdRol";
 
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (SqlCommand cmd = new SqlCommand(query, con)) //esta linea hace que se ejecute la consulta en la base de datos
                 {
                     cmd.Parameters.AddWithValue("@IdRol", idRol);
                     con.Open();

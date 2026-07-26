@@ -69,7 +69,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
-                RegistrarErrorEnBitacora(ex, idUsuarioLogueado, "Usuarios", "Crear Usuario", $"Error al guardar usuario: {u.NombreUsuario}");
+                RegistrarErrorEnBitacora(ex, idUsuarioLogueado, "Usuarios", "Crear Usuario", $"Error al guardar usuario: {u.NombreUsuario}"); 
                 throw new InvalidOperationException("Error al guardar el usuario.", ex);
             }
         }
@@ -218,7 +218,7 @@ namespace CapaNegocio
 
             if (u == null) throw new InvalidOperationException(MENSAJE_LOGIN_GENERICO);
 
-            if (u.FechaBloqueo.HasValue && u.FechaBloqueo.Value > DateTime.Now)
+            if (u.FechaBloqueo.HasValue && u.FechaBloqueo.Value > DateTime.Now) 
             {
                 bitacoraNegocio.RegistrarAccion(u.IdUsuario, "Seguridad", "Acceso Denegado", "Intento en cuenta bloqueada.");
                 throw new InvalidOperationException("Acceso Denegado, Intento en cuenta bloqueada.");

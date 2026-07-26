@@ -86,7 +86,7 @@ namespace CapaNegocio
                     idUsuarioLogueado,
                     "Periodos Academicos",
                     "Crear",
-                    $"Se registró el período académico: '{p.NombrePeriodo}' ({p.FechaInicio:dd/MM/yyyy} al {p.FechaFin:dd/MM/yyyy})."
+                    $"Se registró el período académico: '{p.NombrePeriodo}' ({p.FechaInicio:dd/MM/yyyy} al {p.FechaFin:dd/MM/yyyy})." 
                 );
             }
             catch (Exception ex)
@@ -96,7 +96,7 @@ namespace CapaNegocio
                     idUsuarioLogueado,
                     "Periodos Academicos",
                     "Crear",
-                    $"Intentando guardar período: Nombre='{(p != null ? p.NombrePeriodo : "null")}', FechaInicio={(p != null ? p.FechaInicio.ToString("o") : "null")}, FechaFin={(p != null ? p.FechaFin.ToString("o") : "null")}"
+                    $"Intentando guardar período: Nombre='{(p != null ? p.NombrePeriodo : "null")}', FechaInicio={(p != null ? p.FechaInicio.ToString("o") : "null")}, FechaFin={(p != null ? p.FechaFin.ToString("o") : "null")}" //esta linea hace que se registre el contexto completo del período que se intentaba guardar osea si p es null se registra null, si no se registran los valores de las propiedades del período
                 );
 
                 if (ex is InvalidOperationException || ex is ArgumentException)

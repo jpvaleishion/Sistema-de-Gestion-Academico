@@ -16,40 +16,40 @@ namespace CapaPresentacion.Utilidades
         /// <param name="e">Argumentos del evento de tecla que contienen el carácter ingresado.</param>
         public static void PermitirSoloLetrasYEspacio(object sender, KeyPressEventArgs e)
         {
-            if (char.IsControl(e.KeyChar))
+            if (char.IsControl(e.KeyChar)) // Permite teclas de control como Backspace, Delete, etc.
             {
-                e.Handled = false;
+                e.Handled = false; // No bloquea la entrada de teclas de control
                 return;
             }
 
             var textBox = sender as TextBox;
 
-            if (char.IsLetter(e.KeyChar))
+            if (char.IsLetter(e.KeyChar)) // Permite letras Unicode
             {
-                e.Handled = false;
+                e.Handled = false; 
                 return;
             }
 
-            if (e.KeyChar == ' ')
+            if (e.KeyChar == ' ') // Permite espacios, pero con restricciones
             {
-                if (textBox == null)
+                if (textBox == null) // Si no es un TextBox, no permitimos el espacio
                 {
                     e.Handled = true;
                     return;
                 }
 
-                if (textBox.SelectionStart == 0)
+                if (textBox.SelectionStart == 0) // Evita espacios al inicio del texto
                 {
                     e.Handled = true;
                     return;
                 }
 
-                if (textBox.SelectionStart > 0 && textBox.Text.Length > 0)
+                if (textBox.SelectionStart > 0 && textBox.Text.Length > 0) // Evita espacios dobles consecutivos
                 {
-                    var anterior = textBox.Text[textBox.SelectionStart - 1];
-                    if (anterior == ' ')
+                    var anterior = textBox.Text[textBox.SelectionStart - 1]; // Obtiene el carácter anterior al cursor
+                    if (anterior == ' ') // Si el carácter anterior es un espacio, no permitimos otro espacio
                     {
-                        e.Handled = true;
+                        e.Handled = true; // Bloquea la entrada del espacio
                         return;
                     }
                 }
@@ -69,21 +69,21 @@ namespace CapaPresentacion.Utilidades
         /// <param name="maxLongitud">La longitud máxima permitida para el texto ingresado. El valor predeterminado es 10.</param>
         public static void PermitirSoloNumerosTelefono(object sender, KeyPressEventArgs e, int maxLongitud = 10)
         {
-            if (char.IsControl(e.KeyChar))
+            if (char.IsControl(e.KeyChar)) 
             {
                 e.Handled = false;
                 return;
             }
 
-            var textBox = sender as TextBox;
+            var textBox = sender as TextBox; // Asegura que el sender sea un TextBox
             if (textBox == null)
             {
                 e.Handled = true;
                 return;
             }
 
-            int longitudActual = textBox.Text.Length - textBox.SelectionLength;
-            if (char.IsDigit(e.KeyChar) && longitudActual < maxLongitud)
+            int longitudActual = textBox.Text.Length - textBox.SelectionLength; // Calcula la longitud actual del texto considerando la selección
+            if (char.IsDigit(e.KeyChar) && longitudActual < maxLongitud) // Permite dígitos si no se excede la longitud máxima
             {
                 e.Handled = false;
                 return;
@@ -95,11 +95,11 @@ namespace CapaPresentacion.Utilidades
         public static bool ValidarFechasMatriculaPeriodo(PeriodoAcademico periodo, out string mensaje)
         {
             mensaje = string.Empty;
-            if (periodo == null) return true;
+            if (periodo == null) return true; // Si el período es nulo, no se realiza ninguna validación y se considera válido.
 
-            DateTime hoy = DateTime.Now.Date;
-            DateTime fechaApertura = periodo.FechaInicio.AddDays(-15).Date;
-            DateTime fechaLimite = periodo.FechaInicio.AddDays(-5).Date;
+            DateTime hoy = DateTime.Now.Date; 
+            DateTime fechaApertura = periodo.FechaInicio.AddDays(-15).Date; 
+            DateTime fechaLimite = periodo.FechaInicio.AddDays(-5).Date; 
 
             if (hoy < fechaApertura)
             {
