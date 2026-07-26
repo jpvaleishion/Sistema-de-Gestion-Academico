@@ -47,11 +47,63 @@ namespace CapaNegocio
             if (!Regex.IsMatch(d.Apellidos, @"^[\p{L}\s]+$"))
                 throw new ArgumentException("Los apellidos solo pueden contener letras y espacios.");
 
+            if (string.IsNullOrWhiteSpace(d.Email))
+                throw new ArgumentException("El email es obligatorio.");
+            var regexEmail = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+            if (!regexEmail.IsMatch(d.Email))
+                throw new ArgumentException("El email no tiene un formato válido.");
+            try
+            {
+                var domain = d.Email.Substring(d.Email.IndexOf('@') + 1).ToLowerInvariant();
+                var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "gmail.com", "hotmail.com", "outlook.com", "utmach.edu.ec" };
+                if (!allowed.Contains(domain))
+                    throw new ArgumentException("El dominio del email no es válido. Dominios permitidos: gmail.com, hotmail.com, outlook.com, utmach.edu.ec.");
+            }
+            catch
+            {
+                throw new ArgumentException("El email no tiene un formato válido.");
+            }
+
             if (string.IsNullOrWhiteSpace(d.Especialidad))
                 throw new ArgumentException("La especialidad es obligatoria.");
 
             if (d.Especialidad.Length < 3 || d.Especialidad.Length > 100)
                 throw new ArgumentException("La especialidad debe tener entre 3 y 100 caracteres.");
+        }
+
+        /// <summary>
+        /// Valida que no exista otro docente con la misma combinación de nombres y apellidos ni con el mismo email.
+        /// </summary>
+        /// <param name="d">Docente a validar.</param>
+        /// <param name="esNuevo">True si es un registro nuevo; False si es una actualización.</param>
+        private void ValidarDocenteDuplicado(Docente d, bool esNuevo)
+        {
+            if (d == null)
+                throw new ArgumentNullException(nameof(d));
+
+            var lista = repositorio.ObtenerTodos();
+            var nombresNorm = (d.Nombres ?? string.Empty).Trim().ToLowerInvariant();
+            var apellidosNorm = (d.Apellidos ?? string.Empty).Trim().ToLowerInvariant();
+            var emailNorm = (d.Email ?? string.Empty).Trim().ToLowerInvariant();
+
+            bool existeNombreApellidos;
+            bool existeEmail;
+
+            if (esNuevo)
+            {
+                existeNombreApellidos = lista.Exists(x => (x.Nombres ?? string.Empty).Trim().ToLowerInvariant() == nombresNorm && (x.Apellidos ?? string.Empty).Trim().ToLowerInvariant() == apellidosNorm);
+                existeEmail = lista.Exists(x => (x.Email ?? string.Empty).Trim().ToLowerInvariant() == emailNorm);
+            }
+            else
+            {
+                existeNombreApellidos = lista.Exists(x => x.IdPersona != d.IdPersona && (x.Nombres ?? string.Empty).Trim().ToLowerInvariant() == nombresNorm && (x.Apellidos ?? string.Empty).Trim().ToLowerInvariant() == apellidosNorm);
+                existeEmail = lista.Exists(x => x.IdPersona != d.IdPersona && (x.Email ?? string.Empty).Trim().ToLowerInvariant() == emailNorm);
+            }
+
+            if (existeNombreApellidos)
+                throw new ArgumentException("Ya existe un docente con los mismos nombres y apellidos.");
+            if (existeEmail)
+                throw new ArgumentException("Ya existe un docente registrado con el mismo email.");
         }
 
         /// <summary>
@@ -89,6 +141,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para registrar docentes.");
 
                 ValidarDocente(d);
+                ValidarDocenteDuplicado(d, true);
 
                 repositorio.Insertar(d);
 
@@ -126,6 +179,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para modificar docentes.");
 
                 ValidarDocente(d);
+                ValidarDocenteDuplicado(d, false);
 
                 repositorio.Actualizar(d);
 

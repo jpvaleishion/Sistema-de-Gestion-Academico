@@ -45,6 +45,33 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Valida que no exista otro período académico con el mismo nombre (ignora mayúsculas/minúsculas y espacios).
+        /// </summary>
+        /// <param name="p">Período a validar.</param>
+        /// <param name="esNuevo">True si es un registro nuevo; False si es una actualización (excluirá el mismo Id).</param>
+        private void ValidarPeriodoDuplicado(PeriodoAcademico p, bool esNuevo)
+        {
+            if (p == null)
+                throw new ArgumentNullException(nameof(p));
+
+            var lista = repositorio.ObtenerTodos();
+            var nombreNormalizado = (p.NombrePeriodo ?? string.Empty).Trim().ToLowerInvariant();
+
+            bool existeDuplicado;
+            if (esNuevo)
+            {
+                existeDuplicado = lista.Exists(x => (x.NombrePeriodo ?? string.Empty).Trim().ToLowerInvariant() == nombreNormalizado);
+            }
+            else
+            {
+                existeDuplicado = lista.Exists(x => x.IdPeriodo != p.IdPeriodo && (x.NombrePeriodo ?? string.Empty).Trim().ToLowerInvariant() == nombreNormalizado);
+            }
+
+            if (existeDuplicado)
+                throw new ArgumentException("Ya existe un período académico con el mismo nombre.");
+        }
+
+        /// <summary>
         /// Registra un error en la bitácora. No modifica la estructura de la bitácora existente.
         /// </summary>
         /// <param name="ex">Excepción capturada.</param>
@@ -79,6 +106,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para registrar períodos académicos.");
 
                 ValidarPeriodo(p);
+                ValidarPeriodoDuplicado(p, true);
 
                 repositorio.Insertar(p);
 
@@ -116,6 +144,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para modificar períodos académicos.");
 
                 ValidarPeriodo(p);
+                ValidarPeriodoDuplicado(p, false);
 
                 repositorio.Actualizar(p);
 

@@ -44,11 +44,63 @@ namespace CapaNegocio
             var regexEmail = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
             if (!regexEmail.IsMatch(e.Email))
                 throw new ArgumentException("El email no tiene un formato válido.");
+            try
+            {
+                var domain = e.Email.Substring(e.Email.IndexOf('@') + 1).ToLowerInvariant();
+                var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "gmail.com", "hotmail.com", "outlook.com", "utmach.edu.ec" };
+                if (!allowed.Contains(domain))
+                    throw new ArgumentException("El dominio del email no es válido. Dominios permitidos: gmail.com, hotmail.com, outlook.com, utmach.edu.ec.");
+            }
+            catch
+            {
+                throw new ArgumentException("El email no tiene un formato válido.");
+            }
 
             if (string.IsNullOrWhiteSpace(e.CodigoEstudiante))
                 throw new ArgumentException("El código estudiantil es obligatorio.");
             if (e.CodigoEstudiante.Length < 3 || e.CodigoEstudiante.Length > 20)
                 throw new ArgumentException("El código estudiantil debe tener entre 3 y 20 caracteres.");
+        }
+
+        /// <summary>
+        /// Valida que no exista otro estudiante con los mismos nombres y apellidos, email o código estudiantil.
+        /// </summary>
+        /// <param name="e">Estudiante a validar.</param>
+        /// <param name="esNuevo">True si es un registro nuevo; False si es una actualización.</param>
+        private void ValidarEstudianteDuplicado(Estudiante e, bool esNuevo)
+        {
+            if (e == null)
+                throw new ArgumentNullException(nameof(e));
+
+            var lista = repositorio.ObtenerTodos();
+            var nombresNorm = (e.Nombres ?? string.Empty).Trim().ToLowerInvariant();
+            var apellidosNorm = (e.Apellidos ?? string.Empty).Trim().ToLowerInvariant();
+            var emailNorm = (e.Email ?? string.Empty).Trim().ToLowerInvariant();
+            var codigoNorm = (e.CodigoEstudiante ?? string.Empty).Trim().ToLowerInvariant();
+
+            bool existeNombreApellidos;
+            bool existeEmail;
+            bool existeCodigo;
+
+            if (esNuevo)
+            {
+                existeNombreApellidos = lista.Exists(x => (x.Nombres ?? string.Empty).Trim().ToLowerInvariant() == nombresNorm && (x.Apellidos ?? string.Empty).Trim().ToLowerInvariant() == apellidosNorm);
+                existeEmail = lista.Exists(x => (x.Email ?? string.Empty).Trim().ToLowerInvariant() == emailNorm);
+                existeCodigo = lista.Exists(x => (x.CodigoEstudiante ?? string.Empty).Trim().ToLowerInvariant() == codigoNorm);
+            }
+            else
+            {
+                existeNombreApellidos = lista.Exists(x => x.IdPersona != e.IdPersona && (x.Nombres ?? string.Empty).Trim().ToLowerInvariant() == nombresNorm && (x.Apellidos ?? string.Empty).Trim().ToLowerInvariant() == apellidosNorm);
+                existeEmail = lista.Exists(x => x.IdPersona != e.IdPersona && (x.Email ?? string.Empty).Trim().ToLowerInvariant() == emailNorm);
+                existeCodigo = lista.Exists(x => x.IdPersona != e.IdPersona && (x.CodigoEstudiante ?? string.Empty).Trim().ToLowerInvariant() == codigoNorm);
+            }
+
+            if (existeNombreApellidos)
+                throw new ArgumentException("Ya existe un estudiante con los mismos nombres y apellidos.");
+            if (existeEmail)
+                throw new ArgumentException("Ya existe un estudiante registrado con el mismo email.");
+            if (existeCodigo)
+                throw new ArgumentException("Ya existe un estudiante con el mismo código estudiantil.");
         }
 
         /// <summary>
@@ -89,6 +141,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para registrar estudiantes.");
 
                 ValidarEstudiante(e);
+                ValidarEstudianteDuplicado(e, true);
 
                 repositorio.Insertar(e);
 
@@ -129,6 +182,7 @@ namespace CapaNegocio
                     throw new InvalidOperationException("No tiene permisos para modificar estudiantes.");
 
                 ValidarEstudiante(e);
+                ValidarEstudianteDuplicado(e, false);
 
                 repositorio.Actualizar(e);
 
