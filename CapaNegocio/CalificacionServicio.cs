@@ -31,11 +31,11 @@ namespace CapaNegocio
             bool existeDuplicado;
             if (esNuevo)
             {
-                existeDuplicado = lista.Exists(x => x.IdMatricula == cal.IdMatricula);
+                existeDuplicado = lista.Exists(x => x.IdMatricula == cal.IdMatricula); //esta linea hace que no se pueda registrar una calificacion para la misma matricula
             }
             else
             {
-                existeDuplicado = lista.Exists(x => x.IdCalificacion != cal.IdCalificacion && x.IdMatricula == cal.IdMatricula);
+                existeDuplicado = lista.Exists(x => x.IdCalificacion != cal.IdCalificacion && x.IdMatricula == cal.IdMatricula); //esta linea hace que no se pueda actualizar una calificacion para la misma matricula
             }
 
             if (existeDuplicado)

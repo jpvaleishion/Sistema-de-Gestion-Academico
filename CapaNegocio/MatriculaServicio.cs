@@ -144,7 +144,7 @@ namespace CapaNegocio
         {
             try
             {
-                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Modificar"))
+                if (!permisoService.TienePermiso(idUsuarioLogueado, "frmMatriculas", "Modificar")) //esta linea hace que solo los usuarios con permisos puedan modificar las matriculas
                     throw new InvalidOperationException("No tiene permisos para modificar matrículas.");
 
                 ValidarMatricula(m);
@@ -187,9 +187,10 @@ namespace CapaNegocio
                 if (idMatricula <= 0)
                     throw new ArgumentException("El identificador de la matrícula no es válido.");
 
-                string detalle = $"ID {idMatricula}";
+                string detalle = $"ID {idMatricula}"; //esta linea hace que se obtenga el detalle de la matrícula antes de eliminarla para registrar en la bitácora
                 try
                 {
+                    //la linea del 194 a 196 obtiene el detalle de la matrícula antes de eliminarla para registrar en la bitácora
                     var de_paso = repositorio.ObtenerPorId(idMatricula);
                     if (de_paso != null)
                         detalle = $"ID {idMatricula} (Estudiante ID: {de_paso.IdEstudiante}, Asignatura ID: {de_paso.IdAsignatura}, Estado: {de_paso.Estado})";
@@ -212,9 +213,9 @@ namespace CapaNegocio
             {
                 RegistrarErrorEnBitacora(
                     ex,
-                    idUsuarioLogueado,
-                    "Matriculas",
-                    "Eliminar",
+                    idUsuarioLogueado, //esta linea hace que se registre el id del usuario que intenta eliminar la matrícula en la bitácora
+                    "Matriculas", //esta linea hace que se registre el modulo de la bitácora como "Matriculas"
+                    "Eliminar", //esta linea hace que se registre la acción de la bitácora como "Eliminar"
                     $"Intentando eliminar matrícula ID={idMatricula}"
                 );
 

@@ -25,7 +25,7 @@ namespace CapaNegocio
         {
             try
             {
-                string descripcion = $"Contexto: {contexto} | Detalle: {ex.ToString()}";
+                string descripcion = $"Contexto: {contexto} | Detalle: {ex.ToString()}"; //esta linea realiza un log detallado del error, incluyendo el stack trace.
                 _bitacora.RegistrarAccion(0, modulo, "Error", descripcion);
             }
             catch

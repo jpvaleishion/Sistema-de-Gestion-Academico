@@ -55,7 +55,7 @@ namespace CapaNegocio
             try
             {
                 var domain = d.Email.Substring(d.Email.IndexOf('@') + 1).ToLowerInvariant();
-                var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "gmail.com", "hotmail.com", "outlook.com", "utmach.edu.ec" };
+                var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "gmail.com", "hotmail.com", "outlook.com", "utmach.edu.ec" }; //el HashSet permite una búsqueda más rápida y evita duplicados y el ordinalignore permite que la búsqueda no sea sensible a mayúsculas/minúsculas
                 if (!allowed.Contains(domain))
                     throw new ArgumentException("El dominio del email no es válido. Dominios permitidos: gmail.com, hotmail.com, outlook.com, utmach.edu.ec.");
             }

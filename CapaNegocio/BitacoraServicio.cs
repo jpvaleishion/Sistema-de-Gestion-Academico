@@ -1,10 +1,10 @@
-﻿using System;
+﻿using CapaDatos;
+using CapaEntidades.Entidades;
+using CapaNegocio.Logging;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using CapaDatos;
-using CapaEntidades.Entidades;
-using CapaNegocio.Logging;
 
 namespace CapaNegocio
 {
@@ -16,11 +16,11 @@ namespace CapaNegocio
     public class BitacoraServicio
     {
         private readonly BitacoraRepositorio repositorio = new BitacoraRepositorio();
-        private readonly FileLogger _fileLogger;
+        private readonly FileLogger _fileLogger; //esta linea hace que se pueda inyectar la ruta del archivo de bitácora, si se desea.
 
         public BitacoraServicio(string rutaArchivo = null)
         {
-            _fileLogger = new FileLogger(rutaArchivo);
+            _fileLogger = new FileLogger(rutaArchivo); //estoa hace que si no se pasa rutaArchivo, se use la ruta por defecto en FileLogger.
         }
 
         /// <summary>
